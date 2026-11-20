@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { motion, useInView, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import type { ReplayRow } from "@/lib/engine/payout";
 import { int, monthLabel, ppg, usd } from "@/lib/format";
 import { cx } from "../ui";
@@ -9,14 +9,13 @@ import { FLUID_SPRING } from "./motion";
 /*
  * The replay as pressure: one fuel column per month whose level is the real EIA monthly mean.
  * The strike crosses every column; the part of the column above it (the overflow) is what the
- * cap pays on. Hover, tap or focus a month to read its numbers. Columns fill once, on first view.
+ * cap pays on. Hover, tap or focus a month to read its numbers. Static: no entrance motion.
  */
 
 const H = 196;
 
 export function ReplayColumns({ rows, settleMonth, indexLabel }: { rows: ReplayRow[]; settleMonth: string; indexLabel: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  const seen = useInView(ref, { once: true, amount: 0.3 });
   const reduce = useReducedMotion();
   const [active, setActive] = useState(settleMonth);
   if (!rows.length) return null;
@@ -28,7 +27,7 @@ export function ReplayColumns({ rows, settleMonth, indexLabel }: { rows: ReplayR
   const ticks: number[] = [];
   for (let t = Math.ceil(lo); t <= hi; t += 1) ticks.push(t);
   const a = rows.find((r) => r.month === active) ?? rows[rows.length - 1];
-  const show = seen || !!reduce;
+  const show = true; // static: the replay is read, not performed
 
   return (
     <div ref={ref}>
@@ -60,7 +59,7 @@ export function ReplayColumns({ rows, settleMonth, indexLabel }: { rows: ReplayR
                 </span>
                 <span className="h-5 lg:hidden" aria-hidden />
                 <div className={cx("relative w-full overflow-hidden rounded-[8px] border bg-sunken/60 transition-[border-color] duration-150 group-focus-visible:ring-2 group-focus-visible:ring-jade",
-                  on ? "border-line/28" : settle ? "border-jade/45" : "border-line/10 group-hover:border-line/20")} style={{ height: H }}>
+                  on ? "border-line/14" : settle ? "border-jade/45" : "border-line/8 group-hover:border-line/[0.12]")} style={{ height: H }}>
                   {/* the fuel column */}
                   <motion.div aria-hidden className="absolute inset-x-0 bottom-0" initial={false}
                     animate={{ height: show ? level * H : 0 }} transition={reduce ? { duration: 0 } : { ...FLUID_SPRING, delay: i * 0.04 }}

@@ -26,7 +26,7 @@ function authorize(provider: ProviderId, redirectUri: string, state: string): st
 
 export async function GET(req: Request, ctx: { params: Promise<{ provider: string }> }) {
   const { provider } = await ctx.params;
-  const back = new URL("/", originOf(req));
+  const back = new URL("/app", originOf(req));
   if (!isProvider(provider)) {
     back.searchParams.set("connect_error", "That ledger is not supported.");
     return NextResponse.redirect(back);

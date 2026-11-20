@@ -24,7 +24,7 @@ export default {
         rust: { DEFAULT: c("rust"), deep: c("rust-deep") },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       // Fine opacity steps so `border-line/12` etc. are generated (Tailwind's default scale is multiples of 5).

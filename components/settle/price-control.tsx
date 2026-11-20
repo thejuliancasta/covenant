@@ -24,20 +24,18 @@ export function plateBounds(offset: number, max: number) {
 }
 
 function Plate({ lo, hi, max, state }: { lo: number; hi: number; max: number; state: "idle" | "partial" | "lit" }) {
-  const reduce = useReducedMotion();
   const w = (hi - lo) / max;
   return (
-    <motion.div aria-hidden className="absolute bottom-[7px] top-[7px] px-[2px]" style={{ left: `${(lo / max) * 100}%`, width: `${w * 100}%` }}
-      animate={state === "lit" && !reduce ? { y: [0, -3, 0] } : { y: 0 }} transition={{ duration: 0.34, ease: [0.2, 0.8, 0.2, 1] }}>
+    <div aria-hidden className="absolute bottom-[7px] top-[7px] px-[2px]" style={{ left: `${(lo / max) * 100}%`, width: `${w * 100}%` }}>
       <div className={cx("flex h-full items-center justify-center rounded-[6px] border transition-[border-color,background-color] duration-200",
-        state === "lit" ? "border-jade/70 bg-jade/[0.2]" : state === "partial" ? "border-heat/50 bg-transparent" : "border-line/[0.16] bg-raised/40")}>
+        state === "lit" ? "border-jade/70 bg-jade/[0.2]" : state === "partial" ? "border-heat/50 bg-transparent" : "border-line/10 bg-raised/40")}>
         {state === "lit" && (
           <svg viewBox="0 0 14 14" width="12" height="12" className="text-jade">
-            <motion.path d="M2.5 7.4 5.6 10.3 11.5 3.8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: reduce ? 1 : 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.2 }} />
+            <path d="M2.5 7.4 5.6 10.3 11.5 3.8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -76,7 +74,7 @@ export function PriceRiseControl({ value, onChange, offset, max = 3, step = 0.05
       </div>
       <div className="relative mt-1.5 h-[72px]">
         <div aria-hidden className="absolute inset-y-[8px]" style={{ left: `${INSET}px`, right: `${INSET}px` }}>
-          <div className="absolute inset-0 overflow-hidden rounded-control border border-line/10 bg-sunken/60">
+          <div className="absolute inset-0 overflow-hidden rounded-control border border-line/8 bg-sunken/60">
             {/* the fuel column */}
             <motion.div className="absolute inset-y-0 left-0" style={{ width: fluidW, background: "linear-gradient(90deg, rgb(var(--heat) / 0.10), rgb(var(--heat) / 0.36))" }}>
               <div className="absolute inset-y-0 right-0 w-[2px] bg-heat/80" />
@@ -92,7 +90,7 @@ export function PriceRiseControl({ value, onChange, offset, max = 3, step = 0.05
           className="peer absolute inset-0 z-10 h-full w-full cursor-grab appearance-none bg-transparent opacity-0 active:cursor-grabbing [&::-moz-range-thumb]:h-[72px] [&::-moz-range-thumb]:w-5 [&::-webkit-slider-thumb]:h-[72px] [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none" />
         {/* the thumb: a plate you push */}
         <motion.div aria-hidden className={cx("pointer-events-none absolute top-0 h-[72px] w-[14px] rounded-[6px] border transition-[background-color,border-color,box-shadow] duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-jade peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-raised",
-          drag ? "border-jade bg-ink" : "border-line/30 bg-ink2")} style={{ left: at(f), x: "-50%" }}
+          drag ? "border-jade bg-ink" : "border-line/14 bg-ink2")} style={{ left: at(f), x: "-50%" }}
           animate={{ scaleY: drag ? 1.05 : 1 }} transition={UI_SPRING}>
           <span className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col gap-[3px]">
             {[0, 1, 2].map((k) => <span key={k} className="block h-px w-[6px] rounded-full bg-bg/50" />)}
@@ -119,7 +117,7 @@ export function FineRange({ label, value, min, max, step, onChange, fmt, hint }:
     <div>
       <div className="flex items-center justify-between gap-3 text-[13px]">
         <label htmlFor={id} className="text-muted">{label}</label>
-        <Rolling text={fmt(value)} className="font-medium text-ink" />
+        <span className="num font-medium text-ink">{fmt(value)}</span>
       </div>
       <div className="relative mt-1 h-10">
         <div aria-hidden className="absolute top-1/2 h-1.5 -translate-y-1/2 overflow-hidden rounded-full bg-well" style={{ left: "9px", right: "9px" }}>

@@ -5,16 +5,17 @@
 /* Dark theme tokens (RGB channels). Roles: docs/UI_DIRECTION.md. */
 :root {
   color-scheme: dark;
-  --bg: 11 15 20;          /* #0b0f14 page */
-  --sunken: 7 10 14;       /* #070a0e wells behind charts */
-  --raised: 16 22 29;      /* #10161d cards */
-  --panel: 21 28 37;       /* #151c25 inner panels */
-  --well: 27 35 46;        /* #1b232e inputs, tracks */
-  --ink: 237 241 245;      /* #edf1f5 primary text */
-  --ink2: 211 218 228;     /* #d3dae4 secondary text, headings */
-  --muted: 154 167 183;    /* #9aa7b7 body */
-  --faint: 120 133 149;    /* #788595 metadata */
-  --line: 226 234 242;     /* borders: use at /10 to /14 */
+  /* Linear-style neutrals: near-black, barely cool. */
+  --bg: 8 9 10;            /* #08090a page */
+  --sunken: 5 6 7;         /* #050607 wells */
+  --raised: 15 16 17;      /* #0f1011 surfaces */
+  --panel: 20 21 23;       /* #141517 inner panels */
+  --well: 28 29 32;        /* #1c1d20 inputs, tracks */
+  --ink: 247 248 248;      /* #f7f8f8 primary text */
+  --ink2: 208 214 224;     /* #d0d6e0 secondary text */
+  --muted: 138 143 152;    /* #8a8f98 body */
+  --faint: 98 102 109;     /* #62666d metadata */
+  --line: 255 255 255;     /* borders: use at /6 to /10 */
   /* Accent: ember (token name kept as `jade` so existing classes keep working; `accent` aliases it). */
   --jade: 240 138 75;      /* #f08a4b action, focus, protection in force */
   --jade-deep: 122 52 18;  /* #7a3412 deep ember fills */
@@ -35,6 +36,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01", "ss03";
 }
 .num { font-variant-numeric: tabular-nums; }
 h1, h2, h3 { text-wrap: balance; }

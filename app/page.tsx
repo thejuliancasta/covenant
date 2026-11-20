@@ -1,174 +1,213 @@
-"use client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, LayoutGroup, MotionConfig, motion } from "motion/react";
-import type { Analysis, PipelineEvent, StageId } from "@/lib/engine/pipeline";
-import { readNdjson } from "@/lib/format";
-import { cx } from "@/components/ui";
-import { SPRING_UI } from "@/components/fx/motion";
-import { Strata, type StrataVariant } from "@/components/fx/strata";
+import Link from "next/link";
+import type { ReactNode } from "react";
 import { Logo } from "@/components/brand/logo";
-import { Welcome, Connect, Analyzing, type StageView } from "@/components/onboarding";
-import { Overview, Protection } from "@/components/results";
-import { Simulator, Payout } from "@/components/simulate";
-import { Judge } from "@/components/judge";
+import { Arrow } from "@/components/ui";
+import { getLandingData } from "@/components/landing/data";
+import { Nav } from "@/components/landing/nav";
+import { Reveal } from "@/components/landing/reveal";
+import { ProductWindow } from "@/components/landing/product-window";
+import { CapLadder, ExposureBars, LedgerSort, LenderView, PrivatePayout } from "@/components/landing/fragments";
+import { body, btnPrimary, cx, h2, lift, linkArrow, pct1, surface, usd0, wrap } from "@/components/landing/kit";
 
-type Step = "welcome" | "connect" | "analyzing" | "overview" | "protection" | "simulate" | "payout";
-const NAV: { id: Step; label: string }[] = [
-  { id: "connect", label: "Connect" }, { id: "overview", label: "Your risks" }, { id: "protection", label: "Protection" },
-  { id: "simulate", label: "Simulate" }, { id: "payout", label: "Payout" },
-];
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+export const dynamic = "force-static";
 
-/** Step navigation. The indicator slides between steps on a spring; steps that need a result say so. */
-function StepNav({ step, judge, enabled, go, id }: { step: Step; judge: boolean; enabled: (s: Step) => boolean; go: (s: Step) => void; id: string }) {
-  return (
-    <LayoutGroup id={id}>
-      {NAV.map((n, i) => {
-        const on = enabled(n.id), active = !judge && (step === n.id || (n.id === "connect" && step === "analyzing"));
-        return (
-          <button
-            key={n.id} disabled={!on} onClick={() => go(n.id)} aria-current={active ? "step" : undefined}
-            title={on ? undefined : "Run an analysis first"}
-            className={cx(
-              "relative flex min-h-10 shrink-0 items-center gap-1.5 rounded-control px-3 text-[13.5px] font-medium transition-[color,transform] duration-150 ease-out active:scale-[0.98]",
-              active ? "text-ink" : on ? "text-muted hover:text-ink" : "cursor-not-allowed text-faint/60",
-            )}
-          >
-            {active && <motion.span layoutId="indicator" transition={SPRING_UI} className="absolute bottom-1 left-1/2 h-[2px] w-4 -translate-x-1/2 rounded-full bg-jade" aria-hidden />}
-            <span className={cx("num text-[12px] transition-colors duration-150", active ? "text-jade" : on ? "text-faint" : "text-faint/50")}>{i + 1}</span>
-            <span>{n.label}</span>
-          </button>
-        );
-      })}
-    </LayoutGroup>
-  );
+function Rule() {
+  return <div aria-hidden className="h-px w-full bg-line/[0.07]" />;
 }
 
-function JudgeToggle({ on, disabled, onClick }: { on: boolean; disabled: boolean; onClick: () => void }) {
+function Feature({ id, label, title, children, aside, fragment, flip }: {
+  id?: string; label: string; title: ReactNode; children: ReactNode; aside?: ReactNode; fragment: ReactNode; flip?: boolean;
+}) {
   return (
-    <button
-      disabled={disabled} onClick={onClick} aria-pressed={on} title={disabled ? "Run an analysis first" : "Technical view for judges"}
-      className={cx(
-        "flex min-h-10 shrink-0 items-center gap-2 rounded-control px-2 text-[13px] font-medium transition-[color,transform] duration-150 ease-out active:scale-[0.98]",
-        disabled ? "cursor-not-allowed text-faint/60" : on ? "text-ink" : "text-muted hover:text-ink",
-      )}
-    >
-      <motion.span aria-hidden className={cx("h-1.5 w-1.5 rounded-full", on ? "bg-jade" : disabled ? "bg-faint/40" : "bg-muted")} initial={false} animate={{ scale: on ? 1.35 : 1 }} transition={SPRING_UI} />
-      Judge mode<span className={cx("text-[12px] font-normal", on ? "text-jade" : "text-faint")}>{on ? "on" : "off"}</span>
-    </button>
-  );
-}
-
-export default function Home() {
-  const [step, setStep] = useState<Step>("welcome");
-  const [analysis, setAnalysis] = useState<Analysis | null>(null);
-  const [stages, setStages] = useState<Record<string, StageView>>({});
-  const [error, setError] = useState<string | null>(null);
-  const [source, setSource] = useState("");
-  const [judge, setJudge] = useState(false);
-  const [connectError, setConnectError] = useState<string | null>(null);
-  const imported = useRef(false);
-  const mobileNav = useRef<HTMLElement>(null);
-
-  const go = useCallback((s: Step) => { setStep(s); setJudge(false); window.scrollTo({ top: 0 }); }, []);
-
-  const run = useCallback(async (csv: string, region: string, label: string) => {
-    setError(null); setStages({}); setAnalysis(null); setSource(label); go("analyzing");
-    try {
-      const res = await fetch("/api/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ csv, region }) });
-      if (!res.ok || !res.body) throw new Error((await res.json().catch(() => null))?.error ?? `Analysis failed (HTTP ${res.status}).`);
-      let result: Analysis | null = null, failed: string | null = null;
-      await readNdjson<PipelineEvent>(res, async (ev) => {
-        if (ev.type === "stage") {
-          setStages((s) => ({ ...s, [ev.id as StageId]: { status: ev.status, ms: ev.ms, detail: ev.detail } }));
-          if (ev.status !== "running") await sleep(380); // pacing only, so each real stage result can be read
-        } else if (ev.type === "result") result = ev.analysis;
-        else failed = ev.message;
-      });
-      if (failed) throw new Error(failed);
-      if (!result) throw new Error("The analysis ended without a result.");
-      setAnalysis(result);
-      await sleep(1700); // pacing only: the tape sorts the real classified lines into lanes before moving on
-      go("overview");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
-  }, [go]);
-
-  useEffect(() => {
-    if (imported.current) return;
-    const params = new URLSearchParams(window.location.search);
-    const failed = params.get("connect_error");
-    const raw = sessionStorage.getItem("costshield-import");
-    if (!failed && !raw) return;
-    imported.current = true;
-    window.history.replaceState({}, "", "/");
-    if (raw) {
-      sessionStorage.removeItem("costshield-import");
-      try {
-        const data = JSON.parse(raw) as { csv: string; region: string; label: string };
-        run(data.csv, data.region || "PADD2", data.label);
-      } catch {
-        setConnectError("The ledger came back in a form this page could not read.");
-        setStep("connect");
-      }
-      return;
-    }
-    setConnectError(failed);
-    setStep("connect");
-  }, [run]);
-
-  const hasResult = !!analysis;
-  useEffect(() => {
-    const nav = mobileNav.current, cur = nav?.querySelector<HTMLElement>("[aria-current=step]");
-    if (nav && cur) nav.scrollTo({ left: cur.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft - (nav.clientWidth - cur.offsetWidth) / 2, behavior: "smooth" });
-  }, [step, hasResult]);
-  const enabled = (s: Step) => s === "connect" || hasResult;
-  const view = judge && analysis ? "judge" : step;
-  const sample = async () => { const csv = await (await fetch("/sample/johns-trucking.csv")).text(); run(csv, "PADD2", "Sample company (synthetic)"); };
-
-  return (
-    <MotionConfig reducedMotion="user">
-      <div className="relative min-h-screen bg-bg">
-        <Strata variant={(view === "judge" ? "judge" : view === "welcome" ? "hero" : view) as StrataVariant} />
-        <p className="relative z-10 px-4 pt-3 text-center text-[12px] leading-4 text-faint">
-          Simulation. Not an offer of insurance or derivatives. No real premiums, orders or payouts. Devnet test dollars only.
-        </p>
-        <header className="sticky top-0 z-30 bg-bg/55 backdrop-blur-md">
-          <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-[var(--page-gutter)]">
-            <button onClick={() => go("welcome")} className="-ml-2 flex min-h-10 items-center gap-2.5 rounded-control px-2 transition-transform duration-150 ease-out active:scale-[0.98]" aria-label="CostShield home">
-              <Logo size={24} />
-            </button>
-            <nav className="hidden items-center gap-1 md:flex" aria-label="Steps">
-              <StepNav id="desk" step={step} judge={judge} enabled={enabled} go={go} />
-            </nav>
-            <JudgeToggle on={judge} disabled={!hasResult} onClick={() => { setJudge((j) => !j); window.scrollTo({ top: 0 }); }} />
-          </div>
-          {hasResult && (
-            <nav ref={mobileNav} className="mx-[var(--page-gutter)] flex gap-0.5 overflow-x-auto pb-1 [scrollbar-width:none] md:hidden" aria-label="Steps">
-              <StepNav id="mobile" step={step} judge={judge} enabled={enabled} go={go} />
-            </nav>
-          )}
-        </header>
-        <main className="relative z-10 mx-auto max-w-[1200px] px-[var(--page-gutter)] pb-32 pt-10 sm:pt-16">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={view} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}>
-              {judge && analysis ? <Judge a={analysis} source={source} />
-                : step === "welcome" ? <Welcome onStart={() => go("connect")} onSample={sample} />
-                : step === "connect" ? <Connect onRun={run} connectError={connectError} />
-                : step === "analyzing" ? <Analyzing stages={stages} error={error} source={source} onBack={() => go("connect")} result={analysis} />
-                : analysis && step === "overview" ? <Overview a={analysis} onNext={() => go("protection")} />
-                : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} />
-                : analysis && step === "simulate" ? <Simulator a={analysis} onNext={() => go("payout")} />
-                : analysis && step === "payout" ? <Payout a={analysis} />
-                : <Welcome onStart={() => go("connect")} onSample={() => go("connect")} />}
-            </motion.div>
-          </AnimatePresence>
-        </main>
-        <footer className="relative z-10 mx-auto max-w-[1200px] px-[var(--page-gutter)] pb-10 text-center text-[12px] leading-[1.6] text-faint">
-          <p className="mx-auto max-w-[80ch]">CostShield is a hackathon prototype built for UBC 2026. Price data: U.S. Energy Information Administration. Market data: Gemini Prediction Markets public API. Settlement: Solana devnet with Helius Privacy Rings.</p>
-        </footer>
+    <section id={id} className="scroll-mt-20 py-20 md:py-[120px]">
+      <div className={cx(wrap, "grid items-center gap-10 md:gap-16 lg:grid-cols-[0.85fr_1.15fr]")}>
+        <div className={cx("max-w-[480px]", flip && "lg:order-2 lg:justify-self-end")}>
+          <Reveal><p className="text-[13px] font-[500] text-ink2">{label}</p></Reveal>
+          <Reveal i={1}><h2 className={cx(h2, "mt-4")}>{title}</h2></Reveal>
+          <Reveal i={2}><div className={cx(body, "mt-5 space-y-4")}>{children}</div></Reveal>
+          {aside && <Reveal i={3}><div className="mt-8">{aside}</div></Reveal>}
+        </div>
+        <Reveal i={1} className={cx("min-w-0", flip && "lg:order-1")}>{fragment}</Reveal>
       </div>
-    </MotionConfig>
+    </section>
+  );
+}
+
+export default async function Landing() {
+  const d = await getLandingData();
+  const proof = [
+    { v: pct1(d.diesel.share), c: "of the sample fleet's revenue goes to diesel" },
+    { v: `${d.diesel.shockTimesProfit.toFixed(1)}×`, c: "its operating profit, lost in a 1-in-20 diesel year after surcharges" },
+    { v: String(d.backtest.n), c: `rolling 12-month cover years backtested on EIA prices, ${d.backtest.from.slice(0, 4)} to ${d.backtest.to.slice(0, 4)}` },
+    { v: `${d.backtest.badPaid} of ${d.backtest.bad}`, c: "bad diesel years, a quarter a gallon or worse, in which the cap paid" },
+  ];
+  const verdicts = [
+    { name: "NY Harbor diesel calls", where: "NYMEX", status: "Viable, modelled", tone: "text-jade", note: `R² ${d.wholesaleR2.toFixed(2)} to retail diesel, 12 monthly expiries` },
+    { name: "Crude oil ladders", where: "Gemini", status: "Signal only", tone: "text-ink2", note: "Brent is not diesel, and the ladder expires in days" },
+    { name: "Payroll, leases, repairs", where: "None", status: "No instrument", tone: "text-rust", note: "Nothing trades on these costs" },
+  ];
+  const details = [
+    { t: "Judge mode", b: "Every number opens to its source, its formula and its inputs: provenance, classification, statistics, Gemini and the settlement program.", m: "5 tabs" },
+    { t: "Evidence on every number", b: "Each figure carries a letter: verified public data, calculated, estimate or assumption. Owners can ignore it; reviewers can read it.", m: "V  C  E  A" },
+    { t: "Live Gemini market reads", b: "Prediction-market ladders are read live and turned into an implied volatility for pricing. They are scored as a hedge, and rejected when they fail.", m: "Index, tenor, depth, fit" },
+    { t: "Write-once oracle reports", b: "The oracle posts the EIA monthly mean with the sha256 of the source file. A period can be reported once.", m: `sha256 ${d.eia.sha256.slice(0, 16)}…` },
+    { t: "Refusals the program enforces", b: "Reports from anyone but the oracle, releases of untriggered steps, releases by anyone but the fleet and double releases are refused on chain.", m: "4 checks" },
+    { t: "Reads real exports", b: "QuickBooks reports with title rows above the header, or any export with debit and credit columns. Unreadable rows are counted, not guessed.", m: `${d.lines.toLocaleString("en-US")} rows, ${d.skipped} skipped` },
+  ];
+
+  return (
+    <div className="min-h-screen overflow-x-clip bg-bg">
+      <Nav />
+      <main>
+        {/* Hero */}
+        <section className="pt-16 md:pt-[104px]">
+          <div className={wrap}>
+            <Reveal immediate>
+              <a href="#privacy" className="group/btn inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors duration-150 hover:text-ink">
+                <span className="text-ink2">Private payouts on Solana devnet</span>
+                <span className="text-faint">with Helius Privacy Rings</span>
+                <Arrow className="text-faint" />
+              </a>
+            </Reveal>
+            <Reveal immediate i={1}>
+              <h1 className="mt-6 max-w-[880px] bg-gradient-to-b from-ink from-30% to-ink/70 bg-clip-text pb-1 text-[40px] font-[540] leading-[1.04] tracking-[-0.032em] text-transparent sm:text-[56px] sm:leading-[1.02] lg:text-[68px]">
+                Protect your business from <br className="hidden sm:block" />the costs a market controls
+              </h1>
+            </Reveal>
+            <Reveal immediate i={2}>
+              <p className="mt-6 max-w-[560px] text-[16px] leading-[1.6] text-muted md:text-[18px]">
+                CostShield reads your books, measures what a price spike would cost you, and says plainly what can be protected. Payouts settle privately on Solana.
+              </p>
+            </Reveal>
+            <Reveal immediate i={3}>
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+                <Link href="/app?sample=1" className={btnPrimary}>Analyze a sample company</Link>
+                <a href="#how" className={linkArrow}>How it works<Arrow /></a>
+              </div>
+            </Reveal>
+          </div>
+          <div id="product" className={cx(wrap, "scroll-mt-20 mt-16 md:mt-20")}>
+            <ProductWindow d={d} />
+          </div>
+        </section>
+
+        {/* Proof */}
+        <section aria-label="The sample company in numbers" className="pb-20 md:pb-[120px]">
+          <div className={wrap}>
+            <Reveal><p className="text-[13px] text-faint">From the sample company: {d.company}, a synthetic 10-truck Midwest fleet with real EIA prices.</p></Reveal>
+            <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[16px] border border-line/8 bg-line/[0.07] lg:grid-cols-4">
+              {proof.map((p, i) => (
+                <Reveal key={p.c} i={i} className="bg-bg">
+                  <div className="h-full px-5 py-6 md:px-6 md:py-8">
+                    <p className="num text-[32px] font-[540] leading-none tracking-[-0.03em] text-ink md:text-[40px]">{p.v}</p>
+                    <p className="mt-3 max-w-[30ch] text-[13px] leading-[1.5] text-muted">{p.c}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Rule />
+
+        <Feature id="how" label="Reads your books" title={<>Starts from the books <br className="hidden md:block" />you already keep</>} fragment={<LedgerSort d={d} />}>
+          <p>Upload a QuickBooks export. Ordered, deterministic rules give every line a category and a confidence, gallons come straight from fuel memos, and any row that cannot be read is counted rather than guessed.</p>
+        </Feature>
+
+        <Feature label="Finds what a market controls" title="Finds the costs a market sets" fragment={<ExposureBars d={d} />} flip>
+          <p>Each category is measured as a share of revenue, then the price you paid is tested against public indexes. For the sample fleet, diesel follows the {d.diesel.regionLabel} index with R² {d.diesel.r2.toFixed(2)}. Payroll and leases follow nothing.</p>
+        </Feature>
+
+        <Feature
+          label="Prices protection honestly"
+          title="Prices the cover, and says no when nothing hedges"
+          fragment={<CapLadder d={d} />}
+          aside={
+            <ul className="divide-y divide-line/[0.06] border-y border-line/[0.06]">
+              {verdicts.map((v) => (
+                <li key={v.name} className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5 py-3 text-[13px]">
+                  <span className="text-ink">{v.name} <span className="text-faint">{v.where}</span></span>
+                  <span className={v.tone}>{v.status}</span>
+                  <span className="col-span-2 text-faint">{v.note}</span>
+                </li>
+              ))}
+            </ul>
+          }
+        >
+          <p>A 12-month diesel cap in $0.25 steps, priced as a strip of options with Black-76 and backtested on {d.backtest.n} rolling cover years. Any instrument that fails on index, tenor, depth or fit is rejected, and the page says so.</p>
+        </Feature>
+
+        <Feature id="privacy" label="Pays privately on Solana" title="The payout is real. The amount stays private." fragment={<PrivatePayout d={d} />} flip>
+          <p>Each step of the cap is funded in advance. An oracle posts the EIA monthly mean, and the program releases every step the price reached. Helius Privacy Rings keeps step amounts, the payout and balances encrypted on chain.</p>
+          <p className="text-[14px] text-faint">Hover the fleet&apos;s view to decode it again.</p>
+        </Feature>
+
+        <Feature id="lenders" label="Proves it to your lender" title="Proof for your lender, without a spreadsheet" fragment={<LenderView d={d} />}>
+          <p>Send one link. It carries read-only viewing keys, so your lender sees each step&apos;s trigger, what was funded and what paid. The key can decrypt. It cannot spend.</p>
+        </Feature>
+
+        <Rule />
+
+        {/* Details */}
+        <section aria-labelledby="details" className="py-20 md:py-[120px]">
+          <div className={wrap}>
+            <Reveal><h2 id="details" className={cx(h2, "max-w-[640px]")}>Built to be checked</h2></Reveal>
+            <Reveal i={1}><p className={cx(body, "mt-5 max-w-[520px]")}>Every claim on this page traces back to a file, a formula or a transaction you can open.</p></Reveal>
+            <div className="mt-12 grid gap-px overflow-hidden rounded-[16px] border border-line/8 bg-line/[0.07] sm:grid-cols-2 lg:grid-cols-3">
+              {details.map((x, i) => (
+                <Reveal key={x.t} i={i % 3} className="bg-bg">
+                  <div className="flex h-full flex-col px-6 py-7">
+                    <h3 className="text-[15px] font-[560] tracking-[-0.01em] text-ink">{x.t}</h3>
+                    <p className="mt-2 flex-1 text-[14px] leading-[1.55] text-muted">{x.b}</p>
+                    <p className="num mt-6 truncate font-mono text-[12px] text-faint">{x.m}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Rule />
+
+        {/* Final call to action */}
+        <section className="py-24 md:py-[144px]">
+          <div className={cx(wrap)}>
+            <Reveal>
+              <div className={cx(surface, lift, "px-6 py-12 md:px-14 md:py-16")}>
+                <h2 className={cx(h2, "max-w-[620px]")}>Start with the sample company</h2>
+                <p className={cx(body, "mt-5 max-w-[540px]")}>
+                  Two years of books from a 10-truck fleet, {d.lines.toLocaleString("en-US")} transactions, {usd0(d.revenueTtm)} in revenue and {usd0(d.profitTtm)} of profit. Every number above came from it.
+                </p>
+                <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+                  <Link href="/app?sample=1" className={btnPrimary}>Analyze a sample company</Link>
+                  <Link href="/app" className={linkArrow}>Upload your own export<Arrow /></Link>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-line/[0.07] py-12">
+        <div className={cx(wrap, "grid gap-8 text-[13px] md:grid-cols-[1fr_1.4fr]")}>
+          <div>
+            <Logo size={18} />
+            <p className="mt-4 max-w-[38ch] leading-[1.6] text-faint">
+              A simulation built for the UBC 2026 Hackathon. Not an offer of insurance or derivatives. No real premiums, orders or money: devnet test dollars only.
+            </p>
+          </div>
+          <dl className="grid gap-x-8 gap-y-4 leading-[1.6] sm:grid-cols-2">
+            {[
+              ["Diesel prices", "U.S. Energy Information Administration (EIA)"],
+              ["Market data", "Gemini Prediction Markets public API"],
+              ["Settlement", "Solana devnet"],
+              ["Privacy", "Helius Privacy Rings"],
+            ].map(([k, v]) => (
+              <div key={k}><dt className="text-faint">{k}</dt><dd className="text-muted">{v}</dd></div>
+            ))}
+          </dl>
+        </div>
+      </footer>
+    </div>
   );
 }

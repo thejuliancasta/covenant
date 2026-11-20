@@ -145,7 +145,7 @@ export function SettlementStage({ m, company, explorer, running, underwriterBala
       <div ref={reportScope} className="flex min-h-[44px] flex-wrap items-baseline gap-x-4 gap-y-1.5">
         {m.mean !== null ? (<>
           <span className="text-[13px] text-muted">Oracle report</span>
-          <span className="num text-[20px] font-semibold tracking-[-0.03em] text-heat">${m.mean.toFixed(3)}<span className="ml-1 text-[13px] font-normal tracking-normal text-muted">a gallon</span></span>
+          <span className="num text-[20px] font-[550] tracking-[-0.03em] text-heat">${m.mean.toFixed(3)}<span className="ml-1 text-[13px] font-normal tracking-normal text-muted">a gallon</span></span>
           {m.sha && <HashChip hash={m.sha} />}
           {m.reportTx && <TxChip sig={m.reportTx} explorer={explorer} />}
           {m.reportReused && <span className="text-[12px] text-faint">already on chain, reused</span>}
@@ -186,7 +186,7 @@ export function SettlementStage({ m, company, explorer, running, underwriterBala
               <span className="sm:hidden">${m.strike.toFixed(2)}</span><span className="hidden sm:inline">${m.strike.toFixed(3)}</span>
             </span>
             {m.mean !== null && (
-              <motion.span className="num absolute right-0 z-20 text-[11.5px] font-semibold leading-4 text-heat" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              <motion.span className="num absolute right-0 z-20 text-[11.5px] font-[550] leading-4 text-heat" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 style={{ bottom: `calc(${level * 100}% - 8px)` }}>
                 <span className="sm:hidden">${m.mean.toFixed(2)}</span><span className="hidden sm:inline">${m.mean.toFixed(3)}</span>
               </motion.span>
@@ -203,7 +203,7 @@ export function SettlementStage({ m, company, explorer, running, underwriterBala
                   {!m.opened && !m.funded && (
                     <span className="flex w-full flex-col gap-1.5 px-1">
                       <span className="text-[11.5px] text-faint">Step {p.index}</span>
-                      <span className="h-[5px] rounded-[3px] border border-dashed border-line/25" />
+                      <span className="h-[5px] rounded-[3px] border border-dashed border-line/14" />
                     </span>
                   )}
                 </div>
@@ -235,7 +235,7 @@ function PayoutMark({ step, tx, explorer, shake }: { step: number; tx: string; e
   }, [shake]);
   return (
     <motion.span ref={scope} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={UI_SPRING}
-      className={cx("inline-flex items-center gap-1.5 whitespace-nowrap text-[11.5px] transition-colors duration-300", flash ? "text-rust" : "text-jade")}>
+      className={cx("inline-flex items-center gap-1.5 whitespace-nowrap text-[11.5px] transition-colors duration-300", flash ? "text-rust" : "text-ink2")}>
       <span className="font-medium">{flash ? "paid, repeat refused" : "paid"}</span>
       {!flash && <TxLink sig={tx} explorer={explorer} className="hidden text-[10.5px] !text-inherit xl:inline-flex" />}
       <a href={txUrl(explorer, tx)} target="_blank" rel="noreferrer" aria-label={`Release transaction for step ${step}`} className="relative inline-flex before:absolute before:-inset-3 before:content-[''] xl:hidden"><ArrowOut /></a>
@@ -261,7 +261,7 @@ function StatusMark({ status }: { status: StepStatus }) {
       <svg viewBox="0 0 20 20" width="15" height="15" className="animate-spin text-jade [animation-duration:1.1s]"><path d="M10 2.5a7.5 7.5 0 0 1 7.5 7.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>
     </span>
   );
-  if (status === "done") return <span role="img" aria-label="done" className="mt-[3px] flex h-4 w-4 shrink-0 items-center justify-center text-jade"><DrawCheck size={14} /></span>;
+  if (status === "done") return <span role="img" aria-label="done" className="mt-[3px] flex h-4 w-4 shrink-0 items-center justify-center text-muted"><DrawCheck size={14} /></span>;
   if (status === "rejected") return <span role="img" aria-label="refused" className="mt-[3px] flex h-4 w-4 shrink-0 items-center justify-center text-rust"><svg viewBox="0 0 12 12" width="11" height="11"><path d="M2.5 2.5 9.5 9.5M9.5 2.5 2.5 9.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg></span>;
   return <span role="img" aria-label="error" className="mt-[1px] flex h-4 w-4 shrink-0 items-center justify-center text-[13px] font-bold text-rust">!</span>;
 }

@@ -3,7 +3,8 @@ import { useState, type ReactNode } from "react";
 import { MotionConfig, motion } from "motion/react";
 import type { Analysis } from "@/lib/engine/pipeline";
 import { int, pct, ppg, usd } from "@/lib/format";
-import { Card, CardTitle, Check, Ev, PageHead, Row, Table, Tag, cx } from "./ui";
+import { CardTitle, Check, Ev, PageHead, Row, Table, Tag, cx } from "./ui";
+import { Panel as Card } from "./settle/surface";
 import { Encrypted, LockIcon, tusd, useChainStatus } from "./chain";
 import { AddrChip, ArrowOut } from "./settle/tx";
 import { CipherGlyphs } from "./settle/cipher";
@@ -298,8 +299,8 @@ function SettlementProgram() {
       <CardTitle>Program safeguards</CardTitle>
       <p className={lede}>The cap pays in steps because the program cannot read encrypted amounts. It checks public prices and signers, and releases whole steps.</p>
       <ul className="mt-4 space-y-2">
-        {SAFEGUARDS.map(([title, how, codes], k) => (
-          <motion.li key={title} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: k * STAGGER * 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+        {SAFEGUARDS.map(([title, how, codes]) => (
+          <li key={title}
             className="grid gap-x-8 gap-y-1.5 py-3 md:grid-cols-[13.5rem_minmax(0,1fr)_12.5rem] md:items-start">
             <p className="text-[13.5px] font-medium leading-5 text-ink">{title}</p>
             <p className="text-[13px] leading-[1.55] text-muted">{how}</p>
@@ -307,7 +308,7 @@ function SettlementProgram() {
               <span className="sr-only">Refused with error</span>
               {codes.split(", ").map((c) => <span key={c} className="whitespace-nowrap font-mono text-[12px] text-rust/90">{c}</span>)}
             </p>
-          </motion.li>
+          </li>
         ))}
       </ul>
       <p className={foot}>Error codes are the program&apos;s own (solana/program/src/lib.rs), unchanged from the Equity Floor program it was ported from, where each was triggered on devnet by an attack test. The demo replays two refusals live: a stranger&apos;s release and a duplicate release.</p>

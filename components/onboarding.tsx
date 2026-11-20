@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { AnimatePresence, motion, useAnimationControls } from "motion/react";
 import { STAGES, type Analysis } from "@/lib/engine/pipeline";
 import { int, pct } from "@/lib/format";
-import { Arrow, Button, Card, CardTitle, Note, Tag, cx, display } from "./ui";
+import { Arrow, Button, Card, CardTitle, Note, Tag, cx, display, surfaceHover } from "./ui";
 import { PressureHero } from "./fx/pressure-hero";
 import { LogoMark } from "./brand/logo";
 import { CountUp, TickText } from "./fx/count";
@@ -78,7 +78,7 @@ function LinkGlyph({ ready }: { ready: boolean }) {
 function ProviderTile({ p, onConnect }: { p: LedgerProvider; onConnect: () => void }) {
   const keys = p.missing?.length ? p.missing : null;
   return (
-    <li className="group flex min-w-0 flex-col py-1">
+    <li className={cx("group flex min-w-0 flex-col rounded-[10px] border border-line/[0.08] bg-panel/60 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.03)]", p.configured && surfaceHover)}>
       <div className="flex items-center justify-between gap-3">
         <LinkGlyph ready={p.configured} />
         <Tag tone={p.configured ? "good" : "neutral"}>{p.configured ? "Ready" : "Not configured"}</Tag>
@@ -90,8 +90,8 @@ function ProviderTile({ p, onConnect }: { p: LedgerProvider; onConnect: () => vo
           : "Set the client id and secret on the server."}
       </p>
       {p.configured
-        ? <Button variant="secondary" size="sm" onClick={onConnect} className="mt-2 self-start">Connect</Button>
-        : <p className="mt-3 text-[13px] text-faint">Needs keys</p>}
+        ? <Button variant="secondary" size="sm" onClick={onConnect} className="mt-4 self-start">Connect<Arrow /></Button>
+        : <p className="mt-4 text-[13px] leading-8 text-faint">Needs keys</p>}
     </li>
   );
 }
@@ -192,7 +192,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
   return (
     <div className="mx-auto max-w-5xl">
       <motion.header initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.2, 0.8, 0.2, 1] }} className="mb-8">
-        <h1 className={cx("text-[32px] leading-[1.04] sm:text-[44px] sm:leading-[1.02]", display)}>Connect your accounting records</h1>
+        <h1 className={cx("text-[28px] leading-[1.1] sm:text-[34px] sm:leading-[1.08]", display)}>Connect your accounting records</h1>
         <p className="mt-3 max-w-2xl text-[15px] leading-[1.6] text-muted sm:text-base">We need 12 to 24 months of expense transactions. Sign in, or upload an export.</p>
       </motion.header>
 
@@ -233,7 +233,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
           <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">The owner logs in at their own software and approves access. We pull 24 months of lines and analyze them in this session. The login is not stored.</p>
           {ledgers === null
             ? <p className="mt-5 text-[13px] text-muted">Checking which connections are configured…</p>
-            : <motion.ul initial="hidden" animate="show" transition={{ staggerChildren: 0.06 }} className="mt-5 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+            : <motion.ul initial="hidden" animate="show" transition={{ staggerChildren: 0.06 }} className="mt-4 grid gap-3 sm:grid-cols-2">
                 {ledgers.map((p) => <motion.div key={p.id} variants={rise} className="flex"><ProviderTile p={p} onConnect={() => connect(p.id)} /></motion.div>)}
               </motion.ul>}
           <p className="mt-4 text-[12px] leading-[1.55] text-faint">Each app needs a redirect URL of <code className="font-mono text-[11.5px] text-ink2">/api/connect/quickbooks/callback</code>, and the same path with xero, zoho, or freshbooks. QuickBooks Desktop has no cloud sign-in, so use a CSV. Wave does not return historical ledger lines.</p>
@@ -243,7 +243,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
           <Card className="flex flex-col">
             <div className="flex items-center justify-between gap-3"><CardTitle>Upload an export</CardTitle><Tag tone="good">Works now</Tag></div>
             <div {...dragProps} onClick={() => input.current?.click()}
-              className="group mt-4 cursor-pointer px-4 pb-4 pt-6 text-center">
+              className={cx("group mt-3 cursor-pointer rounded-[10px] border border-dashed px-4 pb-5 pt-5 text-center transition-[border-color,background-color] duration-150 ease-out", drag ? "border-jade/60 bg-jade/[0.04]" : "border-line/[0.12] bg-bg/40 hover:border-line/[0.2]")}>
               <SheetGlyph drag={drag} />
               <p className={cx("mt-2 text-[13.5px] font-medium transition-colors duration-150", drag ? "text-jade" : "text-ink2")}>{drag ? "Release to upload" : "Drop a CSV here"}</p>
               <p className="mx-auto mt-1 max-w-[34ch] text-[12px] leading-[1.45] text-faint">QuickBooks, Xero or any export with date, vendor, account and amount columns</p>
@@ -251,7 +251,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
             <AnimatePresence initial={false}>
               {chip && (
                 <motion.div key={chip.name + chip.size} initial={{ opacity: 0, x: -14, height: 0, marginTop: 0 }} animate={{ opacity: 1, x: 0, height: "auto", marginTop: 12 }} exit={{ opacity: 0, height: 0, marginTop: 0 }} transition={SPRING_UI}>
-                  <div className="flex items-center gap-3 py-1">
+                  <div className="flex items-center gap-3 rounded-[8px] border border-line/[0.08] bg-panel/60 px-3 py-2">
                     <svg width="16" height="18" viewBox="0 0 16 18" aria-hidden className={chip.ok ? "text-jade" : "text-rust"}><path d="M3 1.5h6.5L13.5 5.5V16a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Z M9.5 1.5V5.5h4" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" /></svg>
                     <span className="min-w-0 flex-1 truncate text-[13px] text-ink">{chip.name}</span>
                     <span className="num shrink-0 text-[12px] text-faint">{kb(chip.size)}</span>
@@ -267,7 +267,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
           <Card className="flex flex-col">
             <div className="flex items-center justify-between gap-3"><CardTitle>Sample company</CardTitle><Tag tone="info">Synthetic</Tag></div>
             <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">John&apos;s Trucking LLC: 10 trucks in the Midwest, 3,315 transactions over 24 months. The ledger is generated, but its fuel prices follow the real EIA Midwest diesel index. It goes through the same importer as an upload.</p>
-            <Button variant="secondary" onClick={sample} disabled={busy} className="mt-3 self-start">{busy ? "Loading…" : "Use sample company"}</Button>
+            <Button variant="secondary" onClick={sample} disabled={busy} className="mt-4 self-start">{busy ? "Loading…" : "Use sample company"}</Button>
           </Card>
         </div>
       </div>
@@ -331,7 +331,7 @@ export function Analyzing({ stages, error, source, onBack, result }: { stages: R
   return (
     <div className="mx-auto max-w-3xl">
       <motion.header initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.2, 0.8, 0.2, 1] }} className="mb-6">
-        <h1 className={cx("text-[32px] leading-[1.04] sm:text-[44px] sm:leading-[1.02]", display)}>{error ? "We could not finish the analysis" : done === STAGES.length ? "Analysis complete" : "Analyzing your records"}</h1>
+        <h1 className={cx("text-[28px] leading-[1.1] sm:text-[34px] sm:leading-[1.08]", display)}>{error ? "We could not finish the analysis" : done === STAGES.length ? "Analysis complete" : "Analyzing your records"}</h1>
         <p className="mt-3 text-[14px] leading-5 text-muted">{source}</p>
         <div className="mt-5 flex gap-1" role="progressbar" aria-label="Pipeline stages finished" aria-valuemin={0} aria-valuemax={STAGES.length} aria-valuenow={done}>
           {STAGES.map((s) => {

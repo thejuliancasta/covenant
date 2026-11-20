@@ -10,6 +10,8 @@ import { CapPlates } from "./fx/cap-plates";
 import { SPRING_FLUID, tok } from "./fx/motion";
 
 const MARKET = new Set(["fleet_fuel", "natural_gas", "electricity", "interest"]);
+/** Inner panel: a hairline sub-surface inside a card. */
+const SUB = "rounded-[10px] border border-line/[0.08] bg-panel/60 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.03)]";
 
 /** Content group that settles into place when it first scrolls into view. It is never hidden, so captures and prints show everything. */
 function Reveal({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -31,7 +33,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
   const top = f.categories[0];
   const maxNet = d ? Math.max(...d.shocks.map((s) => s.netImpact), 1) : 1;
   return (
-    <div className="space-y-14">
+    <div className="space-y-4">
       <PageHead eyebrow={`${a.company ?? "Your business"}, ${monthLabel(f.ttm[0])} to ${monthLabel(f.ttm[f.ttm.length - 1])}`}
         title={d?.material ? "We found one cost risk worth protecting." : "We found no cost risk worth protecting."}
         lede={<>We analyzed {int(a.lineCount)} transactions over {f.months.length} months. {d?.material
@@ -59,10 +61,10 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
       </Reveal>
 
       {d && (
-        <Reveal className="grid gap-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
+        <Reveal className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
           <Card>
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className={cx("text-[26px] leading-[1.05]", display)}>Diesel prices</h2>
+              <h2 className={cx("text-[20px] leading-[1.15]", display)}>Diesel prices</h2>
               <span className="flex gap-1.5"><Tag tone="neutral">Primary risk</Tag><Tag tone={d.material ? "warn" : "neutral"}>{d.material ? "Material" : "Not material"}</Tag></span>
             </div>
             <p className="mt-3 text-[13.5px] leading-[1.6] text-muted">
@@ -101,7 +103,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
         </Reveal>
       )}
 
-      <Reveal className="grid gap-14 lg:grid-cols-[1.08fr_0.92fr] lg:gap-10">
+      <Reveal className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
         {d && pool ? (
           <Card>
             <div className="flex items-center justify-between gap-3"><CardTitle>Risk pool</CardTitle><Tag tone={pool.status === "member" ? "good" : "warn"}>{pool.status}</Tag></div>
@@ -114,7 +116,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
             <div className="mt-5"><Note tone="info" title="A pool is not a policy"><span>A pool groups businesses whose payouts move on the same index, so one hedge can cover all of them. Protection also needs a liquid hedge and a licensed company to owe the payout. See the next step.</span></Note></div>
           </Card>
         ) : <div className="hidden lg:block" />}
-        <div className="grid content-start gap-14">
+        <div className="grid content-start gap-4">
           <Card>
             <CardTitle>Risks with no usable hedge</CardTitle>
             <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">{pct(noInstrument.reduce((s, o) => s + o.spendTtm, 0) / f.expensesTtm)} of your spending. No index or traded instrument tracks these costs, so nobody can honestly sell you protection on them.</p>
@@ -163,7 +165,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
     ["Prediction markets", "0% of funding. Used as a price signal only.", "Live data"],
   ];
   return (
-    <div className="space-y-14">
+    <div className="space-y-4">
       <PageHead title="One candidate: a cap on your diesel price."
         lede="If the monthly average diesel price in your region rises above a set level, the cap pays the difference on the gallons you actually bought and could not surcharge. Here are the terms, what it would have done, and who would have to stand behind it." />
 
@@ -183,7 +185,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
             <Row label="Maximum payout, 12 months">{usd(p.aggregateLimit)}</Row>
           </div>
         </div>
-        <div className="mt-8">
+        <div className={cx("mt-6", SUB)}>
           <p className="text-[13.5px] font-medium text-ink">Not covered</p>
           <ul className="mt-2 grid gap-x-8 gap-y-1.5 text-[13px] leading-[1.5] text-muted md:grid-cols-2">
             {[
@@ -205,15 +207,15 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
               <p className="mt-3 text-[13.5px] leading-[1.6] text-muted">Cover costs {(today.premium / then.premium).toFixed(1)} times more after the 2026 spike, and the strike would sit at {ppg(p.todayIndex + p.strikeOffset)}. Protection is cheapest before you need it.</p>
               <p className="mt-3 text-[12px] leading-[1.55] text-faint">Volatility today: {m.volatility.source}<Ev e={m.volatility.evidence} /></p>
             </div>
-            <div className="grid content-start gap-8 sm:grid-cols-2">
-              <div>
+            <div className="grid content-start gap-3 sm:grid-cols-2">
+              <div className={SUB}>
                 <p className="text-[13px] text-muted">If bound in {monthLabel(p.inceptionMonth)}</p>
-                <p className={cx("num mt-2 text-[32px] leading-none", display)}><CountUp value={then.premium} format={(v) => usd(v)} /></p>
+                <p className={cx("num mt-2 text-[28px] leading-none", display)}><CountUp value={then.premium} format={(v) => usd(v)} /></p>
                 <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(then.premiumPerGallon)} per covered gallon, wholesale {ppg(then.forward)}, {pct(then.sigma)} vol</p>
               </div>
-              <div>
+              <div className={SUB}>
                 <p className="text-[13px] text-heat">If bound today</p>
-                <p className={cx("num mt-2 text-[32px] leading-none", display)}><CountUp value={today.premium} format={(v) => usd(v)} /></p>
+                <p className={cx("num mt-2 text-[28px] leading-none", display)}><CountUp value={today.premium} format={(v) => usd(v)} /></p>
                 <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(today.premiumPerGallon)} per covered gallon, wholesale {ppg(today.forward)}, {pct(today.sigma)} vol</p>
               </div>
             </div>
@@ -229,7 +231,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
             <Stat label="Average payout" value={<CountUp value={bt.burnPerGallonYear} format={ppg} />} sub="per covered gallon a year" ev="C" />
             <Stat label="Cost swings removed" value={<CountUp value={bt.varianceReduction * 100} format={(v) => `${v.toFixed(0)}%`} />} sub={`${pct(bt.recoveryInBad)} of the increase recovered in bad years`} ev="C" />
           </div>
-          <div className="mt-10">
+          <div className={cx("mt-6", SUB)}>
             <h3 className="text-[14px] font-medium text-ink">Payout per covered gallon, by the month cover started</h3>
             <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.6] text-muted">Each bar is one 12-month period on real {d.regionLabel} prices, with the strike {usd(p.strikeOffset, 2)} above the starting price. Most periods pay nothing. The ones that pay are the years that hurt.</p>
             <div className="mt-4"><Bars values={bt.cohorts.map((c) => c.payoutPerGallon)} labels={bt.cohorts.map((c) => c.inception.slice(0, 4))} readLabels={bt.cohorts.map((c) => monthLabel(c.inception.slice(0, 7), true))} fmt={(v) => `$${v.toFixed(2)}`} height={170} /></div>
@@ -241,11 +243,11 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-2"><CardTitle>Can this risk actually be hedged?</CardTitle><Tag tone={m.status === "live" ? "good" : "warn"}>{m.status === "live" ? `Gemini live, ${m.scanned} markets scanned` : "Gemini unavailable"}</Tag></div>
           <p className="mt-1.5 max-w-[80ch] text-[13.5px] leading-[1.6] text-muted">We test each instrument against your cost, not against a price forecast. A market that does not track what you pay is rejected even if it is the only one listed.</p>
-          <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
             {a.hedges.map((h) => {
               const viable = h.status.startsWith("viable");
               return (
-                <div key={h.name}>
+                <div key={h.name} className={SUB}>
                   <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-[12px] text-faint">{h.venue}</p><p className="mt-0.5 text-[14px] font-medium leading-5 text-ink">{h.name}</p></div><Tag tone={viable ? "good" : h.status === "signal only" ? "warn" : "bad"}>{h.status}</Tag></div>
                   <dl className="mt-3 grid gap-1.5 text-[13px]">
                     {([["Tracks retail diesel (12-month R²)", h.basisR2Annual !== null ? h.basisR2Annual.toFixed(2) : "n/a"], ["Tenor", h.tenor], ["Capacity", h.capacity], ["Cost", h.cost]] as const).map(([k, v]) => <div key={k} className="flex justify-between gap-4"><dt className="shrink-0 text-muted">{k}</dt><dd className="num text-right text-ink2">{v}</dd></div>)}
@@ -256,7 +258,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
             })}
           </div>
           {crude && (
-            <div className="mt-10 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className={cx("mt-4 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]", SUB)}>
               <div>
                 <h3 className="text-[14px] font-medium text-ink">What the Gemini market is good for</h3>
                 <p className="mt-2 text-[13.5px] leading-[1.6] text-muted">The <span className="font-mono text-[12.5px] text-ink2">{crude.ticker}</span> ladder is a set of yes/no contracts on whether Brent finishes above each price. Read together, their prices are the market&apos;s probability curve for oil. We fit that curve and get an implied volatility of <span className="font-medium text-ink">{pct(crude.implied.sigmaAnnual)}</span> and a median of <span className="font-medium text-ink">${crude.implied.median.toFixed(2)}</span> a barrel.<Ev e="V" /> That volatility is the input our cap price uses today, in place of an options data feed that costs five figures a year.</p>
@@ -273,11 +275,11 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
         <Card>
           <CardTitle>Who would owe the payout</CardTitle>
           <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">CostShield would never owe or fund a payout itself. This is the chain a real product needs, and how much of it exists today.</p>
-          <ol className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-3">
+          <ol className="mt-4 grid gap-3 md:grid-cols-3">
             {waterfall.map(([who, what, status], i) => (
               <motion.li key={who} initial={{ y: 10 }} whileInView={{ y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3, delay: i * 0.06, ease: [0.2, 0.8, 0.2, 1] }}
-                className="min-w-0">
-                <div className="flex items-center justify-between gap-3"><span className="num text-[13px] font-semibold text-faint">{String(i + 1).padStart(2, "0")}</span><Tag tone={status === "Not confirmed" ? "bad" : status === "Modelled" ? "warn" : "neutral"}>{status}</Tag></div>
+                className={cx("min-w-0", SUB)}>
+                <div className="flex items-center justify-between gap-3"><span className="num text-[12px] font-[510] text-faint">{String(i + 1).padStart(2, "0")}</span><Tag tone={status === "Not confirmed" ? "bad" : status === "Modelled" ? "warn" : "neutral"}>{status}</Tag></div>
                 <p className="mt-3 text-[14px] font-medium text-ink">{who}</p><p className="mt-1 text-[12.5px] leading-[1.55] text-muted">{what}</p>
               </motion.li>
             ))}

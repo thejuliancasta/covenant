@@ -1,14 +1,15 @@
 /**
- * CostShield mark: three pressure columns rising toward an ember cap they never cross.
- * Abstract, geometric, and the product in one shape (costs held under a ceiling).
+ * CostShield mark, "Stepped C": a C monogram built from the protection steps.
+ * The ember top arm is the cap; the stepped back is the ladder of $0.25 plates.
  */
 export function LogoMark({ size = 22, className }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 28 28" fill="none" aria-hidden className={className}>
-      <rect x="3" y="4.5" width="22" height="3" rx="1.5" fill="rgb(var(--jade))" />
-      <rect x="4.5" y="16" width="5" height="8.5" rx="1.2" fill="rgb(var(--ink) / 0.38)" />
-      <rect x="11.5" y="12.5" width="5" height="12" rx="1.2" fill="rgb(var(--ink) / 0.62)" />
-      <rect x="18.5" y="10" width="5" height="14.5" rx="1.2" fill="rgb(var(--ink) / 0.92)" />
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden className={className}>
+      <rect x="17" y="6" width="24" height="5.6" rx="1.4" fill="rgb(var(--jade))" />
+      <rect x="11" y="13.1" width="15" height="5.6" rx="1.4" fill="rgb(var(--ink) / 0.9)" />
+      <rect x="8" y="20.2" width="11" height="7.6" rx="1.4" fill="rgb(var(--ink))" />
+      <rect x="11" y="29.3" width="15" height="5.6" rx="1.4" fill="rgb(var(--ink) / 0.9)" />
+      <rect x="17" y="36.4" width="24" height="5.6" rx="1.4" fill="rgb(var(--ink) / 0.72)" />
     </svg>
   );
 }

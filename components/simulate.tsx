@@ -6,7 +6,8 @@ import { DEFAULT_EXPLORER, type SettlementEvent, type SettlementResult } from "@
 import { scenario } from "@/lib/engine/payout";
 import { priceCap } from "@/lib/engine/pricing";
 import { int, monthLabel, pct, ppg, readNdjson, usd } from "@/lib/format";
-import { Arrow, Button, Card, Ev, Note, PageHead, Row, Table, cx } from "./ui";
+import { Arrow, Button, Ev, Note, PageHead, Row, Table, cx } from "./ui";
+import { Panel as Card } from "./settle/surface";
 import { AddrLink, LockIcon, TxLink, periodYm, tusd, useChainStatus } from "./chain";
 import { FineRange, PresetChip, PriceRiseControl, Segmented, plateBounds } from "./settle/price-control";
 import { Rolling, useCountUp } from "./settle/rolling";
@@ -49,7 +50,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
             <div>
               <p className="text-[13px] text-muted">Diesel price increase</p>
               <p className="mt-1.5 flex items-baseline gap-2">
-                <Rolling text={`+$${rise.toFixed(2)}`} className="text-[48px] font-semibold tracking-[-0.045em] text-heat sm:text-[56px]" />
+                <Rolling text={`+$${rise.toFixed(2)}`} className="text-[40px] font-[550] tracking-[-0.03em] text-heat sm:text-[48px]" />
                 <span className="text-[15px] text-muted">a gallon</span>
               </p>
             </div>
@@ -69,7 +70,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
             {([["Extra fuel cost", s.extraCost, "text-ink"], ["Lands on you", s.exposedCost, "text-heat"], ["Cap pays", s.payout, "text-jade"], ["Still yours", s.unhedged, "text-ink"]] as const).map(([l, v, c]) => (
               <div key={l} className="min-w-0">
                 <p className="text-[13px] text-muted">{l}</p>
-                <Rolling text={usd(v)} className={cx("mt-1 text-[26px] font-semibold tracking-[-0.035em] sm:text-[30px]", c)} />
+                <p className={cx("num mt-1 text-[22px] font-[550] leading-[1.1] tracking-[-0.022em] sm:text-[26px]", c)}>{usd(v)}</p>
               </div>
             ))}
           </div>
@@ -89,16 +90,16 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
           </div>
         </Card>
 
-        <div className="grid gap-x-16 gap-y-12 pt-4 lg:grid-cols-[0.85fr_1.15fr]">
-          <section className="space-y-5 self-start">
+        <div className="grid items-start gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+          <Card className="space-y-5 self-start">
             <h2 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Your inputs</h2>
             <FineRange label="Gallons bought per month" value={gallons} min={500} max={40000} step={10} onChange={setGallons} fmt={int} />
             <FineRange label="Share of gallons with no fuel surcharge" value={share} min={0} max={1} step={0.01} onChange={setShare} fmt={(v) => pct(v)} />
             <Segmented label="Increase you absorb before the cap pays" options={offsetOptions} value={offset} onChange={setOffset} fmt={(o) => `$${o.toFixed(2)}`} />
             <FineRange label="Market volatility (drives the cost of cover)" value={vol} min={0.2} max={0.8} step={0.01} onChange={setVol} fmt={(v) => pct(v)} />
             <p className="text-xs leading-[1.5] text-faint">Defaults: gallons and surcharge share from your ledger<Ev e="E" />, volatility from {a.markets.volatility.evidence === "V" ? "the live Gemini Brent ladder" : "a planning assumption"}<Ev e={a.markets.volatility.evidence} />.</p>
-          </section>
-          <section>
+          </Card>
+          <Card>
             <h2 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">The month, line by line</h2>
             <div className="mt-2">
               <Row label="Extra fuel cost" hint={`${int(gallons)} gallons × $${rise.toFixed(2)}`}>{usd(s.extraCost)}</Row>
@@ -110,7 +111,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
               <Row label={<span className="font-medium text-ink">Net effect on profit this month</span>} hint={`Without cover: ${usd(s.netWithoutCover)}`}><span className="text-base">{usd(s.net)}</span></Row>
             </div>
             <div className="mt-4"><Note tone="info" title="Basis risk">The cap pays on the regional index, not your pump price. Your price strays from the index by about ±{ppg(basisStd)} a gallon in a typical month<Ev e={d.fit.method === "ledger-regression" ? "C" : "A"} />, so the true offset on {int(gallons * share)} gallons could be about {usd(s.basisBand)} better or worse (95% range). {s.payout === 0 && rise > 0 ? "At this price the increase is inside the amount you absorb, so the cap pays nothing." : ""}</Note></div>
-          </section>
+          </Card>
         </div>
         <div className="flex justify-end"><Button onClick={onNext} size="lg">See a payout settle<Arrow /></Button></div>
       </div>
@@ -214,7 +215,7 @@ export function Payout({ a }: { a: Analysis }) {
         <section className="pt-10">
           <div className="flex flex-wrap items-start justify-between gap-5">
             <div className="max-w-2xl">
-              <h2 className="text-[28px] font-semibold leading-[1.05] tracking-[-0.04em] text-ink sm:text-[34px]">Settle {month} privately on Solana devnet</h2>
+              <h2 className="text-[24px] font-[550] leading-[1.1] tracking-[-0.025em] text-ink sm:text-[30px]">Settle {month} privately on Solana devnet</h2>
               <p className="mt-3 text-[14px] leading-[1.55] text-muted">The underwriter funds each protection step in advance from its private balance. An oracle key posts the EIA monthly mean with the data file&apos;s sha256. The program checks each step&apos;s trigger against that report, and only {company} can release a triggered step. Amounts stay encrypted on chain. Money is tUSD, a devnet test dollar: 1 tUSD = $1, no scaling.</p>
               <p className="mt-2 text-[12.5px] text-faint">Private settlement on Solana devnet with Helius Privacy Rings.</p>
             </div>
@@ -238,8 +239,8 @@ export function Payout({ a }: { a: Analysis }) {
               </div>
             )}
 
-          <div className="mt-12 grid gap-x-14 gap-y-12 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-            <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
+          <Card className="mt-8"><div className="grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+            <div className="min-w-0 lg:sticky lg:top-6 lg:self-start">
               <h3 className="mb-3 text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Protection steps</h3>
               <SettlementStage key={runId} m={stage} company={company} explorer={explorer} running={running} underwriterBalance={st?.underwriterPrivateBalance} />
             </div>
@@ -248,18 +249,18 @@ export function Payout({ a }: { a: Analysis }) {
               <EventLog steps={steps} explorer={explorer} empty={st?.configured ? "Each step appears here as Solana devnet confirms it, with its transaction." : "Nothing has been sent on chain."} />
               {err && <ErrorBanner message={err} />}
             </div>
-          </div>
+          </div></Card>
 
-          <div className="mt-14">
+          <div className="mt-10 px-1">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Why the cap pays in {usd(stepSize, 2)} steps</h3>
               <span className="text-xs text-faint">{result ? "from the settlement result" : `expected, at the default ${usd(stepSize, 2)} step`}</span>
             </div>
             <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.55] text-muted">The program cannot read encrypted amounts, so it cannot compute (index − strike) × gallons. Instead the cap is split into {plan.count} steps up to {ppg(strike + LADDER_TOP)}. Step <span className="italic">i</span> holds {usd(stepSize, 2)} × {int(gallons)} gallons = {usd(plan.perStep, 2)} in its own private vault and pays when the attested monthly mean is at or above {ppg(strike)} + <span className="italic">i</span> × {usd(stepSize, 2)}. The program compares public prices and releases whole steps; it never needs an amount.</p>
             <div className="mt-4 grid gap-4 text-[13px] sm:grid-cols-3">
-              <div><p className="text-xs text-muted">Linear cap amount</p><p className="num mt-1 text-[24px] font-semibold leading-none tracking-[-0.03em] text-ink">{usd(linear, 2)}</p><p className="mt-1.5 text-xs text-faint">({ppg(index)} − {ppg(strike)}) × {int(gallons)} gal</p></div>
-              <div><p className="text-xs text-muted">Stepped payout</p><p className="num mt-1 text-[24px] font-semibold leading-none tracking-[-0.03em] text-jade">{usd(stepped, 2)}</p><p className="mt-1.5 text-xs text-faint">{result ? result.steps.filter((s) => s.paid).length : plan.hit} of {result ? result.steps.length : plan.count} steps × {usd(plan.perStep, 2)}</p></div>
-              <div><p className="text-xs text-muted">Difference</p><p className="num mt-1 text-[24px] font-semibold leading-none tracking-[-0.03em] text-ink">{usd(Math.max(0, linear - stepped), 2)}</p><p className="mt-1.5 text-xs text-faint">Rounded down to the step{index - strike > LADDER_TOP ? `, and nothing above ${ppg(strike + LADDER_TOP)}` : ""}</p></div>
+              <div><p className="text-xs text-muted">Linear cap amount</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-ink">{usd(linear, 2)}</p><p className="mt-1.5 text-xs text-faint">({ppg(index)} − {ppg(strike)}) × {int(gallons)} gal</p></div>
+              <div><p className="text-xs text-muted">Stepped payout</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-jade">{usd(stepped, 2)}</p><p className="mt-1.5 text-xs text-faint">{result ? result.steps.filter((s) => s.paid).length : plan.hit} of {result ? result.steps.length : plan.count} steps × {usd(plan.perStep, 2)}</p></div>
+              <div><p className="text-xs text-muted">Difference</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-ink">{usd(Math.max(0, linear - stepped), 2)}</p><p className="mt-1.5 text-xs text-faint">Rounded down to the step{index - strike > LADDER_TOP ? `, and nothing above ${ppg(strike + LADDER_TOP)}` : ""}</p></div>
             </div>
           </div>
 
@@ -301,9 +302,9 @@ function SettledCard({ r, company }: { r: SettlementResult; company: string }) {
   return (
     <motion.div className="mt-14 space-y-12" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={UI_SPRING}>
       <div className="pt-6">
-        <p className="flex items-center gap-2 text-[13px] text-jade"><LockIcon />Paid privately to {company}</p>
+        <p className="flex items-center gap-2 text-[13px] text-muted"><LockIcon className="text-cipher" />Paid privately to {company}</p>
         <p className="mt-2 flex flex-wrap items-baseline gap-x-3">
-          <span className="num text-[52px] font-semibold leading-none tracking-[-0.05em] text-ink sm:text-[64px]">{shown.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span className="num text-[44px] font-[550] leading-none tracking-[-0.03em] text-ink sm:text-[52px]">{shown.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           <span className="text-[22px] font-medium text-muted">tUSD</span>
         </p>
         <p className="mt-3 max-w-[80ch] text-[14px] leading-[1.55] text-muted">{paid.length} of {r.steps.length} steps of {usd(r.stepSize, 2)} a gallon on {int(r.coveredGallons)} covered gallons. The linear cap would pay {usd(r.linearPayoutUsd, 2)}. Index {ppg(r.indexMean)} ({r.indexLabel}, recomputed by the server from EIA data), strike {ppg(r.strike)}. Only {company} and anyone it gives a viewing key can see this amount.</p>

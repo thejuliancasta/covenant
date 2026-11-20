@@ -34,9 +34,10 @@ const bitsFor = (seed: string, i: number, tick: number) => {
 };
 
 /** Slowly morphing glyphs for an encrypted value. The length is fixed by the caller, not by the hidden amount. */
-export function CipherGlyphs({ length = 8, seed = "costshield", className, label = "Encrypted amount", dim }: { length?: number; seed?: string; className?: string; label?: string; dim?: boolean }) {
+/** Static by default; pass `live` to the one instance per view that may morph (one moving thing at a time). */
+export function CipherGlyphs({ length = 8, seed = "costshield", className, label = "Encrypted amount", dim, live: wantLive }: { length?: number; seed?: string; className?: string; label?: string; dim?: boolean; live?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const live = useLive(ref);
+  const live = useLive(ref) && !!wantLive;
   const [tick, setTick] = useState(0);
   useEffect(() => {
     if (!live) return;
@@ -60,7 +61,7 @@ export function CipherGlyphs({ length = 8, seed = "costshield", className, label
  * A value that decodes left to right when `play` turns true: digits start as cipher tiles and
  * resolve one by one. Punctuation and units stay readable. Under reduced motion it shows the value at once.
  */
-export function DecodeText({ text, play, seed = text, className, stepMs = 42 }: { text: string; play: boolean; seed?: string; className?: string; stepMs?: number }) {
+export function DecodeText({ text, play, seed = text, className, stepMs = 42, delayMs = 0 }: { text: string; play: boolean; seed?: string; className?: string; stepMs?: number; delayMs?: number }) {
   const reduce = useReducedMotion();
   const chars = text.split("");
   const digits = chars.map((c, i) => (/\d/.test(c) ? i : -1)).filter((i) => i >= 0);
@@ -72,12 +73,15 @@ export function DecodeText({ text, play, seed = text, className, stepMs = 42 }: 
     if (reduce) { setResolved(digits.length); return; }
     setResolved(0);
     let n = 0;
-    const t = setInterval(() => {
-      n += 1; setFlick((f) => f + 1);
-      if (n % 2 === 0) setResolved((r) => Math.min(digits.length, r + 1));
-      if (n > digits.length * 2 + 1) clearInterval(t);
-    }, stepMs / 2);
-    return () => clearInterval(t);
+    let t: ReturnType<typeof setInterval> | undefined;
+    const start = setTimeout(() => {
+      t = setInterval(() => {
+        n += 1; setFlick((f) => f + 1);
+        if (n % 2 === 0) setResolved((r) => Math.min(digits.length, r + 1));
+        if (n > digits.length * 2 + 1) clearInterval(t);
+      }, stepMs / 2);
+    }, delayMs);
+    return () => { clearTimeout(start); clearInterval(t); };
   }, [play, reduce, text]); // eslint-disable-line react-hooks/exhaustive-deps
   const shown = new Set(digits.slice(0, resolved));
   return (

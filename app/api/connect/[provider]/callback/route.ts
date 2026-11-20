@@ -20,7 +20,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ provider: strin
   const url = new URL(req.url);
   const origin = originOf(req);
   const fail = (message: string) => {
-    const back = new URL("/", origin);
+    const back = new URL("/app", origin);
     back.searchParams.set("connect_error", message);
     const res = NextResponse.redirect(back);
     res.cookies.set("costshield_oauth", "", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 0 });

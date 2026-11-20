@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "motion/react";
 import type { SettlementResult } from "@/lib/chain/types";
 import { ppg } from "@/lib/format";
-import { Card, Row, cx } from "../ui";
+import { Row, cx } from "../ui";
+import { Panel as Card } from "./surface";
 import { LockIcon, shareFragment, tusd } from "../chain";
 import { CipherGlyphs, DecodeText } from "./cipher";
 import { UI_SPRING } from "./motion";
@@ -25,7 +26,7 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
   return (
     <section aria-label="Two views of the same settlement" className="space-y-4">
       <div className="max-w-2xl">
-        <h2 className="text-[26px] font-semibold leading-[1.05] tracking-[-0.035em] text-ink sm:text-[30px]">Two views of the same settlement</h2>
+        <h2 className="text-[22px] font-[550] leading-[1.1] tracking-[-0.022em] text-ink sm:text-[26px]">Two views of the same settlement</h2>
         <p className="mt-2 text-[14px] leading-[1.5] text-muted">What {company} reads with its own keys, beside what anyone reading Solana devnet can see.</p>
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-2">
@@ -34,17 +35,17 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
             <div ref={fleetRef}>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">What {company} sees</h3>
-                <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-jade"><LockIcon />Decrypted with its own keys</span>
+                <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink2"><LockIcon className="text-cipher" />Decrypted with its own keys</span>
               </div>
               <p className="mt-1 text-[13px] text-muted">Every amount, decrypted with its own keys</p>
               <div className="mt-3">
                 {r.steps.map((s, i) => (
                   <Row key={s.index} label={`Step ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "released to the fleet" : s.triggered ? "triggered" : "not triggered"}>
-                    <DecodeText text={tusd(s.amount)} play={seen} seed={`f${s.index}`} stepMs={34 + i * 3} />
+                    <DecodeText text={tusd(s.amount)} play={seen} seed={`f${s.index}`} delayMs={i * 90} />
                   </Row>
                 ))}
-                <Row label={<span className="font-medium text-ink">Payout received</span>}><DecodeText text={tusd(r.fleetView.received)} play={seen} className="font-semibold text-jade" /></Row>
-                <Row label="Private balance before → after"><DecodeText text={`${tusd(r.fleetView.balanceBefore)} → ${tusd(r.fleetView.balanceAfter)}`} play={seen} stepMs={26} /></Row>
+                <Row label={<span className="font-medium text-ink">Payout received</span>}><DecodeText text={tusd(r.fleetView.received)} play={seen} delayMs={r.steps.length * 90} className="font-[550] text-jade" /></Row>
+                <Row label="Private balance before → after"><DecodeText text={`${tusd(r.fleetView.balanceBefore)} → ${tusd(r.fleetView.balanceAfter)}`} play={seen} delayMs={(r.steps.length + 1) * 90} stepMs={26} /></Row>
               </div>
             </div>
           </Card>
@@ -58,7 +59,7 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
           <p className="mt-1 text-[13px] text-muted">Terms and events, no amounts</p>
           <div className="mt-3">
             {r.steps.map((s) => <Row key={s.index} label={`Step ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "marked paid" : "open"}><CipherGlyphs length={8} seed={`${r.policyId}-${s.index}`} label="Encrypted" /></Row>)}
-            <Row label="Payout received"><CipherGlyphs length={8} seed={`${r.policyId}-paid`} label="Encrypted" /></Row>
+            <Row label="Payout received"><CipherGlyphs length={8} seed={`${r.policyId}-paid`} label="Encrypted" live /></Row>
             <Row label="Fleet balance"><CipherGlyphs length={10} seed={`${r.policyId}-bal`} label="Encrypted" /></Row>
           </div>
           <div className="mt-5 grid gap-5 text-[13px] sm:grid-cols-2">
@@ -96,7 +97,7 @@ export function LenderShareCard({ r, company }: { r: SettlementResult; company: 
       <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Prove the cover to your lender, not to the world</h3>
       <p className="mt-2 max-w-[60ch] text-[13px] leading-[1.55] text-muted">Your lender or factoring company can read this policy&apos;s coverage and payouts with this link but cannot spend: it carries read-only viewing keys for the {r.lenderShare.steps.length} step vaults, and the keys travel in the part of the URL after #, which browsers do not send when loading a page.</p>
       <div className="mt-4 flex min-w-0 flex-col gap-2 sm:flex-row">
-        <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-control border border-line/12 bg-bg/40 pl-3 pr-1 transition-[border-color] duration-150 focus-within:border-jade/50">
+        <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-control border border-line/8 bg-bg/40 pl-3 pr-1 transition-[border-color] duration-150 focus-within:border-jade/50">
           <LockIcon className="shrink-0 text-cipher" />
           <span className="sr-only">Lender link for {company}</span>
           <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} className="min-w-0 flex-1 bg-transparent font-mono text-[12px] text-muted outline-none" />
@@ -114,7 +115,7 @@ export function LenderShareCard({ r, company }: { r: SettlementResult; company: 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-[52ch] text-xs leading-[1.5] text-faint">Anyone holding the link can read these amounts, so send it only to your lender. In this demo the lender page asks the CostShield server to decrypt with the keys in the link.</p>
         <a href={shareFragment(r.lenderShare)} target="_blank" rel="noreferrer"
-          className="inline-flex min-h-10 items-center gap-1.5 text-[13.5px] font-medium text-jade underline-offset-4 transition-colors duration-150 hover:text-ink hover:underline">
+          className="inline-flex min-h-10 items-center gap-1.5 text-[13.5px] font-medium text-ink2 underline-offset-4 transition-colors duration-150 hover:text-ink hover:underline">
           Open the lender view<ArrowOut />
         </a>
       </div>

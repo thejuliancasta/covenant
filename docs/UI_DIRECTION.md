@@ -1,5 +1,17 @@
 # UI direction: dark, crafted, alive
 
+## Revision 3 (05:00 CST): Linear-style. Overrides everything below, including Revision 2
+
+The user found Revision 2 messy and the background art stock-like. The target is the feel of linear.app: a real startup page, precise, restrained, unique in its details.
+
+- **Structure.** `/` is a real landing page. `/app` is the product (`components/flow.tsx`, mounted by `app/app/page.tsx`, opens at Connect). Every landing CTA leads to `/app` (the sample company: `/app?sample=1` should start the sample analysis).
+- **No background art.** Remove `Strata` and the ridgelines everywhere. No full-bleed decoration. The page canvas is flat near-black.
+- **Foundation (done by the lead).** Tokens in `app/globals.css`: near-black neutrals (`bg` #08090a, `raised` #0f1011, `panel` #141517, `well` #1c1d20), text ladder `ink` #f7f8f8 → `ink2` → `muted` #8a8f98 → `faint` #62666d, borders `line` at /6 to /10. Ember accent `jade`/`accent` (#f08a4b) used sparingly: primary button, focus, one highlight per view. Font: Inter (`font-sans`) with stylistic sets on; Geist Mono only for hashes and addresses.
+- **Type.** Hero H1 56 to 72 px, weight 510 to 560, tracking about -0.03em, line-height 1.02, with a subtle vertical text gradient from `ink` to `ink`/70. Section H2 40 to 48 px. Body 15 to 17 px in `muted`, max 60 characters. Small labels 13 px in `ink2`. Sentence case.
+- **Signature visual.** The hero is a crafted **product window**: a framed, slightly tilted (perspective, a few degrees) live rendering of the real app UI with the sample company's real numbers, a 1 px border at /8, a lighter 1 px inner top edge, a soft shadow, and a bottom fade into the page. Below the hero, each feature section has its own small live product fragment (not illustration art): ledger lines sorting into categories, exposure bars, the cap plates with the strike, an encrypted amount decoding, the lender view. All built from real data or real sample output.
+- **Details that make it feel built.** Precise 8 px grid and alignment; hairline section separators made of full-width rules only where the page genuinely changes topic; hover states that brighten borders and lift by 1 px; buttons with a subtle top highlight; keyboard focus rings; numbers in `tabular-nums`; reveal-on-scroll (8 px rise and fade, 80 ms stagger, once); a sticky translucent nav with backdrop blur. Restraint: at most one moving thing in view at a time.
+- **Still in force.** No pills, chips or circles around text (status is plain colored text). The new logo (`components/brand/logo.tsx`). No green. Honesty labels and evidence letters stay (as plain text). Speed over QA: `npm run build` must pass.
+
 ## Revision 2 (user feedback, 04:15 CST): these rules override anything below
 
 1. **No green.** The accent is now **ember** (`#f08a4b`). The token is still named `jade` in code (alias `accent`) so existing classes keep working; `heat` is a lighter ember for market-driven cost; `rust` is now red for refusal. Replace any hard-coded green (`#0B5D4B`, `87 194 154`, etc.) with tokens.

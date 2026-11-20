@@ -4,7 +4,8 @@ import Link from "next/link";
 import { MotionConfig, motion } from "motion/react";
 import { DEFAULT_EXPLORER, type LenderShare, type LenderView } from "@/lib/chain/types";
 import { monthLabel, ppg } from "@/lib/format";
-import { Button, Card, CardTitle, Note, PageHead, Row, Stat, Tag, cx } from "@/components/ui";
+import { Button, CardTitle, Note, PageHead, Row, Stat, Tag, cx } from "@/components/ui";
+import { Panel as Card } from "@/components/settle/surface";
 import { AddrLink, Encrypted, LockIcon, REGION_LABEL, decodeShare, periodYm, tusd } from "@/components/chain";
 import { CipherGlyphs, DecodeText } from "@/components/settle/cipher";
 import { useCountUp } from "@/components/settle/rolling";
@@ -247,7 +248,7 @@ function Verified({ share, view }: { share: LenderShare; view: LenderView }) {
                     <Encrypted label="decrypted" className="sm:hidden lg:inline-flex" />
                   </span>
                 </Cell>
-                <Cell label="Status">{s.paid ? <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-jade"><DrawCheck size={12} />paid</span> : <span className="text-[13px] text-muted">open</span>}</Cell>
+                <Cell label="Status">{s.paid ? <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink2"><DrawCheck size={12} className="text-muted" />paid</span> : <span className="text-[13px] text-muted">open</span>}</Cell>
                 <Cell label="Accounts"><Accounts acct={acct} /></Cell>
               </motion.li>
             );
