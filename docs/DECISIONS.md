@@ -4,13 +4,13 @@ Newest first. One or two lines each: what was decided, why, and where the detail
 
 ## Open questions
 
-- **Gemini Prediction Markets bounty: enter or not?** `README.md` and `docs/SUBMISSION.md` currently list it. Gemini has no diesel market; the engine reads Gemini live, rejects the Brent ladders as a hedge and uses them for implied volatility. Julian to confirm.
 - **QuickNode Streams bounty: enter or not?** Not integrated today.
 - **Colour theme and final UI direction.** A proposal with four themes is on the `design/ui-ux-proposal` branch. Not merged, not decided.
 - **Docs drift to fix before submitting.** `docs/LIMITATIONS.md` and `docs/SUBMISSION.md` still say QuickBooks and Xero OAuth were not built, but ledger sign-in for four providers was merged on Nov 20. State exactly which providers work end to end.
 
 ## 2026-11-20
 
+- **Entering the Gemini Prediction Markets bounty.** The engine calls Gemini's Prediction Markets API live for market discovery, screens each market as a hedge, and fits an implied volatility from the Brent ladders to price the cap. Gemini lists no diesel market, so we say plainly that it is rejected as a direct hedge. Do not describe providers as hedging on Gemini; that is not built.
 - **UI/UX proposal drafted, not adopted.** Owner navigation becomes Overview, Costs, Protection, Payments, with a three-step onboarding (connect, confirm, review offer) and a separate provider workspace. Pool matching moves to the background. See `design/` on the `design/ui-ux-proposal` branch.
 - **Never call the accounting connection "read-only".** The standard QuickBooks scope can write. We say the app only reads and never changes the books, and the code has to keep that true.
 - **Ledger sign-in added** for QuickBooks, Xero, Zoho Books and FreshBooks, connecting to each provider directly (`lib/ledger/`). CSV upload stays as the fallback that always works.
