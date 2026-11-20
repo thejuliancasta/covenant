@@ -275,6 +275,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
             <Tag tone="bad">Not available to buy</Tag>
           </div>
           <p className="mt-3 max-w-[62ch] text-[14px] leading-[1.55] text-muted">A replay on real prices, as if you had bought it in {monthLabel(p.inceptionMonth, true)}. Nobody sold this policy.</p>
+          <p className="mt-2 max-w-[62ch] text-[14px] leading-[1.55] text-muted">Model price if bought in {monthLabel(p.inceptionMonth, true)}: <span className="num font-medium text-ink">{usd(then.premium)}</span> for 12 months, about {usd(then.premiumPerMonth)} a month. A model price, not a quote.<Ev e="A" /></p>
           <div className="mt-7 border-t border-line/[0.08] pt-6">
             <CardTitle>Diesel price vs. where protection starts</CardTitle>
             <div className="mt-4"><PriceVsTrigger trigger={p.strike} months={months} /></div>

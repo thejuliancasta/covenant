@@ -17,7 +17,7 @@ Every screen must pass this: a judge who has never heard of hedging looks for 10
 | Do not show (main screens) | Show instead |
 | --- | --- |
 | strike, strike price | the price where protection starts, "protection starts at $4.36" |
-| plates, steps, ladder | (hide; if needed: "paid in 25-cent chunks") |
+| plates, ladder, chunks | (hide; if needed: "paid in 25-cent steps") |
 | index, EIA index, PADD 2 | the official Midwest diesel price (U.S. government data) |
 | cap, call strip, Black-76 | protection, the price of protection |
 | premium | what protection costs, per month |

@@ -151,10 +151,10 @@ const README_URL = "https://github.com/thejuliancasta/orange-cat#deployed-progra
 const EARLIER_RUN = {
   month: "2026-09", when: "Nov 20, 2026 at 3:12 AM Central",
   txs: [
-    ["eight chunks opened", "5EcVnVPwuLLKudQEhm5p4nErLGkFS29vx7Jo6thwrHDR1nJuWGPDS5xKrPHzF5EaQHLjgDg8hxK2ZDBenrF5Y7jL"],
+    ["eight steps opened", "5EcVnVPwuLLKudQEhm5p4nErLGkFS29vx7Jo6thwrHDR1nJuWGPDS5xKrPHzF5EaQHLjgDg8hxK2ZDBenrF5Y7jL"],
     ["official price posted", "3FYhzywtKP1hmRxN1Y1BmsBaaoW3YWiKugKndctb5A8NcbVKVcT7M1jAPKwoFvgHqkczNYVmhsCPSues4wca8a2Z"],
-    ["first chunk paid privately", "2wTYb5MjiCKCWLNA6FVrnufXAWsfmhyCBhAimbWnjFXFCQnXrEsm61zHstiz5z6ZvgiXycqujN2HRQKngPC7pC9S"],
-    ["unused chunk returned to the backer", "3zZyVtP2HHdRU5am7YRaddypcjYYebUfpF3KgHy26tUWT3V71iPPTi9rbar4L8gNwuABrnMaxiNyJEL3LKftHP7j"],
+    ["first step paid privately", "2wTYb5MjiCKCWLNA6FVrnufXAWsfmhyCBhAimbWnjFXFCQnXrEsm61zHstiz5z6ZvgiXycqujN2HRQKngPC7pC9S"],
+    ["unused step returned to the backer", "3zZyVtP2HHdRU5am7YRaddypcjYYebUfpF3KgHy26tUWT3V71iPPTi9rbar4L8gNwuABrnMaxiNyJEL3LKftHP7j"],
   ] as [string, string][],
 };
 const LINK = "text-jade underline decoration-jade/40 underline-offset-2 hover:decoration-jade";
@@ -262,7 +262,7 @@ export function Payout({ a, sample = false, detail, onDetail }: { a: Analysis; s
                   <p className="mt-2 text-[12px] leading-[1.45] text-faint">{paidSteps} of {allSteps} steps × {usd(plan.perStep, 2)}{result ? ", from the settlement result" : ", worked out from the public price"}</p>
                 </div>
               </div>
-              <p className="mt-4 max-w-[70ch] text-[13px] leading-[1.55] text-muted">The Solana program can&apos;t read encrypted amounts, so it pays one full step (a {cents}-cent chunk) for every {cents} cents the price climbed above the line{linear - stepped < 0.5 ? "" : index - strike > LADDER_TOP ? `; ${usd(linear - stepped)} isn't paid: the part past the last full step, and anything above ${ppg(strike + LADDER_TOP)}` : `; the last ${usd(linear - stepped)} didn't fill a step and isn't paid`}.</p>
+              <p className="mt-4 max-w-[70ch] text-[13px] leading-[1.55] text-muted">The Solana program can&apos;t read encrypted amounts, so it pays one full {cents}-cent step for every {cents} cents the price climbed above the line{linear - stepped < 0.5 ? "" : index - strike > LADDER_TOP ? `; ${usd(linear - stepped)} isn't paid: the part past the last full step, and anything above ${ppg(strike + LADDER_TOP)}` : `; the last ${usd(linear - stepped)} didn't fill a step and isn't paid`}.</p>
             </div>
           </div></Card>
           {detail && <Card>
@@ -276,7 +276,7 @@ export function Payout({ a, sample = false, detail, onDetail }: { a: Analysis; s
               <Row label="Estimated cost of protection for those months">{usd(p.priceAtInception.premium * (p.replay.length / 12))}<Ev e="A" /></Row>
               <Row label={<span className="font-medium text-ink">Net benefit</span>}>{usd(net)}</Row>
             </div>
-            <p className="mt-3 text-xs leading-[1.5] text-faint">2026 was one of the worst diesel years on record. In {pct(1 - (a.backtest?.shareOfCohortsPaid ?? 0.35))} of 12-month periods since 2015 this protection paid nothing. The replay pays every cent above the line; the devnet settlement below pays in 25-cent chunks.</p>
+            <p className="mt-3 text-xs leading-[1.5] text-faint">2026 was one of the worst diesel years on record. In {pct(1 - (a.backtest?.shareOfCohortsPaid ?? 0.35))} of 12-month periods since 2015 this protection paid nothing. The replay pays every cent above the line; the devnet settlement below pays in 25-cent steps.</p>
           </Card>}
         </div>
 
@@ -346,14 +346,14 @@ export function Payout({ a, sample = false, detail, onDetail }: { a: Analysis; s
 
           {detail && <div className="mt-10 px-1">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Why the money comes in {Math.round(stepSize * 100)}-cent chunks</h3>
+              <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Why the money comes in {Math.round(stepSize * 100)}-cent steps</h3>
               <span className="text-xs text-faint">{result ? "from the settlement result" : `expected, at the default ${usd(stepSize, 2)} step`}</span>
             </div>
-            <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.55] text-muted">The Solana program can&apos;t read encrypted amounts, so it can&apos;t work out the exact amount owed. Instead the money is split into {plan.count} chunks up to {ppg(strike + LADDER_TOP)}. Each chunk holds {usd(stepSize, 2)} × {gal2(gallons)} gallons = {usd(plan.perStep, 2)}, set aside in advance, and pays when the official price reaches its level. The program only compares public prices; it never needs to see an amount.</p>
+            <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.55] text-muted">The Solana program can&apos;t read encrypted amounts, so it can&apos;t work out the exact amount owed. Instead the money is split into {plan.count} steps up to {ppg(strike + LADDER_TOP)}. Each step holds {usd(stepSize, 2)} × {gal2(gallons)} gallons = {usd(plan.perStep, 2)}, set aside in advance, and pays when the official price reaches its level. The program only compares public prices; it never needs to see an amount.</p>
             <div className="mt-4 grid gap-4 text-[13px] sm:grid-cols-3">
               <div><p className="text-xs text-muted">Every cent above the line</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-ink">{usd(linear, 2)}</p><p className="mt-1.5 text-xs text-faint">({ppg(index)} − {ppg(strike)}) × {gal2(gallons)} gal</p></div>
-              <div><p className="text-xs text-muted">Paid in chunks</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-jade">{usd(stepped, 2)}</p><p className="mt-1.5 text-xs text-faint">{result ? result.steps.filter((s) => s.paid).length : plan.hit} of {result ? result.steps.length : plan.count} chunks × {usd(plan.perStep, 2)}</p></div>
-              <div><p className="text-xs text-muted">Difference</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-ink">{usd(Math.max(0, linear - stepped), 2)}</p><p className="mt-1.5 text-xs text-faint">Rounded down to the chunk{index - strike > LADDER_TOP ? `, and nothing above ${ppg(strike + LADDER_TOP)}` : ""}</p></div>
+              <div><p className="text-xs text-muted">Paid in steps</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-jade">{usd(stepped, 2)}</p><p className="mt-1.5 text-xs text-faint">{result ? result.steps.filter((s) => s.paid).length : plan.hit} of {result ? result.steps.length : plan.count} steps × {usd(plan.perStep, 2)}</p></div>
+              <div><p className="text-xs text-muted">Difference</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-ink">{usd(Math.max(0, linear - stepped), 2)}</p><p className="mt-1.5 text-xs text-faint">Rounded down to a full step{index - strike > LADDER_TOP ? `, and nothing above ${ppg(strike + LADDER_TOP)}` : ""}</p></div>
             </div>
           </div>}
 
@@ -402,7 +402,7 @@ function SettledCard({ r, company }: { r: SettlementResult; company: string }) {
           <span className="text-[22px] font-medium text-muted">test dollars</span>
         </p>
         <p className="mt-3 max-w-[80ch] text-[15px] leading-[1.55] text-ink2">This payout is a real Solana devnet transaction; the amount is encrypted for everyone except the business and anyone it shares a read-only key with.</p>
-        <p className="mt-2 max-w-[80ch] text-[14px] leading-[1.55] text-muted">{paid.length} of {r.steps.length} chunks of {Math.round(r.stepSize * 100)} cents a gallon on {int(r.coveredGallons)} protected gallons (paying every cent above the line would be {usd(r.linearPayoutUsd, 2)}). Official price {ppg(r.indexMean)}, recomputed by the server from U.S. government data; protection started at {ppg(r.strike)}.</p>
+        <p className="mt-2 max-w-[80ch] text-[14px] leading-[1.55] text-muted">{paid.length} of {r.steps.length} steps of {Math.round(r.stepSize * 100)} cents a gallon on {int(r.coveredGallons)} protected gallons (paying every cent above the line would be {usd(r.linearPayoutUsd, 2)}). Official price {ppg(r.indexMean)}, recomputed by the server from U.S. government data; protection started at {ppg(r.strike)}.</p>
         <dl className="mt-5 grid gap-4 text-[13px] sm:grid-cols-2 lg:grid-cols-4">
           <div className="min-w-0"><dt className="text-muted">{company} private balance</dt><dd className="num mt-1 text-ink2">{tusd(r.fleetView.balanceBefore)} → {tusd(r.fleetView.balanceAfter)}</dd></div>
           <div className="min-w-0"><dt className="text-muted">Policy, month</dt><dd className="mt-1 text-ink2"><span className="break-all font-mono text-[12px]">{r.policyId}</span>, {monthLabel(periodYm(r.period), true)}</dd></div>
@@ -412,10 +412,10 @@ function SettledCard({ r, company }: { r: SettlementResult; company: string }) {
       </div>
 
       <div>
-        <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">On Solana: one account per chunk</h3>
+        <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">On Solana: one account per step</h3>
         <div className="mt-2">
-          <Table align={["l", "r", "r", "l", "l"]} head={["Chunk", "Pays when price ≥", "Test dollars", "Status", "Payment"]} rows={r.steps.map((s) => [
-            <span key="i" className="inline-flex items-center gap-2 whitespace-nowrap">Chunk {s.index} <AddrLink addr={s.account} explorer={r.explorer} className="text-[11px]" /></span>,
+          <Table align={["l", "r", "r", "l", "l"]} head={["Step", "Pays when price ≥", "Test dollars", "Status", "Payment"]} rows={r.steps.map((s) => [
+            <span key="i" className="inline-flex items-center gap-2 whitespace-nowrap">Step {s.index} <AddrLink addr={s.account} explorer={r.explorer} className="text-[11px]" /></span>,
             ppg(s.triggerPrice),
             <span key="a" className="inline-flex items-center justify-end gap-2 whitespace-nowrap">{tusd(s.amount)}<span className="inline-flex items-center gap-1 text-[11.5px] text-cipher"><LockIcon />encrypted on chain</span></span>,
             s.paid ? <span key="s" className="font-medium text-jade">paid</span> : s.triggered ? <span key="s" className="font-medium text-heat">due, not collected</span> : <span key="s" className="text-muted">price not reached</span>,
@@ -428,7 +428,7 @@ function SettledCard({ r, company }: { r: SettlementResult; company: string }) {
       <div>
         <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Refused on Solana, as designed</h3>
         <ul className="mt-3 grid gap-x-10 gap-y-4 text-[13px] md:grid-cols-2">
-          {([["Someone other than the official price source tried to post a price", r.rejections.stranger], ["The business tried to collect the same chunk twice", r.rejections.duplicate]] as const).map(([l, why]) => (
+          {([["Someone other than the official price source tried to post a price", r.rejections.stranger], ["The business tried to collect the same step twice", r.rejections.duplicate]] as const).map(([l, why]) => (
             <li key={l} className="flex items-start gap-3">
               <span role="img" aria-label="refused" className="mt-[3px] flex h-4 w-4 shrink-0 items-center justify-center text-rust"><svg viewBox="0 0 12 12" width="11" height="11"><path d="M2.5 2.5 9.5 9.5M9.5 2.5 2.5 9.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg></span>
               <div className="min-w-0"><p className="font-medium text-ink">{l}</p><p className="mt-0.5 break-words leading-[1.5] text-muted">{why}</p></div>

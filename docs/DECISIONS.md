@@ -9,6 +9,7 @@ Newest first. One or two lines each: what was decided, why, and where the detail
 
 ## 2026-11-20
 
+- **Payouts says "steps", never "chunks".** One word for the 25-cent units on the Payouts screen and its settlement views. `docs/PLAIN_LANGUAGE.md` is changed to match. The landing page and the lender page still say "chunks".
 - **The Books screen plays one short sequence and waits for a button.** Counter, sorted category bars, then "1 risk worth protecting found" and a button to Risks; the per-stage timings moved behind "Show details". The pacing delays and the automatic move to Risks are removed.
 - **The hosted app can be added to a phone's home screen** (manifest, apple-touch-icon, meta tags; opens at `/app`). No service worker and no offline mode. The icons are drawn at build time with `next/og`, which ships with Next.js, so no dependency was added.
 - **Simple view is one headline, one number, one chart and one button,** on Risks, Protection and Payouts. Everything else is behind "Show the detailed analysis"; nothing was deleted. Protection keeps a "Not available to buy" tag and one line with the reasons and hedge verdicts, so the rule below still holds. The price chart no longer puts dollar labels on bars. Extends the "Simple view first" line below to Payouts.

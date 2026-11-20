@@ -114,7 +114,7 @@ function PlateBody({ p, perStep }: { p: PlateModel; perStep: number | null }) {
   return (
     <div className="relative flex h-full min-w-0 flex-col justify-center gap-1.5 px-1">
       <div className="flex min-w-0 items-baseline justify-between gap-2 leading-4">
-        <span className={cx("num shrink-0 text-[12px] font-medium", p.lane === "wallet" ? "text-ink" : "text-ink2")}>Chunk {p.index}</span>
+        <span className={cx("num shrink-0 text-[12px] font-medium", p.lane === "wallet" ? "text-ink" : "text-ink2")}>Step {p.index}</span>
         <span className="min-w-0 truncate text-[12px]">
           {p.lane === "wallet" ? (perStep !== null ? <DecodeText text={`+${perStep.toFixed(2)}`} play className="font-medium text-jade" /> : <span className="text-jade">paid</span>)
             : p.lane === "underwriter" ? (p.reclaimed ? <span className="text-muted">back to backer</span> : <span className="text-faint">not set aside yet</span>)
@@ -202,7 +202,7 @@ export function SettlementStage({ m, company, explorer, running, underwriterBala
                   {p.reclaimed && p.tx && <ReturnMark tx={p.tx} explorer={explorer} />}
                   {!m.opened && !m.funded && (
                     <span className="flex w-full flex-col gap-1.5 px-1">
-                      <span className="text-[11.5px] text-faint">Chunk {p.index}</span>
+                      <span className="text-[11.5px] text-faint">Step {p.index}</span>
                       <span className="h-[5px] rounded-[3px] border border-dashed border-line/14" />
                     </span>
                   )}

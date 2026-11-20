@@ -293,7 +293,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
 
 const MARKET = new Set(["fleet_fuel", "natural_gas", "electricity", "interest"]);
 
-/** Every line of the ledger grouped by category, from the analysis result: first in the order the books list them, then by size. */
+/** The cost lines of the ledger grouped by category, from the analysis result: first in the order the books list them, then by size. */
 function useLanes(result: Analysis | null | undefined) {
   return useMemo(() => {
     if (!result) return null;
@@ -302,12 +302,10 @@ function useLanes(result: Analysis | null | undefined) {
       const g = by.get(v.category) ?? { label: v.label, lines: 0, market: MARKET.has(v.category) };
       g.lines += v.lines; by.set(v.category, g);
     }
-    const expense = [...by.values()].reduce((s, g) => s + g.lines, 0);
     const total = result.lineCount;
     const all = [...by.entries()].map(([k, g]) => ({ key: k, ...g }));
     const big = all.filter((g) => g.lines / total >= 0.025), rest = all.filter((g) => g.lines / total < 0.025);
-    const found = [...big];
-    if (total - expense > 0) found.push({ key: "income", label: "Income, not a cost", lines: total - expense, market: false });
+    const found = [...big]; // cost categories only: income lines are counted in the total but not charted
     const sorted = [...found].sort((a, b) => b.lines - a.lines);
     if (rest.length) {
       const other = { key: "rest", label: `${rest.length} smaller categories`, lines: rest.reduce((s, g) => s + g.lines, 0), market: false };
@@ -390,8 +388,8 @@ export function Analyzing({ stages, error, source, onBack, onNext, result }: { s
           {/* 2. The categories, listed as the books have them, slide into order of size. */}
           {lanes && hold !== null && (
             <div className="books-seq mt-6 border-t border-line/[0.08] pt-5" style={{ "--hold": `${hold}ms` } as CSSProperties}>
-              <p className="books-rows-title text-[14px] font-medium leading-5 text-ink">Sorted by category</p>
-              <ul className="mt-2" aria-label="Transactions by category, largest first">
+              <p className="books-rows-title text-[14px] font-medium leading-5 text-ink">Transactions by category</p>
+              <ul className="mt-2" aria-label="Cost transactions by category, largest first">
                 {lanes.lanes.map((l, i) => (
                   <li key={l.key} className="books-row flex h-11 flex-col justify-center" style={{ "--from": l.from, "--i": i } as CSSProperties}>
                     <span className="flex items-baseline justify-between gap-3 text-[13px] leading-5">

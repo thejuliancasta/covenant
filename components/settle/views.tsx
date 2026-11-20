@@ -40,7 +40,7 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
               <p className="mt-1 text-[13px] text-muted">Every amount, readable with its own keys</p>
               <div className="mt-3">
                 {r.steps.map((s, i) => (
-                  <Row key={s.index} label={`Chunk ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "paid to the business" : s.triggered ? "due" : "price not reached, back to the backer"}>
+                  <Row key={s.index} label={`Step ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "paid to the business" : s.triggered ? "due" : "price not reached, back to the backer"}>
                     <DecodeText text={tusd(s.amount)} play={seen} seed={`f${s.index}`} delayMs={i * 90} />
                   </Row>
                 ))}
@@ -58,7 +58,7 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
           </div>
           <p className="mt-1 text-[13px] text-muted">The terms and what happened, never the amounts</p>
           <div className="mt-3">
-            {r.steps.map((s) => <Row key={s.index} label={`Chunk ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "marked paid" : "not paid"}><CipherGlyphs length={8} seed={`${r.policyId}-${s.index}`} label="Encrypted" /></Row>)}
+            {r.steps.map((s) => <Row key={s.index} label={`Step ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "marked paid" : "not paid"}><CipherGlyphs length={8} seed={`${r.policyId}-${s.index}`} label="Encrypted" /></Row>)}
             <Row label="Payout received"><CipherGlyphs length={8} seed={`${r.policyId}-paid`} label="Encrypted" live /></Row>
             <Row label="The business balance"><CipherGlyphs length={10} seed={`${r.policyId}-bal`} label="Encrypted" /></Row>
           </div>
@@ -96,7 +96,7 @@ export function LenderShareCard({ r, company }: { r: SettlementResult; company: 
     <Card>
       <h3 className="text-[17px] font-medium leading-6 tracking-[-0.015em] text-ink">Proof for your lender</h3>
       <p className="mt-2 max-w-[60ch] text-[14px] leading-[1.55] text-ink2">Your lender sees what was set aside and what was paid to you. It can&apos;t move money or see your other accounts.</p>
-      <p className="mt-2 max-w-[60ch] text-[12.5px] leading-[1.55] text-faint">Your lender or factoring company can read this policy&apos;s coverage and payouts with this link but cannot spend: it carries read-only keys for the {r.lenderShare.steps.length} chunks of money set aside, and the keys travel in the part of the URL after #, which browsers do not send when loading a page.</p>
+      <p className="mt-2 max-w-[60ch] text-[12.5px] leading-[1.55] text-faint">Your lender or factoring company can read this policy&apos;s coverage and payouts with this link but cannot spend: it carries read-only keys for the {r.lenderShare.steps.length} steps of money set aside, and the keys travel in the part of the URL after #, which browsers do not send when loading a page.</p>
       <div className="mt-4 flex min-w-0 flex-col gap-2 sm:flex-row">
         <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-control border border-line/8 bg-bg/40 pl-3 pr-1 transition-[border-color] duration-150 focus-within:border-jade/50">
           <LockIcon className="shrink-0 text-cipher" />
