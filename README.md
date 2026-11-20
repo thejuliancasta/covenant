@@ -11,7 +11,7 @@ Other cover pays for a bad day. Covenant protects a small business from a bad ye
 | Main track | DeFi and Onchain Applications |
 | Chain award | Best use of Solana |
 | Bounty | Gemini Prediction Markets |
-| Live demo | _add your deployment URL_ (the hosted demo holds no keys, so private settlement is not enabled there; the devnet evidence is under [Deployed program](#deployed-program)) |
+| Live demo | [trycovenant.app](https://trycovenant.app) (the hosted demo holds no keys, so private settlement is not enabled there; the devnet evidence is under [Deployed program](#deployed-program)) |
 | Demo video | _add your video link_ |
 
 ## The problem

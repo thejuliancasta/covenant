@@ -168,7 +168,7 @@ const gal2 = (g: number) => g.toLocaleString("en-US", { maximumFractionDigits: 2
  * Copied from the README ("Deployed program"); keep the two in step. It is the sample fleet's month only:
  * the screen claims "this settlement ran" for the sample fleet and that month, and for nothing else.
  */
-const README_URL = "https://github.com/thejuliancasta/orange-cat#deployed-program";
+const README_URL = "https://github.com/thejuliancasta/covenant#deployed-program";
 const EARLIER_RUN = {
   month: "2026-09", when: "Nov 20, 2026 at 3:12 AM Central",
   txs: [
@@ -283,8 +283,10 @@ export function Payout({ a, sample = false, detail, onDetail }: { a: Analysis; s
                   <p className="mt-2 text-[12px] leading-[1.45] text-faint">{paidSteps} of {allSteps} steps × {usd(plan.perStep, 2)}{result ? ", from the settlement result" : ", worked out from the public price"}</p>
                 </div>
               </div>
-              <p className="mt-4 max-w-[70ch] text-[13px] leading-[1.55] text-muted"><span className="font-medium text-ink2">How it pays.</span> Before cover starts, the backer locks the most this protection could pay in vaults on Solana that only the program can open. Each month the official price is posted once. {company} signs once, and the program releases every step whose line the price cleared. The backer can&apos;t block it or take it back.</p>
-              <p className="mt-2 max-w-[70ch] text-[13px] leading-[1.55] text-muted"><span className="font-medium text-ink2">Why two numbers.</span> The amounts are encrypted with Helius Privacy Rings, so the public sees that a step paid, not how much. The Solana program can&apos;t read encrypted amounts, so it pays one whole {cents}-cent step for every {cents} cents the price climbed above the line{linear - stepped < 0.5 ? "" : index - strike > LADDER_TOP ? `; ${usd(linear - stepped)} isn't paid: the part past the last full step, and anything above ${ppg(strike + LADDER_TOP)}` : `; the last ${usd(linear - stepped)} didn't fill a step and isn't paid`}.</p>
+              {detail ? <>
+                <p className="mt-4 max-w-[70ch] text-[13px] leading-[1.55] text-muted"><span className="font-medium text-ink2">How it pays.</span> Before cover starts, the backer locks the most this protection could pay in vaults on Solana that only the program can open. Each month the official price is posted once. {company} signs once, and the program releases every step whose line the price cleared. The backer can&apos;t block it or take it back.</p>
+                <p className="mt-2 max-w-[70ch] text-[13px] leading-[1.55] text-muted"><span className="font-medium text-ink2">Why two numbers.</span> The amounts are encrypted with Helius Privacy Rings, so the public sees that a step paid, not how much. The Solana program can&apos;t read encrypted amounts, so it pays one whole {cents}-cent step for every {cents} cents the price climbed above the line{linear - stepped < 0.5 ? "" : index - strike > LADDER_TOP ? `; ${usd(linear - stepped)} isn't paid: the part past the last full step, and anything above ${ppg(strike + LADDER_TOP)}` : `; the last ${usd(linear - stepped)} didn't fill a step and isn't paid`}.</p>
+              </> : <p className="mt-4 max-w-[70ch] text-[13px] leading-[1.55] text-muted">{settled ? "Paid" : "Pays"} in {cents}-cent steps, because the amounts are encrypted and the program can&apos;t read them.{linear - stepped < 0.5 ? "" : index - strike > LADDER_TOP ? ` ${usd(linear - stepped)} isn't paid: the part past the last full step, and anything above ${ppg(strike + LADDER_TOP)}.` : ` The last ${usd(linear - stepped)} didn't fill a step and isn't paid.`}</p>}
             </div>
           </div></Card>
           {detail && <Card>

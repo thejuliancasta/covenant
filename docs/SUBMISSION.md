@@ -75,9 +75,9 @@ Recording notes:
 
 ## Links for the Devpost form
 
-- Repository: https://github.com/thejuliancasta/orange-cat
+- Repository: https://github.com/thejuliancasta/covenant
 - Program (Solana devnet): `DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114`, https://explorer.solana.com/address/DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114?cluster=devnet
-- Live demo: _add your deployment URL_ (no keys on the host, so private settlement is not enabled there)
+- Live demo: https://trycovenant.app (no keys on the host, so private settlement is not enabled there)
 - Video: _add your video link_
 
 ## Finalist presentation (5 minutes)

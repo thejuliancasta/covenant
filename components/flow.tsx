@@ -158,7 +158,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
           <nav className="mt-6 grid gap-0.5" aria-label="Steps">
             <StepNav id="side" vertical step={navStep} enabled={enabled} why={why} go={go} />
           </nav>
-          <div className="mt-4 flex flex-col gap-2 px-3">{judgeButton("h-8 w-full px-3 text-left")}<ThemeToggle className="w-full" /></div>
+          <div className="mt-4 flex items-center gap-2 px-3">{judgeButton("h-8 min-w-0 flex-1 px-3 text-left")}<ThemeToggle /></div>
           {(analysis?.company || source) && <p className="mt-6 truncate px-3 text-[12px] leading-[1.5] text-muted">{analysis?.company ?? source}</p>}
           <div className="mt-auto grid gap-3">
             <p title="Payouts use test dollars on Solana devnet" className="flex cursor-default items-center gap-2 px-3 text-[12px] leading-[1.5] text-muted"><span aria-hidden className="h-1.5 w-1.5 rounded-full bg-jade" />Test mode</p>

@@ -64,7 +64,7 @@ export function Ev({ e }: { e: Evidence | string }) {
   return (
     <abbr
       tabIndex={0} title={label} aria-label={label}
-      className={cx("ml-[3px] cursor-help align-super text-[9.5px] font-semibold leading-none no-underline decoration-dotted underline-offset-2 transition-[color] duration-150 hover:underline focus-visible:underline", EV_TONE[e] ?? EV_TONE.A)}
+      className={cx("ml-1.5 cursor-help align-super text-[10px] font-semibold leading-none tracking-normal no-underline decoration-dotted underline-offset-2 transition-[color] duration-150 hover:underline focus-visible:underline", EV_TONE[e] ?? EV_TONE.A)}
     >{e}</abbr>
   );
 }

@@ -199,37 +199,6 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
         <p className="mt-3 max-w-2xl text-[15px] leading-[1.6] text-muted sm:text-base">Covenant reads your books, finds the cost a market controls (for a trucking fleet, diesel), measures what a price spike would do to your profit, and shows what protection would pay you back. We only read your books and never change them. Uploaded files aren&apos;t stored.</p>
       </motion.header>
 
-      <Card className="mb-4">
-        <div className="grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end md:gap-8">
-          <div>
-            <CardTitle>Before you continue</CardTitle>
-            <label className="mt-3 block text-[13px] leading-5 text-muted" htmlFor="region">Where do you buy most of your fuel?</label>
-            <div className="relative mt-1.5">
-              <select id="region" value={region} onChange={(e) => setRegion(e.target.value)}
-                className="min-h-10 w-full cursor-pointer appearance-none rounded-control border border-line/[.14] bg-well py-2.5 pl-3.5 pr-10 text-sm text-ink transition-[border-color] duration-150 hover:border-line/25">
-                <option value="PADD2">Midwest</option>
-                <option value="US">Other / U.S. average</option>
-              </select>
-              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted"><path d="m4.5 6.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </div>
-            <p className="mt-1.5 text-[12px] leading-[1.45] text-faint">Protection pays on the official weekly diesel price for this region (U.S. government data). Two regions are available in this demo.</p>
-          </div>
-          <motion.label ref={consentRef} animate={shake} className={cx("flex min-h-11 cursor-pointer items-start gap-3 py-2 text-[14px] leading-5 transition-[color] duration-150",
-            consent ? "text-ink" : err && /Confirm/.test(err) ? "text-rust" : "text-ink2 hover:text-ink")}>
-            <span className="relative mt-px h-5 w-5 shrink-0">
-              <input type="checkbox" checked={consent} onChange={(e) => { setConsent(e.target.checked); setErr(null); }}
-                className="peer absolute inset-0 h-5 w-5 cursor-pointer appearance-none rounded-[6px] border border-line/30 bg-well transition-[background-color,border-color] duration-150 checked:border-jade checked:bg-jade" />
-              <svg viewBox="0 0 20 20" className="pointer-events-none absolute inset-0 h-5 w-5" aria-hidden>
-                <motion.path d="m5.5 10.4 3 3 6-6.6" fill="none" stroke="rgb(var(--jade-ink))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  initial={false} animate={{ pathLength: consent ? 1 : 0, opacity: consent ? 1 : 0 }} transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }} />
-              </svg>
-            </span>
-            <span>These are my company&apos;s records, or I have permission to share them.</span>
-          </motion.label>
-        </div>
-        <Alert text={errAt === "top" ? err : null} />
-      </Card>
-
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="flex flex-col">
           <div className="flex items-center justify-between gap-3"><CardTitle>Try a sample fleet</CardTitle><Tag tone="info">Synthetic data</Tag></div>
@@ -261,6 +230,37 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
           <Button variant="secondary" onClick={() => input.current?.click()} className="mt-4 w-full">Choose file</Button>
         </Card>
       </div>
+
+      <Card className="mt-4">
+        <div className="grid gap-5 md:grid-cols-[0.9fr_1.1fr] md:items-end md:gap-8">
+          <div>
+            <CardTitle>Before you upload or sign in</CardTitle>
+            <label className="mt-3 block text-[13px] leading-5 text-muted" htmlFor="region">Where do you buy most of your fuel?</label>
+            <div className="relative mt-1.5">
+              <select id="region" value={region} onChange={(e) => setRegion(e.target.value)}
+                className="min-h-10 w-full cursor-pointer appearance-none rounded-control border border-line/[.14] bg-well py-2.5 pl-3.5 pr-10 text-sm text-ink transition-[border-color] duration-150 hover:border-line/25">
+                <option value="PADD2">Midwest</option>
+                <option value="US">Other / U.S. average</option>
+              </select>
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted"><path d="m4.5 6.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </div>
+            <p className="mt-1.5 text-[12px] leading-[1.45] text-faint">Protection pays on the official weekly diesel price for this region (U.S. government data). Two regions are available in this demo.</p>
+          </div>
+          <motion.label ref={consentRef} animate={shake} className={cx("flex min-h-11 cursor-pointer items-start gap-3 py-2 text-[14px] leading-5 transition-[color] duration-150",
+            consent ? "text-ink" : err && /Confirm/.test(err) ? "text-rust" : "text-ink2 hover:text-ink")}>
+            <span className="relative mt-px h-5 w-5 shrink-0">
+              <input type="checkbox" checked={consent} onChange={(e) => { setConsent(e.target.checked); setErr(null); }}
+                className="peer absolute inset-0 h-5 w-5 cursor-pointer appearance-none rounded-[6px] border border-line/30 bg-well transition-[background-color,border-color] duration-150 checked:border-jade checked:bg-jade" />
+              <svg viewBox="0 0 20 20" className="pointer-events-none absolute inset-0 h-5 w-5" aria-hidden>
+                <motion.path d="m5.5 10.4 3 3 6-6.6" fill="none" stroke="rgb(var(--jade-ink))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  initial={false} animate={{ pathLength: consent ? 1 : 0, opacity: consent ? 1 : 0 }} transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }} />
+              </svg>
+            </span>
+            <span>These are my company&apos;s records, or I have permission to share them.</span>
+          </motion.label>
+        </div>
+        <Alert text={errAt === "top" ? err : null} />
+      </Card>
 
       {ready.length > 0 && (
         <Card className="mt-4">

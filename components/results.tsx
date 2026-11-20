@@ -286,9 +286,10 @@ export function Protection({ a, onNext, onBack, detail, onDetail }: { a: Analysi
             </div>
             <Tag tone="bad">Not available to buy</Tag>
           </div>
-          <p className="mt-3 max-w-[62ch] text-[14px] leading-[1.55] text-muted">A replay on real prices, as if you had bought it in {monthLabel(p.inceptionMonth, true)}. Nobody sold this policy.</p>
-          <p className="mt-2 max-w-[62ch] text-[14px] leading-[1.55] text-muted">Model price if bought in {monthLabel(p.inceptionMonth, true)}: <span className="num font-medium text-ink">{usd(then.premium)}</span> for 12 months, about {usd(then.premiumPerMonth)} a month, using an assumed swing of {pct(then.sigma)} a year. A model price, not a quote.<Ev e="A" /></p>
-          <p className="mt-2 max-w-[62ch] text-[14px] leading-[1.55] text-muted">Bought today it would cost about <span className="num font-medium text-ink">{usd(today.premiumPerMonth)}</span> a month: diesel is already ${p.todayIndex.toFixed(2)}, so protection would start at ${startToday.toFixed(2)}. {todayVol}<Ev e={m.volatility.evidence} /></p>
+          <p className="mt-3 max-w-[62ch] text-[14px] leading-[1.55] text-muted">
+            A replay, as if bought in {monthLabel(p.inceptionMonth, true)}. Nobody sold this policy. Model price: <span className="num font-medium text-ink">{usd(then.premium)}</span><Ev e="A" /> for 12 months, about {usd(then.premiumPerMonth)} a month. Not a quote.
+            {" "}Bought today: about <span className="num font-medium text-ink">{usd(today.premiumPerMonth)}</span> a month, starting at ${startToday.toFixed(2)}{fromGemini ? <>, from Gemini&apos;s live oil markets.<Ev e="V" /></> : <>. {todayVol}<Ev e={m.volatility.evidence} /></>}
+          </p>
           <div className="mt-7 border-t border-line/[0.08] pt-6">
             <CardTitle>Diesel price vs. where protection starts</CardTitle>
             <div className="mt-4"><PriceVsTrigger trigger={p.strike} months={months} /></div>

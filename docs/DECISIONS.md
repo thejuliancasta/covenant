@@ -9,6 +9,7 @@ Newest first. One or two lines each: what was decided, why, and where the detail
 
 ## 2026-11-20
 
+- **Simple screens lead with the number and the chart.** Protection's simple view is the replay total, one line for the November 2025 model price and today's price, then the chart. Payouts' simple view is the two September figures, one line on the unpaid 25-cent step, then the chart. The longer explanations stay behind "Show the detailed analysis". On Books the sample fleet and CSV upload come first; region and consent sit under them.
 - **Renamed CostShield to Covenant.** Every product, docs and code mention changed. Kept on purpose: the archived Arc contract `CostShieldVault`, the Rust crate `costshield_steps` (the deployed program's build name) and internal storage and cookie keys (`costshield-import`, `costshield-theme`, `costshield_oauth`). The Stepped C mark stays: C for Covenant.
 - **Copy pass: product copy, README and Devpost text follow `docs/MESSAGING.md`,** which states what each technology does; no hackathon framing in product copy (simulation notices stay).
 - **Payouts says "steps", never "chunks".** One word for the 25-cent units on the Payouts screen and its settlement views. `docs/PLAIN_LANGUAGE.md` is changed to match. The landing page and the lender page still say "chunks".
