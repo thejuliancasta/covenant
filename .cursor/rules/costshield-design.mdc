@@ -1,0 +1,23 @@
+---
+description: CostShield UI/UX proposal. Read before changing screens, navigation, copy or colours.
+globs: app/**/*.tsx, components/**/*.tsx, app/globals.css, tailwind.config.ts
+alwaysApply: false
+---
+
+A design proposal lives in `design/`. It is reference material, not shipped code. Do not import from it.
+
+Before changing any screen, navigation, copy or theme:
+
+1. Read `design/README.md` for what is decided and what is still open.
+2. Read `design/SPEC.md`. Sections 3 (states and their exact words), 6 (copy rules) and 8 (mapping onto the current components) matter most.
+3. Open the matching mockup in `design/screens/` (`m*` phone, `d*` desktop, `p1` provider). Shared styles are in `design/screens/screens.css`, tokens in `design/tokens.css`.
+
+Rules to keep when implementing:
+
+- Owner navigation is Overview, Costs, Protection, Payments. Onboarding is Connect, Confirm, Review your offer.
+- Use the status, plan-state and payment-stage words from `design/SPEC.md` section 3 exactly.
+- Never describe the accounting connection as read-only. Say the app only reads and never changes the books, and keep that true.
+- Never label a model estimate as an offer, or a sent payout as received.
+- Every figure in the mockups is sample data. Do not copy numbers into the app; take them from the engine.
+- Colour theme is not decided. Do not change `tailwind.config.ts` colours unless asked.
+- Keep the app on Tailwind and `components/ui.tsx`. Do not add a component library for styling.

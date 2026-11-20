@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CostShield design proposal</title>
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="screens.css">
+<script src="app.js"></script>
+<style>
+.gal { max-width: 1500px; margin: 0 auto; padding: 32px 24px 80px; display: flex; flex-direction: column; gap: 28px; }
+.themes { display: flex; flex-wrap: wrap; gap: 8px; }
+.themes button { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font: 500 14px var(--font-body); color: var(--ink); cursor: pointer; }
+.themes button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.strip { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; }
+.strip figure { margin: 0; flex: none; display: flex; flex-direction: column; gap: 8px; }
+.strip iframe { width: 390px; height: 844px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); }
+.wide iframe { width: 100%; height: 860px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+figcaption { font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; gap: 12px; }
+figcaption a { font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="gal">
+<header class="stack tight">
+<h1 class="h1" style="font-size:36px">CostShield design proposal</h1>
+<p class="sub" style="max-width:760px">Ten screens, one structure, four colour themes. Every figure is sample data for a fictional 10-truck fleet. Read <a href="../README.md">design/README.md</a> first, then <a href="../SPEC.md">SPEC.md</a>.</p>
+<div class="themes" role="group" aria-label="Colour theme">
+<button data-theme-btn="evergreen">Evergreen (default)</button>
+<button data-theme-btn="cobalt">Cobalt (GPT proposal)</button>
+<button data-theme-btn="signal">Signal</button>
+<button data-theme-btn="paper">Paper (app on main today)</button>
+</div>
+</header>
+<section class="stack"><h2 class="h2">Owner · mobile</h2><div class="strip" id="mobile"></div></section>
+<section class="stack wide"><h2 class="h2">Owner · desktop</h2><div class="stack" id="desktop"></div></section>
+<section class="stack wide"><h2 class="h2">Provider workspace · desktop</h2><div class="stack" id="provider"></div></section>
+</div>
+<script>
+(function () {
+  var groups = {
+    mobile: [["m1-connect", "1 · Connect"], ["m2-confirm", "2 · Confirm what matters"], ["m3-costs", "3 · Costs"], ["m4-offer", "4 · Review your offer"], ["m5-overview", "5 · Overview"], ["m6-payment", "6 · Payout received"]],
+    desktop: [["d1-overview", "Overview"], ["d2-costs", "Costs"], ["d3-offer", "Review your offer"]],
+    provider: [["p1-provider", "Opportunities and quote review"]]
+  };
+  var theme = document.documentElement.dataset.theme;
+  function draw() {
+    Object.keys(groups).forEach(function (id) {
+      var box = document.getElementById(id);
+      box.innerHTML = "";
+      groups[id].forEach(function (s) {
+        var src = s[0] + ".html?theme=" + theme;
+        var fig = document.createElement("figure");
+        fig.innerHTML = '<figcaption><span>' + s[1] + '</span><a href="' + src + '" target="_blank" rel="noopener">Open</a></figcaption><iframe title="' + s[1] + '" src="' + src + '"></iframe>';
+        box.appendChild(fig);
+      });
+    });
+    document.querySelectorAll("[data-theme-btn]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.themeBtn === theme));
+    });
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("cs-theme", theme); } catch (e) {}
+  }
+  document.querySelectorAll("[data-theme-btn]").forEach(function (b) {
+    b.addEventListener("click", function () { theme = b.dataset.themeBtn; draw(); });
+  });
+  draw();
+})();
+</script>
+</body>
+</html>
