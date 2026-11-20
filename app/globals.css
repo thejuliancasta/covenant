@@ -72,6 +72,24 @@ p { text-wrap: pretty; }
 ::selection { background: rgb(var(--jade) / 0.32); color: rgb(var(--ink)); }
 :focus-visible { outline: 2px solid rgb(var(--jade)); outline-offset: 2px; border-radius: 8px; }
 
+/* Books: the reading sequence. One timeline that starts when the counter has finished (--hold):
+   rows appear in the order the books list them, slide to their sorted place, then the finding arrives. */
+@keyframes books-sort {
+  0% { opacity: 0; transform: translateY(calc(var(--from) * 2.75rem)); }
+  22%, 45% { opacity: 1; transform: translateY(calc(var(--from) * 2.75rem)); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes books-bar { from { transform: scaleX(0); } }
+@keyframes books-in { from { opacity: 0; transform: translateY(8px); } }
+.books-rows-title { animation: books-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: var(--hold, 0ms); }
+.books-row { animation: books-sort 1600ms cubic-bezier(0.3, 0, 0.2, 1) both; animation-delay: calc(var(--hold, 0ms) + var(--i) * 20ms); }
+.books-bar { transform-origin: left; animation: books-bar 560ms cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--hold, 0ms) + 160ms + var(--i) * 20ms); }
+.books-found { animation: books-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--hold, 0ms) + 1900ms); }
+@media (prefers-reduced-motion: reduce) {
+  /* No sequence: the sorted bars and the finding are simply there. */
+  .books-rows-title, .books-row, .books-bar, .books-found { animation: none !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
 }

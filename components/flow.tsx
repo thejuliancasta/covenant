@@ -25,7 +25,6 @@ const NAV: { id: Step; label: string }[] = [
   { id: "connect", label: "Books" }, { id: "overview", label: "Risks" }, { id: "protection", label: "Protection" },
   { id: "simulate", label: "What if" }, { id: "payout", label: "Payouts" },
 ];
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Step list. A short ember mark slides to the active step; steps that need a result say so. */
 function StepNav({ step, enabled, go, id, vertical }: { step: Step; enabled: (s: Step) => boolean; go: (s: Step) => void; id: string; vertical?: boolean }) {
@@ -80,15 +79,12 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
       await readNdjson<PipelineEvent>(res, async (ev) => {
         if (ev.type === "stage") {
           setStages((s) => ({ ...s, [ev.id as StageId]: { status: ev.status, ms: ev.ms, detail: ev.detail } }));
-          if (ev.status !== "running") await sleep(380); // pacing only, so each real stage result can be read
         } else if (ev.type === "result") result = ev.analysis;
         else failed = ev.message;
       });
       if (failed) throw new Error(failed);
       if (!result) throw new Error("The analysis ended without a result.");
-      setAnalysis(result);
-      await sleep(1700); // pacing only: the tape sorts the real classified lines into lanes before moving on
-      go("overview");
+      setAnalysis(result); // the Books screen plays its sequence and waits for the button to Risks
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -185,7 +181,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={view} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}>
                   {judge && analysis ? <Judge a={analysis} source={source} />
-                    : step === "analyzing" ? <Analyzing stages={stages} error={error} source={source} onBack={() => go("connect")} result={analysis} />
+                    : step === "analyzing" ? <Analyzing stages={stages} error={error} source={source} onBack={() => go("connect")} onNext={() => go("overview")} result={analysis} />
                     : analysis && step === "overview" ? <Overview a={analysis} onNext={() => go("protection")} detail={detail} onDetail={setDetail} />
                     : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} detail={detail} onDetail={setDetail} />
                     : analysis && step === "simulate" ? <Simulator a={analysis} onNext={() => go("payout")} />

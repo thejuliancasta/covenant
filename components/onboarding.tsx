@@ -1,13 +1,13 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent } from "react";
 import { AnimatePresence, motion, useAnimationControls } from "motion/react";
 import { STAGES, type Analysis } from "@/lib/engine/pipeline";
 import { int, pct } from "@/lib/format";
 import { Arrow, Button, Card, CardTitle, Note, Tag, cx, display, surfaceHover } from "./ui";
 import { PressureHero } from "./fx/pressure-hero";
 import { LogoMark } from "./brand/logo";
-import { CountUp, TickText } from "./fx/count";
-import { SPRING_FLUID, SPRING_UI, STAGGER } from "./fx/motion";
+import { CountUp } from "./fx/count";
+import { SPRING_UI, STAGGER } from "./fx/motion";
 
 /** Source label of the bundled sample fleet. An uploaded file always carries its file name, so it can never match. */
 export const SAMPLE_LABEL = "Sample fleet (synthetic data)";
@@ -293,7 +293,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
 
 const MARKET = new Set(["fleet_fuel", "natural_gas", "electricity", "interest"]);
 
-/** Lanes of real classified lines, from the analysis result: expense lines by category plus income lines. */
+/** Every line of the ledger grouped by category, from the analysis result: first in the order the books list them, then by size. */
 function useLanes(result: Analysis | null | undefined) {
   return useMemo(() => {
     if (!result) return null;
@@ -304,12 +304,18 @@ function useLanes(result: Analysis | null | undefined) {
     }
     const expense = [...by.values()].reduce((s, g) => s + g.lines, 0);
     const total = result.lineCount;
-    const all = [...by.entries()].map(([k, g]) => ({ key: k, ...g })).sort((a, b) => b.lines - a.lines);
+    const all = [...by.entries()].map(([k, g]) => ({ key: k, ...g }));
     const big = all.filter((g) => g.lines / total >= 0.025), rest = all.filter((g) => g.lines / total < 0.025);
-    const lanes = [...big];
-    if (rest.length) lanes.push({ key: "rest", label: `${rest.length} smaller categories`, lines: rest.reduce((s, g) => s + g.lines, 0), market: false });
-    if (total - expense > 0) lanes.push({ key: "income", label: "Income lines", lines: total - expense, market: false });
-    return { lanes, total };
+    const found = [...big];
+    if (total - expense > 0) found.push({ key: "income", label: "Income, not a cost", lines: total - expense, market: false });
+    const sorted = [...found].sort((a, b) => b.lines - a.lines);
+    if (rest.length) {
+      const other = { key: "rest", label: `${rest.length} smaller categories`, lines: rest.reduce((s, g) => s + g.lines, 0), market: false };
+      found.push(other); sorted.push(other);
+    }
+    // `from` is how many rows a category sits away from its sorted place when it is first listed.
+    const lanes = sorted.map((l, to) => ({ ...l, from: found.indexOf(l) - to }));
+    return { lanes, total, top: sorted[0]?.lines ?? 1 };
   }, [result]);
 }
 
@@ -330,16 +336,30 @@ const STEP_LABEL: Record<string, string> = {
   classify: "Sorting costs", financials: "Measuring where the money goes", exposure: "Matching prices you don't control",
   pool: "Comparing with similar businesses", markets: "Checking live markets", price: "Pricing protection",
 };
-const PLAIN_DETAIL = new Set(["ingest", "classify", "financials"]);
 function stepLabel(id: string, v: StageView | undefined, read: number) {
   if (id === "ingest") return Number.isFinite(read) ? `Reading ${read.toLocaleString("en-US")} transactions` : "Reading transactions";
   return STEP_LABEL[id] ?? id;
 }
 
-export function Analyzing({ stages, error, source, onBack, result }: { stages: Record<string, StageView>; error: string | null; source: string; onBack: () => void; result?: Analysis | null }) {
+/** The reading sequence: the counter runs for this long, then the bars sort and the finding arrives (timed in globals.css). About 3.5 s in all. */
+const COUNT_MS = 1200;
+
+export function Analyzing({ stages, error, source, onBack, onNext, result }: { stages: Record<string, StageView>; error: string | null; source: string; onBack: () => void; onNext: () => void; result?: Analysis | null }) {
   const done = STAGES.filter((s) => stages[s.id]?.status === "done").length;
   const lanes = useLanes(result);
   const read = stages.ingest?.status === "done" ? Number((stages.ingest.detail ?? "").match(/^([\d,]+)/)?.[1]?.replace(/,/g, "")) : NaN;
+  const counting = Number.isFinite(read);
+  const running = STAGES.find((s) => stages[s.id]?.status === "running");
+  const [details, setDetails] = useState(false);
+  // One timeline. The counter starts when the file is read; the bars hold until it has finished counting.
+  const countedAt = useRef<number | null>(null);
+  const [hold, setHold] = useState<number | null>(null);
+  useEffect(() => { if (counting && countedAt.current === null) countedAt.current = performance.now(); }, [counting]);
+  useEffect(() => {
+    if (result) setHold((h) => h ?? Math.max(0, Math.round(COUNT_MS - (countedAt.current === null ? 0 : performance.now() - countedAt.current))));
+  }, [result]);
+  const risks = result?.diesel?.material ? 1 : 0;
+  const open = details || !!error;
   return (
     <div className="mx-auto max-w-3xl">
       <motion.header initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.2, 0.8, 0.2, 1] }} className="mb-6">
@@ -358,71 +378,79 @@ export function Analyzing({ stages, error, source, onBack, result }: { stages: R
         </div>
       </motion.header>
 
-      <Card>
-        <ol className="grid gap-2">
-          {STAGES.map((s) => {
-            const v = stages[s.id];
-            return (
-              <li key={s.id} className="grid grid-cols-[20px_1fr_auto] items-start gap-3 py-2.5">
-                <StatusMark v={v} />
-                <div className="min-w-0">
-                  <p className={cx("text-[14px] font-medium leading-5 transition-colors duration-200", v ? "text-ink" : "text-faint")}>{stepLabel(s.id, v, read)}</p>
-                  <AnimatePresence initial={false}>
-                    {v?.detail && (v.status === "error" || PLAIN_DETAIL.has(s.id)) && (
-                      <motion.p key={v.status} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={SPRING_UI}
-                        className={cx("num mt-1 text-[13px] leading-[1.5]", v.status === "error" ? "text-rust" : "text-muted")}>
-                        {v.status === "error" ? v.detail : <TickText text={v.detail} />}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </div>
-                <span className="num min-w-[64px] pt-px text-right text-[12px] leading-5 text-faint">
-                  {v?.ms !== undefined ? <><CountUp value={v.ms} duration={0.5} format={(x) => (v.ms! < 10 ? x.toFixed(1) : String(Math.round(x)))} /> ms</> : v?.status === "running" ? "Running" : ""}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
-      </Card>
+      {!error && (
+        <Card>
+          {/* 1. The counter: the real number of transactions in the file. */}
+          <p className={cx("num text-[52px] leading-none sm:text-[68px]", display)}>{counting ? <CountUp value={read} duration={COUNT_MS / 1000} /> : <span className="text-faint">0</span>}</p>
+          <p className="mt-2 text-[15px] leading-6 text-ink2">transactions read</p>
+          <p className="mt-1 min-h-5 text-[13px] leading-5 text-muted" aria-live="polite">
+            {result ? stages.classify?.detail : running ? `${stepLabel(running.id, stages[running.id], read)}…` : ""}
+          </p>
 
-      {(Number.isFinite(read) || lanes) && (
-        <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={SPRING_UI} className="mt-4">
-          <Card>
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <p className="text-[14px] font-medium text-ink">{lanes ? "Every line, sorted by category" : "Lines read"}</p>
-              <p className="num text-[13px] text-muted"><CountUp value={lanes ? lanes.total : read} /> lines</p>
-            </div>
-            <div className="mt-3 flex h-10 w-full gap-[3px] overflow-hidden rounded-control" aria-hidden>
-              {lanes
-                ? lanes.lanes.map((l, i) => (
-                    <motion.span key={l.key} className="h-full min-w-[3px] rounded-[4px]"
-                      initial={{ width: `${100 / lanes.lanes.length}%`, backgroundColor: "rgb(var(--ink2) / 0.16)" }}
-                      animate={{ width: `${(l.lines / lanes.total) * 100}%`, backgroundColor: l.market ? "rgb(var(--heat) / 0.7)" : `rgb(var(--ink2) / ${Math.max(0.12, 0.42 - i * 0.05)})` }}
-                      transition={{ ...SPRING_FLUID, delay: i * 0.05 }} />
-                  ))
-                : <motion.span className="h-full w-full rounded-[4px]" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={SPRING_FLUID} style={{ originX: 0, background: "repeating-linear-gradient(90deg, rgb(var(--ink2) / .22) 0 1px, transparent 1px 4px)" }} />}
-            </div>
-            {lanes && (
-              <motion.ul initial="hidden" animate="show" transition={{ staggerChildren: 0.05, delayChildren: 0.25 }} className="mt-4 grid gap-x-6 gap-y-2 text-[13px] sm:grid-cols-2">
-                {lanes.lanes.map((l) => (
-                  <motion.li key={l.key} variants={rise} className="flex items-center justify-between gap-3">
-                    <span className="flex min-w-0 items-center gap-2"><i className={cx("h-2.5 w-2.5 shrink-0 rounded-[3px]", l.market ? "bg-heat/70" : "bg-ink2/30")} /><span className="truncate text-ink2">{l.label}</span></span>
-                    <span className="num shrink-0 text-muted">{int(l.lines)} <span className="text-faint">{pct(l.lines / lanes.total)}</span></span>
-                  </motion.li>
+          {/* 2. The categories, listed as the books have them, slide into order of size. */}
+          {lanes && hold !== null && (
+            <div className="books-seq mt-6 border-t border-line/[0.08] pt-5" style={{ "--hold": `${hold}ms` } as CSSProperties}>
+              <p className="books-rows-title text-[14px] font-medium leading-5 text-ink">Sorted by category</p>
+              <ul className="mt-2" aria-label="Transactions by category, largest first">
+                {lanes.lanes.map((l, i) => (
+                  <li key={l.key} className="books-row flex h-11 flex-col justify-center" style={{ "--from": l.from, "--i": i } as CSSProperties}>
+                    <span className="flex items-baseline justify-between gap-3 text-[13px] leading-5">
+                      <span className={cx("truncate", l.market ? "font-medium text-ink" : "text-ink2")}>{l.label}</span>
+                      <span className="num shrink-0 text-muted">{int(l.lines)} <span className="text-faint">{pct(l.lines / lanes.total)}</span></span>
+                    </span>
+                    <span className="mt-1.5 block h-2 overflow-hidden rounded-full bg-line/[0.06]">
+                      <span className={cx("books-bar block h-full rounded-full", l.market ? "bg-heat" : "bg-ink/20")} style={{ width: `${Math.max(1.5, (l.lines / lanes.top) * 100)}%` }} />
+                    </span>
+                  </li>
                 ))}
-              </motion.ul>
-            )}
-          </Card>
-        </motion.section>
+              </ul>
+
+              {/* 3. The finding, and the way on. */}
+              <div className="books-found mt-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-line/[0.08] pt-5" role="status">
+                <div className="min-w-0">
+                  <p className={cx("text-[22px] leading-[1.15] sm:text-[26px]", display)}>{risks === 1 ? "1 risk worth protecting found" : "No risk worth protecting found"}</p>
+                  <p className="mt-1.5 text-[13.5px] leading-[1.5] text-muted">{risks === 1 ? "Fleet fuel: its price follows the diesel market." : "Risks shows every cost we checked and why."}</p>
+                </div>
+                <Button size="lg" onClick={onNext}>{risks === 1 ? "See your risk" : "See what we checked"}<Arrow /></Button>
+              </div>
+            </div>
+          )}
+        </Card>
       )}
 
-      <p className="mt-3 text-[12px] leading-[1.55] text-faint">Each step is real work on your file, shown with how long it took.</p>
       {error && (
-        <div className="mt-5 space-y-3">
+        <div className="space-y-3">
           <Note tone="warn" title="What went wrong">{error}</Note>
           <Button onClick={onBack} variant="secondary">Back to import</Button>
         </div>
       )}
+
+      {/* The real stage data: every pipeline stage, its result and how long it took. */}
+      <div className="mt-4">
+        {!error && <Button variant="ghost" size="sm" onClick={() => setDetails((d) => !d)} ariaLabel={details ? "Hide details of each step" : "Show details of each step"}>{details ? "Hide details" : "Show details"}</Button>}
+        {open && (
+          <Card className="mt-3">
+            <ol className="grid gap-2">
+              {STAGES.map((s) => {
+                const v = stages[s.id];
+                return (
+                  <li key={s.id} className="grid grid-cols-[20px_1fr_auto] items-start gap-3 py-2.5">
+                    <StatusMark v={v} />
+                    <div className="min-w-0">
+                      <p className={cx("text-[14px] font-medium leading-5 transition-colors duration-200", v ? "text-ink" : "text-faint")}>{stepLabel(s.id, v, read)}</p>
+                      {v?.detail && <p className={cx("num mt-1 text-[13px] leading-[1.5]", v.status === "error" ? "text-rust" : "text-muted")}>{v.detail}</p>}
+                    </div>
+                    <span className="num min-w-[64px] pt-px text-right text-[12px] leading-5 text-faint">
+                      {v?.ms !== undefined ? `${v.ms < 10 ? v.ms.toFixed(1) : Math.round(v.ms)} ms` : v?.status === "running" ? "Running" : ""}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+            <p className="mt-3 border-t border-line/[0.08] pt-3 text-[12px] leading-[1.55] text-faint">Each step is real work on your file, shown with how long it took.</p>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
