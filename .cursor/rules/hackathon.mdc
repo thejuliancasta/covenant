@@ -1,0 +1,24 @@
+---
+description: UBC 2026 Hackathon constraints and CostShield ground rules. Applies to every session.
+alwaysApply: true
+---
+
+Start from `AGENTS.md`. Check `docs/DECISIONS.md` before proposing anything that might already be settled.
+
+Hackathon facts that constrain the work (full detail in `docs/HACKATHON_GUIDE.md`):
+
+- Submission deadline: Friday Nov 20, 2026, 12:00 PM Central. Finalist pitches in person in Austin on Saturday Nov 21.
+- We are entered in: main track DeFi and Onchain Applications; chain award Best use of Solana. Bounty selection is in `docs/DECISIONS.md`.
+- A submission needs: public GitHub repo, working demo or deployment, README with technical docs and architecture, program addresses, a 2 to 3 minute video, and the Devpost answers in `docs/SUBMISSION.md`.
+- The DeFi track also expects economic design and risk assumptions in the README.
+- All code must be written during the event. No code from pre-existing projects.
+- Judged on technical execution, product and UX, innovation, impact, and demo.
+
+Ground rules:
+
+- Never present simulated, estimated or devnet results as real. Keep every "simulation" and "not available" label.
+- Keep README and docs true to the code. If you find a claim the code does not support, report it.
+- Never read out, copy or commit `.env.local`, `.solana-keys/` or any private key.
+- No new dependencies and no restructuring before submission unless asked.
+- Do not commit or push unless asked. No AI co-author or session lines in commits or PRs.
+- Before the deadline, prefer the smallest change that fixes the problem. Say what you ran and what you saw; do not claim something works without running it.

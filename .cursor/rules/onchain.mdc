@@ -1,0 +1,17 @@
+---
+description: Rules for Solana settlement, the program, Privacy Rings and deployment files.
+globs: solana/**, lib/chain/**, scripts/solana-*.ts, scripts/chain.ts, deployments/**, contracts/**, app/api/settle/**, app/api/chain/**, app/api/lender/**
+alwaysApply: false
+---
+
+Read `docs/SOLANA_PORT.md` and the Solana section of `docs/LIMITATIONS.md` first.
+
+- Settlement runs on Solana devnet with Helius Privacy Rings and tUSD test dollars. Never point anything at mainnet.
+- `contracts/`, `lib/chain/arc`, `scripts/chain.ts` and `deployments/arc-testnet.json` are the archived Arc version. Do not extend them. Do not delete them without asking.
+- `lib/chain/types.ts` is the contract between the server and the UI. Do not change its shapes without updating both.
+- The program must keep refusing: reports from anyone but the oracle, releases of untriggered steps, releases by anyone but the fleet, and double releases. Do not relax a check to make a demo pass.
+- Oracle reports are write-once per index and month. A rerun reuses the report on chain and says so.
+- The cap pays in $0.25 per gallon steps because the program cannot read encrypted amounts. Always show the stepped payout next to the linear amount.
+- Secrets live in `.env.local` and `.solana-keys/`. Never print, copy or commit them. Only public addresses go in `deployments/solana-devnet.json`.
+- Be exact about what is and is not private or trustless. The demo server holds every key, the oracle is one key, Helius's prover sees plaintext, funding is not verified on chain. UI copy and docs must not claim more than that.
+- After a program change: rebuild, redeploy to devnet, run `npm run solana:checks` and `npm run solana:e2e`, and update the addresses file and README deployment block.
