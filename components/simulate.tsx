@@ -174,7 +174,7 @@ function ladder(index: number, strike: number, step: number, gallons: number) {
 }
 
 /** `sample` is true only for the bundled sample fleet, the one ledger the team settled on devnet. */
-export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean }) {
+export function Payout({ a, sample = false, detail, onDetail }: { a: Analysis; sample?: boolean; detail: boolean; onDetail: (detail: boolean) => void }) {
   const d = a.diesel!, p = a.policy!;
   const company = a.company?.trim() || "Your business";
   const { status: st, failed, reload } = useChainStatus();
@@ -228,6 +228,7 @@ export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean })
   const paidSteps = result ? result.steps.filter((s) => s.paid).length : plan.hit;
   const allSteps = result ? result.steps.length : plan.count;
   const cents = Math.round(stepSize * 100);
+  const started = running || log.length > 0 || !!result || !!err; // a run was started here: show it live in either view
   const earlierLinks = EARLIER_RUN.txs.map(([label, sig], i) => <span key={sig}>{i > 0 && ", "}<a href={txUrl(DEFAULT_EXPLORER, sig)} target="_blank" rel="noreferrer" className={LINK}>{label}</a></span>);
 
   return (
@@ -237,14 +238,17 @@ export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean })
           title={result ? <>CostShield paid {company} {usd(result.payoutUsd)} in test dollars, privately.</> : <>Replay a real price spike: {month}</>}
           lede={<>Suppose {company} had bought protection in {monthLabel(p.inceptionMonth, true)}, when the official Midwest diesel price (U.S. government data) was {ppg(p.inceptionIndex)}. We replay the real prices against the gallons in its books. {st?.configured ? <>Then {month} is paid for real, in test dollars, on Solana&apos;s test network.</> : ranEarlier ? <>The team settled {month} on Solana&apos;s test network, in test dollars; the transactions are linked below.</> : <>This demo server does not send test payments; the sample fleet&apos;s devnet settlement is linked below.</>}</>} />
 
-        <div className="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <Card>
-            <h2 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Diesel price each month, and where protection starts</h2>
-            <div className="mt-3">
-              <PriceVsTrigger months={p.replay.map((r) => ({ label: monthLabel(r.month), price: r.index, payout: r.payout }))} trigger={p.strike} selected={chartMonth} onSelect={setChartMonth} />
+        {/* Simple view: one headline, the settlement month's two figures, one chart, one button. The rest is in the detailed analysis. */}
+        <div className={cx("grid items-start gap-6", detail && "lg:grid-cols-[1.2fr_0.8fr]")}>
+          <Card><div className="flex flex-col">
+            <div className={detail ? undefined : "mt-6 border-t border-line/[0.08] pt-5"}>
+              <h2 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Diesel price each month, and where protection starts</h2>
+              <div className="mt-3">
+                <PriceVsTrigger months={p.replay.map((r) => ({ label: monthLabel(r.month), price: r.index, payout: r.payout }))} trigger={p.strike} selected={chartMonth} onSelect={setChartMonth} readout="sentence" />
+              </div>
             </div>
             {/* The settlement month counted two ways: the replay's formula, and what the program pays. */}
-            <div className="mt-5 border-t border-line/[0.08] pt-5">
+            <div className={detail ? "mt-5 border-t border-line/[0.08] pt-5" : "order-first"}>
               <p className="text-[13px] leading-5 text-muted">{month}, counted two ways</p>
               <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-4">
                 <div className="min-w-0">
@@ -260,8 +264,8 @@ export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean })
               </div>
               <p className="mt-4 max-w-[70ch] text-[13px] leading-[1.55] text-muted">The Solana program can&apos;t read encrypted amounts, so it pays one full step (a {cents}-cent chunk) for every {cents} cents the price climbed above the line{linear - stepped < 0.5 ? "" : index - strike > LADDER_TOP ? `; ${usd(linear - stepped)} isn't paid: the part past the last full step, and anything above ${ppg(strike + LADDER_TOP)}` : `; the last ${usd(linear - stepped)} didn't fill a step and isn't paid`}.</p>
             </div>
-          </Card>
-          <Card>
+          </div></Card>
+          {detail && <Card>
             <h2 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">The protection</h2>
             <div className="mt-2">
               <Row label="Bought">{monthLabel(p.inceptionMonth, true)}</Row>
@@ -273,28 +277,28 @@ export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean })
               <Row label={<span className="font-medium text-ink">Net benefit</span>}>{usd(net)}</Row>
             </div>
             <p className="mt-3 text-xs leading-[1.5] text-faint">2026 was one of the worst diesel years on record. In {pct(1 - (a.backtest?.shareOfCohortsPaid ?? 0.35))} of 12-month periods since 2015 this protection paid nothing. The replay pays every cent above the line; the devnet settlement below pays in 25-cent chunks.</p>
-          </Card>
+          </Card>}
         </div>
 
-        <div>
+        {detail && <div>
           <Table align={["l", "r", "r", "r", "r", "r"]} head={["Month", "Official price", "Above the line", "Protected gallons", "Would have paid", ""]}
             rows={p.replay.map((r) => [monthLabel(r.month), <span key="i" className={r.triggered ? "text-heat" : undefined}>{ppg(r.index)}</span>, r.triggered ? `+${ppg(r.index - r.strike)}` : "—", int(r.coveredGallons), r.triggered ? <span key="p" className="text-jade">{usd(r.payout)}</span> : "—",
               r.month === p.settlement.month ? (result ? <span key="s" className="font-medium text-jade">settled privately below</span> : <span key="s" className="text-ink2">settlement month</span>) : r.triggered ? <span key="t" className="text-ink2">would have paid</span> : <span className="text-faint" key="n">no money back</span>])} />
-        </div>
+        </div>}
 
-        <section className="pt-10">
-          <div className="flex flex-wrap items-start justify-between gap-5">
+        <section className={detail ? "pt-10" : undefined}>
+          {detail && <div className="flex flex-wrap items-start justify-between gap-5">
             <div className="max-w-2xl">
               <h2 className="text-[24px] font-[550] leading-[1.1] tracking-[-0.025em] text-ink sm:text-[30px]">{!off ? <>Settle {month} privately on Solana devnet</> : ranEarlier ? <>{month}, settled privately on Solana devnet</> : <>How {month} would settle privately on Solana devnet</>}</h2>
               <p className="mt-3 text-[14px] leading-[1.55] text-muted">The backer sets the money aside in advance. The official price is posted on the blockchain with a fingerprint of the government data file. A Solana program checks the price, and only {company} can collect. Amounts stay encrypted. Money is test dollars: 1 test dollar = $1, nothing scaled.</p>
               {!off && <p className="mt-2 text-[13px] text-ink2">Test mode: paid in test dollars on Solana devnet. No wallet needed.</p>}
             </div>
             {st?.configured && <SettleButton onClick={settle} disabled={!canRun} running={running} again={!!result} />}
-          </div>
+          </div>}
 
           {!st && !failed ? <p className="mt-5 text-[13px] text-muted">Checking the settlement program on Solana devnet…</p>
             : !st ? <div className="mt-5"><Note tone="warn" title="Could not read the settlement status">{failed} The replay and the step plan below are unaffected. Nothing has been sent on chain.</Note></div>
-            : !st.configured ? <div className="mt-5">{ranEarlier
+            : !st.configured ? <div className={detail ? "mt-5" : undefined}>{ranEarlier
                 ? <Note tone="good" title="This settlement ran on Solana devnet">
                     The team ran it on {EARLIER_RUN.when}, in test dollars. See it on Solana Explorer: {earlierLinks}. Explorer shows who signed and that a private transfer happened, not the amounts.
                     <span className="mt-2 block">This demo server holds no keys, so it does not send the payment again: nothing here is a new payout. The full list of transactions is in the <a href={README_URL} target="_blank" rel="noreferrer" className={LINK}>README</a>, and Judge mode says what this server is missing.</span>
@@ -303,7 +307,7 @@ export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean })
                     It holds no keys, so nothing has been sent on chain for this ledger and no payout is shown. The replay and the step plan are unaffected.
                     <span className="mt-2 block">The same settlement ran on Solana devnet for the sample fleet&apos;s {monthLabel(EARLIER_RUN.month, true)}, on {EARLIER_RUN.when}, in test dollars: {earlierLinks}. Explorer shows who signed and that a private transfer happened, not the amounts. The full list is in the <a href={README_URL} target="_blank" rel="noreferrer" className={LINK}>README</a>, and Judge mode says what this server is missing.</span>
                   </Note>}</div>
-            : (
+            : detail && (
               <div className="mt-8">
                 <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-[13px] md:grid-cols-3 lg:grid-cols-6">
                   <div className="min-w-0"><p className="text-xs text-muted">Solana program</p>{st.programId ? <AddrLink addr={st.programId} explorer={st.explorer} /> : <span className="text-faint">not set</span>}</div>
@@ -317,7 +321,18 @@ export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean })
               </div>
             )}
 
-          <Card className="mt-8"><div className="grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+          {!detail && (
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+              <Button variant="secondary" onClick={() => onDetail(true)}>Show the detailed analysis</Button>
+              {st?.configured ? <SettleButton onClick={settle} disabled={!canRun} running={running} again={!!result} />
+                : off ? <a href={txUrl(DEFAULT_EXPLORER, EARLIER_RUN.txs[2][1])} target="_blank" rel="noreferrer"
+                    className="group/btn inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-control bg-jade px-6 text-[15px] font-medium text-jade-ink transition-[background-color,transform] duration-150 hover:bg-jade/90 active:scale-[0.98]">
+                    {ranEarlier ? "See the payout on Solana Explorer" : "See the sample fleet's payout on Explorer"}<Arrow /></a>
+                : null}
+            </div>
+          )}
+
+          {(detail || started) && <Card className="mt-8"><div className="grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
             <div className="min-w-0 lg:sticky lg:top-6 lg:self-start">
               <h3 className="mb-3 text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Where the money is</h3>
               <SettlementStage key={runId} m={stage} company={company} explorer={explorer} running={running} underwriterBalance={st?.underwriterPrivateBalance} />
@@ -327,9 +342,9 @@ export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean })
               <EventLog steps={steps} explorer={explorer} empty={st?.configured ? "Each step appears here as Solana devnet confirms it, with its transaction." : off ? "Nothing has been sent on chain from this server." : "Nothing has been sent on chain."} />
               {err && <ErrorBanner message={err} />}
             </div>
-          </div></Card>
+          </div></Card>}
 
-          <div className="mt-10 px-1">
+          {detail && <div className="mt-10 px-1">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Why the money comes in {Math.round(stepSize * 100)}-cent chunks</h3>
               <span className="text-xs text-faint">{result ? "from the settlement result" : `expected, at the default ${usd(stepSize, 2)} step`}</span>
@@ -340,14 +355,15 @@ export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean })
               <div><p className="text-xs text-muted">Paid in chunks</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-jade">{usd(stepped, 2)}</p><p className="mt-1.5 text-xs text-faint">{result ? result.steps.filter((s) => s.paid).length : plan.hit} of {result ? result.steps.length : plan.count} chunks × {usd(plan.perStep, 2)}</p></div>
               <div><p className="text-xs text-muted">Difference</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-ink">{usd(Math.max(0, linear - stepped), 2)}</p><p className="mt-1.5 text-xs text-faint">Rounded down to the chunk{index - strike > LADDER_TOP ? `, and nothing above ${ppg(strike + LADDER_TOP)}` : ""}</p></div>
             </div>
-          </div>
+          </div>}
 
           {result && <SettledCard r={result} company={company} />}
 
-          <div className="mt-6"><Note tone="info" title="What is real and what is not">Real: the Solana program on the test network (devnet), the private transfers (Helius Privacy Rings), the transactions and the U.S. government prices. Test money: test dollars are worth nothing. Not real yet: the policy (nobody sold it), the price poster (one key that recomputes the official monthly average, not a decentralised feed) and the business wallet (in test mode the server holds every party&apos;s keys). Helius&apos;s prover sees amounts inside secure hardware. Gemini markets do not pay out here.</Note></div>
+          {detail && <div className="mt-6"><Note tone="info" title="What is real and what is not">Real: the Solana program on the test network (devnet), the private transfers (Helius Privacy Rings), the transactions and the U.S. government prices. Test money: test dollars are worth nothing. Not real yet: the policy (nobody sold it), the price poster (one key that recomputes the official monthly average, not a decentralised feed) and the business wallet (in test mode the server holds every party&apos;s keys). Helius&apos;s prover sees amounts inside secure hardware. Gemini markets do not pay out here.</Note></div>}
         </section>
 
         {result && <TwoViews r={result} company={company} />}
+        {detail && <div><Button variant="secondary" onClick={() => onDetail(false)}>Show the simple view</Button></div>}
       </div>
     </MotionConfig>
   );

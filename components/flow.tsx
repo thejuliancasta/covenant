@@ -31,11 +31,12 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 function StepNav({ step, enabled, go, id, vertical }: { step: Step; enabled: (s: Step) => boolean; go: (s: Step) => void; id: string; vertical?: boolean }) {
   return (
     <LayoutGroup id={id}>
-      {NAV.map((n) => {
+      {NAV.map((n, i) => {
         const on = enabled(n.id), active = (step === n.id || (n.id === "connect" && step === "analyzing"));
         return (
           <button
             key={n.id} disabled={!on} onClick={() => go(n.id)} aria-current={active ? "step" : undefined}
+            aria-label={`${n.label}, step ${i + 1} of ${NAV.length}${on ? "" : ". Run an analysis first"}`}
             title={on ? undefined : "Run an analysis first"}
             className={cx(
               "relative flex shrink-0 items-center gap-3 rounded-[6px] text-[13px] font-[510] transition-[color,background-color] duration-150 ease-out",
@@ -63,7 +64,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
   const [source, setSource] = useState("");
   const [connectError, setConnectError] = useState<string | null>(null);
   const [judge, setJudge] = useState(false);
-  const [detail, setDetailState] = useState(false); // Simple view first; Detailed adds the working
+  const [detail, setDetailState] = useState(false); // Simple view first on Risks, Protection and Payouts; Detailed adds the working
   const setDetail = useCallback((d: boolean) => { setDetailState(d); window.scrollTo({ top: 0 }); }, []);
   const imported = useRef(false);
   const mobileNav = useRef<HTMLElement>(null);
@@ -171,7 +172,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
             <Link href="/" className="flex h-10 items-center" aria-label="CostShield home"><Logo size={20} /></Link>
             <span className="flex items-center gap-2"><ThemeToggle />{judgeButton("h-8 px-3")}</span>
           </div>
-          <nav ref={mobileNav} className="flex gap-0.5 overflow-x-auto px-2 pb-1 [scrollbar-width:none]" aria-label="Steps">
+          <nav ref={mobileNav} className="flex gap-0.5 overflow-x-auto px-2 pb-1 [scrollbar-width:none]" aria-label="Steps, as tabs">
             <StepNav id="top" step={navStep} enabled={enabled} go={go} />
           </nav>
         </header>
@@ -188,7 +189,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
                     : analysis && step === "overview" ? <Overview a={analysis} onNext={() => go("protection")} detail={detail} onDetail={setDetail} />
                     : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} detail={detail} onDetail={setDetail} />
                     : analysis && step === "simulate" ? <Simulator a={analysis} onNext={() => go("payout")} />
-                    : analysis && step === "payout" ? <Payout a={analysis} sample={source === SAMPLE_LABEL} />
+                    : analysis && step === "payout" ? <Payout a={analysis} sample={source === SAMPLE_LABEL} detail={detail} onDetail={setDetail} />
                     : <Connect onRun={run} connectError={connectError} />}
                 </motion.div>
               </AnimatePresence>

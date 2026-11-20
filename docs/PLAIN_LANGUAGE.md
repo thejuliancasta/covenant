@@ -50,7 +50,7 @@ export function PriceVsTrigger(props: {
 }): JSX.Element;
 ```
 
-Visual: one bar per month for the price (neutral), a single dashed line labeled "Protection starts at $4.36", the part of each bar above the line in ember, and above each bar that paid a short label ("$2.6K back"). Two y-axis ticks at most. A plain legend: "Diesel price that month" and "The part CostShield pays back". Hover, tap or arrow keys select a month and show one sentence under the chart, for example: "April 2026: diesel averaged $5.25 a gallon, 89¢ above where protection starts. Your fuel bill rose $X; CostShield paid you $2,602." Nothing else on the chart.
+Visual: one bar per month for the price (neutral), a single dashed line labeled "Protection starts at $4.36", the part of each bar above the line in ember. Bars carry no dollar labels (changed Nov 20: the labels crowded the chart on a phone); the selected month's payout is the one readout under the chart, and the line's price is named on the axis and in the legend so it never covers a bar. Month labels are spaced so each stays readable. Two y-axis ticks at most. A plain legend: "Diesel price that month" and "The part CostShield pays back". Hover, tap or arrow keys select a month and show one sentence under the chart, for example: "April 2026: diesel averaged $5.25 a gallon, 89¢ above where protection starts. Your fuel bill rose $X; CostShield paid you $2,602." Nothing else on the chart.
 
 ## Tie it to the hackathon
 

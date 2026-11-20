@@ -18,7 +18,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     try { localStorage.setItem(THEME_KEY, next ? "dark" : "light"); } catch { /* private browsing: the choice lasts for this page only */ }
   };
   return (
-    <button type="button" onClick={flip} aria-pressed={dark} title={dark ? "Switch to light mode" : "Switch to dark mode"}
+    <button type="button" onClick={flip} aria-pressed={dark} aria-label={dark ? "Dark theme on. Switch to light mode" : "Light theme on. Switch to dark mode"} title={dark ? "Switch to light mode" : "Switch to dark mode"}
       className={`inline-flex h-8 items-center gap-2 rounded-[6px] border border-line/[0.12] px-2.5 text-[12px] font-[510] text-ink2 transition-[color,border-color] duration-150 ease-out hover:border-line/[0.24] hover:text-ink ${className}`}>
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
         {dark

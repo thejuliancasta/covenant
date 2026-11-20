@@ -54,12 +54,76 @@ function StepFooter({ detail, onDetail, onNext, next }: DetailProps & { onNext: 
   );
 }
 
+/**
+ * Labeled horizontal spending bars (the classic UI's chart): one row per cost, largest first,
+ * with fuel in the risk color because its price is set by a market. The Simple view's one chart.
+ */
+function SpendingBars({ categories, topTtm }: { categories: Analysis["financials"]["categories"]; topTtm: number }) {
+  return (
+    <ul className="grid gap-4" aria-label="Spending by category, last 12 months">
+      {categories.map((c, i) => {
+        const fuel = c.category === "fleet_fuel";
+        return (
+          <li key={c.category}>
+            <div className="flex items-baseline justify-between gap-3 text-[14px] leading-5">
+              <span className={cx("min-w-0 truncate", fuel ? "font-[560] text-ink" : "text-ink2")}>{c.label}</span>
+              <span className="num shrink-0 text-muted"><span className={fuel ? "font-[560] text-ink" : "text-ink2"}>{usdK(c.ttm)}</span>, {pct(c.shareOfExpenses)}</span>
+            </div>
+            <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-well">
+              <motion.div className={cx("h-full rounded-full", fuel ? "bg-heat" : "bg-ink/20")} initial={{ width: 0 }} whileInView={{ width: `${Math.max(1.5, Math.min(100, (c.ttm / (topTtm || 1)) * 100))}%` }} viewport={{ once: true }} transition={{ ...SPRING_FLUID, delay: Math.min(0.4, i * 0.05) }} />
+            </div>
+            {fuel && <p className="mt-1.5 text-[12.5px] leading-[1.45] text-heat">Its price follows the diesel market, which you don&apos;t control.</p>}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export function Overview({ a, onNext, detail, onDetail }: { a: Analysis; onNext: () => void } & DetailProps) {
   const f = a.financials, d = a.diesel, pool = a.pool;
   const noInstrument = a.others.filter((o) => o.verdict === "no instrument");
   const small = a.others.filter((o) => o.verdict !== "no instrument");
   const top = f.categories[0];
   const maxNet = d ? Math.max(...d.shocks.map((s) => s.netImpact), 1) : 1;
+  const next = d?.material ? "See diesel protection" : "Continue";
+  const span = `${a.company ?? "Your business"}, ${monthLabel(f.ttm[0])} to ${monthLabel(f.ttm[f.ttm.length - 1])}`;
+
+  // Simple view: one headline, one number, one chart, one button. Everything else is in the detailed analysis below.
+  if (!detail) {
+    const bad = d?.material ? d.shocks[1] : null;
+    const shown = f.categories.slice(0, 7);
+    const fuel = f.categories.find((c) => c.category === "fleet_fuel");
+    if (fuel && !shown.includes(fuel)) shown.push(fuel);
+    return (
+      <div className="space-y-4">
+        <PageHead eyebrow={span}
+          title={bad ? "Diesel is your biggest risk." : "We found no cost risk worth protecting."}
+          lede={bad
+            ? <>We read {int(a.lineCount)} transactions. Fuel is {pct(d!.shareOfRevenue)} of your revenue and its price is set by a market you do not control.</>
+            : <>We read {int(a.lineCount)} transactions. None of your market-driven costs is large enough against profit to justify paying for protection.</>} />
+        <Card>
+          {bad && (
+            <div className="mb-7 border-b border-line/[0.08] pb-7">
+              <p className="text-[15px] leading-5 text-ink2">A bad diesel year would cost you</p>
+              <p className={cx("num mt-2 text-[48px] leading-none sm:text-[68px]", display)}><CountUp value={bad.netImpact} format={(v) => usd(v)} /><Ev e="C" /></p>
+              <p className="mt-3 max-w-[62ch] text-[14px] leading-[1.55] text-muted">
+                {bad.pctOfProfit ? <>That is <span className="font-medium text-ink">{bad.pctOfProfit.toFixed(1)} times</span> your yearly profit of {usd(f.operatingProfitTtm)}. </> : null}
+                A bad year is the kind that comes about once every 20 years. This is what lands on you after the fuel surcharges your customers already pay.
+              </p>
+            </div>
+          )}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <CardTitle>Where your money goes</CardTitle>
+            <span className="text-[12px] text-faint">Spending and share of all costs, last 12 months</span>
+          </div>
+          <div className="mt-5"><SpendingBars categories={shown} topTtm={top.ttm} /></div>
+        </Card>
+        <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next={next} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <PageHead eyebrow={`${a.company ?? "Your business"}, ${monthLabel(f.ttm[0])} to ${monthLabel(f.ttm[f.ttm.length - 1])}`}
@@ -175,7 +239,7 @@ export function Overview({ a, onNext, detail, onDetail }: { a: Analysis; onNext:
           <p className="mt-3 text-[12px] leading-[1.6] text-faint">Labels: <Ev e="V" /> verified public data, <Ev e="C" /> calculated from data, <Ev e="E" /> estimate, <Ev e="A" /> assumption.</p>
         </Card>
       </Reveal> : <p className="text-[12px] leading-[1.6] text-faint">The small letters next to numbers say where each one comes from: <Ev e="V" /> verified public data, <Ev e="C" /> calculated from data, <Ev e="E" /> estimate, <Ev e="A" /> assumption.</p>}
-      <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next="Protect diesel" />
+      <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next={next} />
     </div>
   );
 }
@@ -193,6 +257,38 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
     ["ULSD options hedge", "Would fund the benchmark part of claims.", "Modelled"],
     ["Prediction markets", "0% of funding. Used as a price signal only.", "Live data"],
   ];
+  const months = p.replay.map((r) => ({ label: monthLabel(r.month), price: r.index, payout: r.payout }));
+
+  // Simple view: one headline, one number, one chart, one button. The "not available" and "rejected" labels stay, as one line.
+  if (!detail) {
+    const failed = a.hedges.filter((h) => !h.status.startsWith("viable"));
+    return (
+      <div className="space-y-4">
+        <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, CostShield would pay you the difference.`}
+          lede="It pays on the gallons you actually bought and could not pass on to customers, using the official Midwest diesel price (U.S. government data)." />
+        <Card>
+          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+            <div>
+              <p className="text-[15px] leading-5 text-ink2">Over the last {p.replay.length} months it would have paid you</p>
+              <p className={cx("num mt-2 text-[48px] leading-none sm:text-[68px]", display, "!text-jade")}><CountUp value={p.totalPayout} format={(v) => usd(v)} /><Ev e="C" /></p>
+            </div>
+            <Tag tone="bad">Not available to buy</Tag>
+          </div>
+          <p className="mt-3 max-w-[62ch] text-[14px] leading-[1.55] text-muted">A replay on real prices, as if you had bought it in {monthLabel(p.inceptionMonth, true)}. Nobody sold this policy.</p>
+          <div className="mt-7 border-t border-line/[0.08] pt-6">
+            <CardTitle>Diesel price vs. where protection starts</CardTitle>
+            <div className="mt-4"><PriceVsTrigger trigger={p.strike} months={months} /></div>
+          </div>
+        </Card>
+        <p className="px-1 text-[13px] leading-[1.6] text-muted">
+          <span className="font-[510] text-rust">Not available to buy.</span> {a.eligibility.reasons.slice(1).join(" ")}
+          {failed.map((h) => <span key={h.name}> {h.venue}: {h.status === "signal only" ? <><span className="text-heat">signal only</span>, not a hedge.</> : <><span className="text-rust">{h.status}</span> as a hedge.</>}</span>)} The detailed analysis shows the terms, the price and every test.
+        </p>
+        <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next="See it pay out" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, CostShield would pay you the difference.`}
@@ -203,7 +299,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
         <div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Diesel price vs. where protection starts</CardTitle><Tag tone="bad">Not available to buy</Tag></div>
         <div className="mt-5 grid gap-8 lg:grid-cols-[1.12fr_0.88fr]">
           <div className="min-w-0">
-            <PriceVsTrigger trigger={p.strike} months={p.replay.map((r) => ({ label: monthLabel(r.month), price: r.index, payout: r.payout }))} />
+            <PriceVsTrigger trigger={p.strike} months={months} />
           </div>
           <div className="min-w-0">
             <Row label="What it protects against">Diesel price increases, {d.regionLabel}</Row>

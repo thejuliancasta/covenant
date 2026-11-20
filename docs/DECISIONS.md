@@ -9,6 +9,7 @@ Newest first. One or two lines each: what was decided, why, and where the detail
 
 ## 2026-11-20
 
+- **Simple view is one headline, one number, one chart and one button,** on Risks, Protection and Payouts. Everything else is behind "Show the detailed analysis"; nothing was deleted. Protection keeps a "Not available to buy" tag and one line with the reasons and hedge verdicts, so the rule below still holds. The price chart no longer puts dollar labels on bars. Extends the "Simple view first" line below to Payouts.
 - **Payouts on a server without keys shows the earlier devnet run, not a disabled button.** For the sample fleet's September 2026 the screen says "This settlement ran on Solana devnet" and links the 3:12 AM transactions from the README. For any other ledger it says the server does not settle that month. The stepped amount reads "Settled in 25-cent steps" only for a live result or the sample fleet's run, and "Settles in 25-cent steps" otherwise; it is labelled as worked out from the public price, because on-chain amounts are encrypted. This replaces the not-configured note described below.
 - **Ledger sign-in copy changes from "Needs keys" to one line.** The Books screen leads with the sample fleet and CSV upload and says sign-in is built but switched off in this demo. Replaces the "Needs keys" wording in the sign-in decision below; the status (built, not verified live) is unchanged.
 - **The sample fleet is the primary call to action** on the landing page and the Books screen. The hero says "profit", not "earns".
