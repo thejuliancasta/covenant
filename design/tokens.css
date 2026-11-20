@@ -1,0 +1,83 @@
+/* CostShield design tokens.
+   One structure, four colour themes. Screens only use these variables, so a
+   theme is a retint, never a redesign. Switch with <html data-theme="...">.
+
+   evergreen  default. Keeps the app's existing shield green (#0B5D4B).
+   cobalt     the direction proposed in reference/gpt-proposal.md.
+   signal     graphite and orange, closer to operators and logistics.
+   paper      what the app looks like on main today, for comparison only. */
+
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap");
+
+:root, [data-theme="evergreen"] {
+  --bg: #F3F5F4;            /* page ground */
+  --surface: #FFFFFF;       /* cards */
+  --surface-2: #E9EDEB;     /* quiet fills, neutral chips */
+  --ink: #0F1B17;           /* main text */
+  --text-2: #3D4A46;        /* body copy on ground */
+  --muted: #55635E;         /* labels, 4.5:1 on --bg */
+  --line: #DDE3E0;          /* dividers, card borders */
+  --action: #0B5D4B;        /* buttons, links, selection */
+  --action-ink: #FFFFFF;
+  --action-soft: #E3F1EC;
+  --hero-bg: #0B5D4B;       /* the one emphasised card per screen */
+  --hero-ink: #FFFFFF;
+  --hero-muted: #D6EAE3;
+  --success: #0B5D4B;       /* money received, funded */
+  --success-soft: #E3F1EC;
+  --warn: #8A4B08;          /* needs attention, will-not-pay notes */
+  --warn-soft: #FBF0DC;
+  --info: #1F4B82;          /* better handled another way */
+  --info-soft: #E4ECF7;
+  --error: #B42318;
+  --font-body: Inter, system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --display-weight: 600;
+  --radius: 16px;
+  --radius-sm: 12px;
+}
+
+[data-theme="cobalt"] {
+  --bg: #F4F6FA; --surface: #FFFFFF; --surface-2: #E9EDF4;
+  --ink: #111827; --text-2: #374151; --muted: #526175; --line: #D8DEE8;
+  --action: #2545D3; --action-ink: #FFFFFF; --action-soft: #E6EBFB;
+  --hero-bg: #111827; --hero-ink: #FFFFFF; --hero-muted: #C9D1E0;
+  --success: #167349; --success-soft: #E3F3EA;
+  --warn: #8A4B08; --warn-soft: #FBF0DC;
+  --info: #2545D3; --info-soft: #E6EBFB;
+  --error: #B42318;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-display: "IBM Plex Sans", system-ui, sans-serif;
+  --display-weight: 600;
+  --radius: 10px; --radius-sm: 8px;
+}
+
+[data-theme="signal"] {
+  --bg: #F5F5F4; --surface: #FFFFFF; --surface-2: #E7E5E4;
+  --ink: #1C1917; --text-2: #44403C; --muted: #57534E; --line: #D6D3D1;
+  --action: #C2410C; --action-ink: #FFFFFF; --action-soft: #FDEBDD;
+  --hero-bg: #1C1917; --hero-ink: #FFFFFF; --hero-muted: #D6D3D1;
+  --success: #167349; --success-soft: #E3F3EA;
+  --warn: #8A4B08; --warn-soft: #FBF0DC;
+  --info: #1F4B82; --info-soft: #E4ECF7;
+  --error: #B42318;
+  --font-body: Inter, system-ui, sans-serif;
+  --font-display: Archivo, system-ui, sans-serif;
+  --display-weight: 600;
+  --radius: 8px; --radius-sm: 6px;
+}
+
+[data-theme="paper"] {
+  --bg: #F6F4EF; --surface: #FFFFFF; --surface-2: #EDEAE2;
+  --ink: #15181B; --text-2: #3E4449; --muted: #626970; --line: #E5E1D8;
+  --action: #0B5D4B; --action-ink: #FFFFFF; --action-soft: #E4F0EB;
+  --hero-bg: #0B5D4B; --hero-ink: #FFFFFF; --hero-muted: #D6EAE3;
+  --success: #0B5D4B; --success-soft: #E4F0EB;
+  --warn: #9A5B06; --warn-soft: #FAF0DC;
+  --info: #33475B; --info-soft: #EDF1F5;
+  --error: #A8321F;
+  --font-body: system-ui, sans-serif;
+  --font-display: "Instrument Serif", Georgia, serif;
+  --display-weight: 400;
+  --radius: 16px; --radius-sm: 12px;
+}

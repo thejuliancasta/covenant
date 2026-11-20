@@ -12,7 +12,7 @@ Team: Julian Castaneda (`thejuliancasta`) and Aabis (`GitBolt`).
 
 | Path | What |
 | --- | --- |
-| `app/`, `components/` | Next.js 15 app. One page flow in `app/page.tsx`, lender page in `app/lender`, API routes in `app/api` |
+| `app/`, `components/` | Next.js 15 app. Landing page in `app/page.tsx`, the app flow in `app/app` (`components/flow.tsx`), lender page in `app/lender`, API routes in `app/api` |
 | `lib/engine/` | The risk engine: ingest, classify, exposure, pool, Gemini evaluation, pricing, backtest, payout |
 | `lib/ledger/` | CSV import and ledger sign-in for QuickBooks, Xero, Zoho Books, FreshBooks |
 | `lib/chain/` | Solana settlement with Helius Privacy Rings. `lib/chain/arc` is the archived Arc version |
@@ -30,7 +30,7 @@ Team: Julian Castaneda (`thejuliancasta`) and Aabis (`GitBolt`).
 | Product behaviour or scope | `docs/PRODUCT.md`, `docs/CONCEPT.md` |
 | Engine maths | `docs/MODEL.md` |
 | Settlement or the program | `docs/SOLANA_PORT.md`, `docs/LIMITATIONS.md` |
-| Screens, copy, colours | `design/README.md` and `design/SPEC.md` if present (they live on the `design/ui-ux-proposal` branch until merged) |
+| Screens, copy, colours | `docs/UI_DIRECTION.md` and `docs/PLAIN_LANGUAGE.md` for the shipped UI; `design/README.md` and `design/SPEC.md` for the mockups (phone layout, provider workspace), which are not shipped code |
 
 ## Commands
 

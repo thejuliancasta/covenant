@@ -5,10 +5,14 @@ Newest first. One or two lines each: what was decided, why, and where the detail
 ## Open questions
 
 - **QuickNode Streams bounty: enter or not?** Not integrated today.
-- **Colour theme and final UI direction.** A proposal with four themes is on the `design/ui-ux-proposal` branch. Not merged, not decided.
+- **Colour theme and final UI direction.** A proposal with four themes is on the `design/ui-ux-proposal` branch. Not merged, not decided. (Merged on Nov 20, see below. Light mode and friendlier colours are still open.)
 
 ## 2026-11-20
 
+- **Aabis's redesign is merged** (`design/ui-ux-proposal`): landing page at `/`, the app at `/app`, dark token-based theme. This reverses "Cut before submission: merging `design/ui-ux-proposal`" below. Julian asked for it. The earlier UI stays viewable on the `classic-ui` branch.
+- **`motion` accepted as a dependency.** The redesign's animations use it. It is the one exception to "no new dependencies before submission".
+- **Judge mode stays.** The redesign removed it; Julian wants it back. It opens from a button in the app's sidebar once an analysis exists.
+- **The redesign keeps the honesty rules.** The simulation notice is on the landing page, the app and the lender page. Replayed months read "would have paid", not "paid". "Settled privately below" appears only after a real devnet settlement. The landing page says the cover is not for sale and that no insurer has agreed to carry it.
 - **Hosted demo runs without settlement keys.** The live link is a Vercel deployment with no env vars. Everything runs except private settlement, which shows its not-configured note. Proof of settlement is the video and the Explorer transactions in the README. Reasons: keys on a public host let anyone spend the devnet wallets, and the Privacy Rings WASM is untested on a serverless host.
 - **Without keys, Judge mode shows the deployed program's public wallets** from `deployments/solana-devnet.json`, not addresses derived from whatever keys are on the machine (`lib/chain/server.ts`).
 - **How we describe the Arc work.** Archived, written for Arc testnet, not deployed (`deployments/arc-testnet.json` holds no addresses). Labelled in `contracts/README.md`, `scripts/chain.ts`, `scripts/export-abi.cjs`, `lib/chain/arc/` and the README. Nothing deleted or renamed.

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview (desktop) · CostShield design</title>
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="screens.css">
+<script src="app.js"></script>
+</head>
+<body>
+<div class="page">
+<aside class="side"><div class="brand">CostShield</div><nav aria-label="Main"><a href="d1-overview.html" aria-current="page">Overview</a><a href="d2-costs.html">Costs</a><a href="d3-offer.html">Protection</a><a href="d1-overview.html">Payments</a></nav><nav class="push" aria-label="Account"><a href="#">Connections</a><a href="#">Settings</a></nav></aside>
+<main class="main">
+<div class="rowx between wrap"><div class="stack tight"><span class="muted">John's Trucking Co. · books synced today</span><h1 class="h1" style="font-size:34px">You're up to date. $4,800 of a $6,000 fuel price rise is covered.</h1></div><a class="btn ghost" href="d3-offer.html">Review December offer</a></div>
+<div class="cols">
+<section class="card wide">
+<div class="rowx between wrap"><h2 class="h2">Diesel index against your trigger</h2><span class="muted small">Midwest diesel, monthly average, last 12 months</span></div>
+<div style="position:relative">
+<svg class="chart" role="img" aria-label="Index rising from $3.62 to $4.07 over twelve months, below the $4.20 trigger" viewBox="0 0 700 220" preserveAspectRatio="none">
+<rect x="0" y="0" width="700" height="40" fill="var(--success-soft)"></rect>
+<path d="M0 40H700" stroke="var(--success)" stroke-width="2" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"></path>
+<path d="M0 100H700M0 160H700" stroke="var(--surface-2)" vector-effect="non-scaling-stroke"></path>
+<path d="M20 156 80 164 140 148 200 138 260 120 320 128 380 112 440 96 500 104 560 86 620 76 680 66" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+</svg>
+<span class="small" style="position:absolute;left:12px;top:10px;font-weight:600;color:var(--success)">Above $4.20 you get paid</span>
+</div>
+<div class="legend muted"><span>Dec</span><span>Mar</span><span>Jun</span><span>Sep</span><span>Nov · $4.07</span></div>
+<p class="sub">The index is 13 cents below your trigger with 12 days left. Nothing to do. If November averages above $4.20, the payout is sent automatically.</p>
+</section>
+<div class="narrow stack">
+<section class="card"><div class="rowx between"><h2 class="h2">Fuel protection</h2><span class="chip ok">Active</span></div>
+<div><div class="kv"><span>Covers</span><b>8,000 of 10,000 gal</b></div><div class="kv"><span>Period</span><b>Nov 1 to Nov 30</b></div><div class="kv"><span>Most it can pay</span><b>$6,400</b></div><div class="kv"><span>Provided by</span><b>[Provider name]</b></div><div class="kv"><span>Payout funded</span><b>In full</b></div></div>
+</section>
+<section class="card"><h2 class="h2">Payments</h2>
+<div><div class="kv"><span>Nov 1 · Premium paid</span><b>$360</b></div><div class="kv"><span>Next · Settlement</span><b>Dec 2</b></div></div>
+</section>
+<section class="quiet">QuickBooks connected. Last sync today.</section>
+</div>
+</div>
+</main></div>
+</body>
+</html>

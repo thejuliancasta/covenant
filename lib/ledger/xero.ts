@@ -5,7 +5,7 @@ import { formPost, readJson, windowStart } from "./http";
 const AUTH = "https://login.xero.com/identity/connect/authorize";
 const TOKEN = "https://identity.xero.com/connect/token";
 const API = "https://api.xero.com/api.xro/2.0";
-const SCOPE = "offline_access accounting.invoices.read accounting.banktransactions.read accounting.manualjournals.read accounting.settings";
+const SCOPE = "offline_access accounting.invoices.read accounting.banktransactions.read accounting.manualjournals.read accounting.settings.read";
 
 export function xeroAuthorizeUrl(redirectUri: string, state: string): string {
   const q = new URLSearchParams({

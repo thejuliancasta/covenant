@@ -78,7 +78,8 @@ The $6.350 on chain is the mean of the four September 2026 weeks in the committe
 
 ```
 Browser (Next.js, React, Tailwind)
-  welcome -> connect -> analysis -> risks -> protection -> simulator -> payout   + judge mode
+  /      landing page (figures computed at build time by the real engine on the sample fleet)
+  /app   books (connect) -> analysis -> risks -> protection -> what if -> payouts   + judge mode
   /lender#<share>   read-only lender view (key in the URL fragment)
         |  POST /api/analyze (NDJSON stream of real pipeline stages)
         |  GET  /api/chain   (program, mint, roles, decrypted demo balances)
@@ -203,6 +204,6 @@ Do not run `npm run chain`: its `deploy` and `demo` commands overwrite the "Depl
 
 ## Repository map
 
-`app/` pages (including `app/lender`) and API routes · `components/` screens · `lib/engine/` risk engine · `lib/ledger/` ledger sign-in for four accounting providers · `lib/chain/` Solana and Privacy Rings access (`lib/chain/arc/` is the archived Arc version) · `solana/program/` settlement program (Rust, Pinocchio) · `deployments/` public addresses · `contracts/` archived Arc vault and Foundry tests · `scripts/` data, ledger and chain tools · `tests/` engine and ledger tests and a recorded Gemini fixture · `docs/` product, model, submission, limitations and the Solana port decision.
+`app/` pages (landing at `app/page.tsx`, the app at `app/app`, `app/lender`) and API routes · `components/` screens (the earlier single-page UI is kept on the `classic-ui` branch) · `design/` mockups for a phone layout and a provider workspace: reference material, not shipped code · `lib/engine/` risk engine · `lib/ledger/` ledger sign-in for four accounting providers · `lib/chain/` Solana and Privacy Rings access (`lib/chain/arc/` is the archived Arc version) · `solana/program/` settlement program (Rust, Pinocchio) · `deployments/` public addresses · `contracts/` archived Arc vault and Foundry tests · `scripts/` data, ledger and chain tools · `tests/` engine and ledger tests and a recorded Gemini fixture · `docs/` product, model, submission, limitations and the Solana port decision.
 
 Built during the UBC 2026 hackathon. MIT licence.

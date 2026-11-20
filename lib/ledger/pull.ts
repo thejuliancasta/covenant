@@ -23,5 +23,5 @@ export async function pullLedger(provider: ProviderId, code: string, redirectUri
 
 export function handoffPage(payload: { csv: string; label: string; region: string }): string {
   const json = JSON.stringify(payload).replace(/</g, "\\u003c");
-  return `<!doctype html><meta charset="utf-8"><title>Connecting books</title><p>Reading the ledger…</p><script>sessionStorage.setItem("costshield-import",${json});location.replace("/");</script>`;
+  return `<!doctype html><meta charset="utf-8"><title>Connecting books</title><p>Reading the ledger…</p><script>sessionStorage.setItem("costshield-import",${json});location.replace("/app");</script>`;
 }

@@ -14,11 +14,11 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
   return (
     <div className="min-w-0 space-y-6">
       <PageHead eyebrow="Judge mode · technical view" title="How every number was produced" lede={`Source file: ${source}. Analysis generated ${a.generatedAt}. Business owners never need this screen.`} />
-      <div className="flex flex-wrap gap-1.5">{TABS.map((t) => <button key={t} onClick={() => setTab(t)} className={cx("rounded-full border px-3.5 py-1.5 text-[13px]", tab === t ? "border-ink bg-ink text-white" : "border-line text-muted hover:border-ink/40")}>{t}</button>)}</div>
+      <div className="flex flex-wrap gap-1.5">{TABS.map((t) => <button key={t} onClick={() => setTab(t)} className={cx("rounded-[8px] border px-3.5 py-1.5 text-[13px] font-[510] transition-colors duration-150", tab === t ? "border-jade bg-jade text-jade-ink" : "border-line/[0.12] text-muted hover:border-line/[0.28] hover:text-ink")}>{t}</button>)}</div>
 
       {tab === "Data provenance" && (<>
         <Card>
-          <Table head={["Dataset", "Source", "Fetched", "Used for", ""]} rows={a.provenance.map((x) => [x.name, x.url ? <a key="u" href={x.url} target="_blank" rel="noreferrer" className="text-shield hover:underline">{x.source}</a> : x.source, x.fetchedAt.slice(0, 16).replace("T", " "), x.note, <Ev key="e" e={x.evidence} />])} />
+          <Table head={["Dataset", "Source", "Fetched", "Used for", ""]} rows={a.provenance.map((x) => [x.name, x.url ? <a key="u" href={x.url} target="_blank" rel="noreferrer" className="text-jade hover:underline">{x.source}</a> : x.source, x.fetchedAt.slice(0, 16).replace("T", " "), x.note, <Ev key="e" e={x.evidence} />])} />
         </Card>
         <Card>
           <h2 className="text-[15px] font-medium">Import report</h2>
@@ -54,7 +54,7 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
         </Card>
         <Card>
           <h2 className="text-[15px] font-medium">Most recent {a.sampleLines.length} expense lines</h2>
-          <div className="mt-3 max-h-[480px] overflow-y-auto"><Table align={["l", "l", "l", "r", "l", "r"]} head={["Date", "Vendor", "Memo", "Amount", "Category", "Quantity"]} rows={a.sampleLines.map((l) => [l.date, l.vendor, <span key="m" className="text-muted">{l.memo}</span>, usd(l.amount, 2), l.category, l.quantity ? <span key="q">{l.quantity.toFixed(1)} gal <span className={l.quantitySource === "ledger" ? "text-shield" : "text-amber"}>({l.quantitySource})</span></span> : ""])} /></div>
+          <div className="mt-3 max-h-[480px] overflow-y-auto"><Table align={["l", "l", "l", "r", "l", "r"]} head={["Date", "Vendor", "Memo", "Amount", "Category", "Quantity"]} rows={a.sampleLines.map((l) => [l.date, l.vendor, <span key="m" className="text-muted">{l.memo}</span>, usd(l.amount, 2), l.category, l.quantity ? <span key="q">{l.quantity.toFixed(1)} gal <span className={l.quantitySource === "ledger" ? "text-jade" : "text-heat"}>({l.quantitySource})</span></span> : ""])} /></div>
         </Card>
       </>)}
 
@@ -62,7 +62,7 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <h2 className="text-[15px] font-medium">Customer cost model</h2>
-            <p className={cx(mono, "mt-2 rounded-lg bg-paper p-3")}>dCost_t = a + b0·dIndex_t + b1·dIndex_(t−1) + e_t</p>
+            <p className={cx(mono, "mt-2 rounded-[8px] bg-well p-3")}>dCost_t = a + b0·dIndex_t + b1·dIndex_(t−1) + e_t</p>
             <div className="mt-2">
               <Row label="Method">{d.fit.method}<Ev e={d.fit.evidence} /></Row>
               <Row label="b0, b1 (hedge ratio)">{d.fit.b0.toFixed(3)}, {d.fit.b1.toFixed(3)} ({d.fit.hedgeRatio.toFixed(3)})</Row>
@@ -117,7 +117,7 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
       {tab === "Gemini markets" && (<>
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-[15px] font-medium">Gemini Prediction Markets API</h2><Tag tone={m.status === "live" ? "good" : "warn"}>{m.status} · {m.fetchedAt.slice(0, 19).replace("T", " ")} UTC</Tag></div>
-          <p className={cx(mono, "mt-2 break-all rounded-lg bg-paper p-3")}>{m.endpoint}<br />GET https://api.gemini.com/v1/book/&#123;instrumentSymbol&#125;</p>
+          <p className={cx(mono, "mt-2 break-all rounded-[8px] bg-well p-3")}>{m.endpoint}<br />GET https://api.gemini.com/v1/book/&#123;instrumentSymbol&#125;</p>
           {m.error && <p className="mt-2 text-[13px] text-rust">{m.error}</p>}
           <p className="mt-2 text-[13px] text-muted">Volatility used for pricing: <span className="font-medium text-ink">{pct(m.volatility.value, 1)}</span>. {m.volatility.source}<Ev e={m.volatility.evidence} /></p>
         </Card>
@@ -125,7 +125,7 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
               <h2 className="text-[15px] font-medium">Implied distribution: {m.crude.ticker}</h2>
-              <p className={cx(mono, "mt-2 rounded-lg bg-paper p-3")}>ln K = mu + s·z, z = N⁻¹(1 − P(S &gt; K))<br />sigma_annual = s / sqrt(days / 365)</p>
+              <p className={cx(mono, "mt-2 rounded-[8px] bg-well p-3")}>ln K = mu + s·z, z = N⁻¹(1 − P(S &gt; K))<br />sigma_annual = s / sqrt(days / 365)</p>
               <div className="mt-2">
                 <Row label="Settlement index">{m.crude.index}</Row>
                 <Row label="Strikes used / fit R²">{m.crude.implied.nUsed} / {m.crude.implied.fitR2.toFixed(4)}</Row>
@@ -139,7 +139,7 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
               <Card>
                 <h2 className="text-[15px] font-medium">Could the ladder replicate one fleet-month of cover?</h2>
                 <p className="mt-1 text-[13px] text-muted">Holding D × width contracts at each strike pays about D dollars per $1 Brent finishes above ${m.crude.replication.startStrike}. D = covered gallons × slope / 42 = {usd(m.crude.replication.dollarsPerUnit, 2)}.</p>
-                <div className="mt-3"><Table align={["r", "r", "r", "r", "r"]} head={["Strike", "Need", "Best ask", "Filled", "Cost"]} rows={m.crude.replication.legs.map((l) => [`$${l.strike}`, int(l.contracts), l.ask?.toFixed(2) ?? "none", <span key="f" className={l.shortfall > 0.5 ? "text-amber" : ""}>{int(l.filled)}</span>, usd(l.cost, 2)])} /></div>
+                <div className="mt-3"><Table align={["r", "r", "r", "r", "r"]} head={["Strike", "Need", "Best ask", "Filled", "Cost"]} rows={m.crude.replication.legs.map((l) => [`$${l.strike}`, int(l.contracts), l.ask?.toFixed(2) ?? "none", <span key="f" className={l.shortfall > 0.5 ? "text-heat" : ""}>{int(l.filled)}</span>, usd(l.cost, 2)])} /></div>
                 <div className="mt-2">
                   <Row label="Filled at displayed depth">{pct(m.crude.replication.filledShare)}</Row>
                   <Row label="Cost / maximum payout">{usd(m.crude.replication.cost)} / {usd(m.crude.replication.maxPayout)}</Row>
@@ -222,7 +222,7 @@ function SettlementProgram() {
         ["Step and vault accounts, trigger prices, periods, the index id", "Payout amounts (the fleet's key)"],
         ["Oracle reports: the monthly mean and the EIA file's sha256", "Private balances of the fleet and the underwriter"],
         ["Which steps are open, paid or reclaimed, and that a private transfer happened", "The premium, if paid privately"],
-      ].map(([a1, b]) => [a1, <span key="e" className="inline-flex items-start gap-2"><LockIcon className="mt-1 shrink-0 text-slate" />{b}</span>])} /></div>
+      ].map(([a1, b]) => [a1, <span key="e" className="inline-flex items-start gap-2"><LockIcon className="mt-1 shrink-0 text-cipher" />{b}</span>])} /></div>
       <p className="mt-3 text-[13px] text-muted">Lender disclosure: the fleet can share the step vaults&apos; viewing keys in a link. The lender decrypts funded and paid amounts <Encrypted label="read-only" className="mx-1 align-middle" /> but cannot spend. Deposits into a private balance from a public token account reveal their amount.</p>
     </Card>
     <Card>
@@ -233,7 +233,7 @@ function SettlementProgram() {
     </Card>
     <Card>
       <h2 className="text-[15px] font-medium">Trust assumptions</h2>
-      <ul className="mt-3 space-y-2 text-[13px]">{TRUST.map((t) => <li key={t} className="flex gap-2"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" aria-hidden />{t}</li>)}</ul>
+      <ul className="mt-3 space-y-2 text-[13px]">{TRUST.map((t) => <li key={t} className="flex gap-2"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-heat" aria-hidden />{t}</li>)}</ul>
     </Card>
   </>);
 }
