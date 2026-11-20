@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Analysis, PipelineEvent, StageId } from "@/lib/engine/pipeline";
 import { readNdjson } from "@/lib/format";
 import { cx } from "@/components/ui";
@@ -22,6 +22,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [source, setSource] = useState("");
   const [judge, setJudge] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
+  const imported = useRef(false);
 
   const go = useCallback((s: Step) => { setStep(s); setJudge(false); window.scrollTo({ top: 0 }); }, []);
 
@@ -47,6 +49,29 @@ export default function Home() {
       setError(e instanceof Error ? e.message : String(e));
     }
   }, [go]);
+
+  useEffect(() => {
+    if (imported.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const failed = params.get("connect_error");
+    const raw = sessionStorage.getItem("costshield-import");
+    if (!failed && !raw) return;
+    imported.current = true;
+    window.history.replaceState({}, "", "/");
+    if (raw) {
+      sessionStorage.removeItem("costshield-import");
+      try {
+        const data = JSON.parse(raw) as { csv: string; region: string; label: string };
+        run(data.csv, data.region || "PADD2", data.label);
+      } catch {
+        setConnectError("The ledger came back in a form this page could not read.");
+        setStep("connect");
+      }
+      return;
+    }
+    setConnectError(failed);
+    setStep("connect");
+  }, [run]);
 
   const hasResult = !!analysis;
   return (
@@ -83,7 +108,7 @@ export default function Home() {
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 sm:pt-12">
         {judge && analysis ? <Judge a={analysis} source={source} />
           : step === "welcome" ? <Welcome onStart={() => go("connect")} onSample={async () => { const csv = await (await fetch("/sample/johns-trucking.csv")).text(); run(csv, "PADD2", "Sample company (synthetic)"); }} />
-          : step === "connect" ? <Connect onRun={run} />
+          : step === "connect" ? <Connect onRun={run} connectError={connectError} />
           : step === "analyzing" ? <Analyzing stages={stages} error={error} source={source} onBack={() => go("connect")} />
           : analysis && step === "overview" ? <Overview a={analysis} onNext={() => go("protection")} />
           : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} />

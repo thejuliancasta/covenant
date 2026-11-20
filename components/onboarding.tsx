@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { STAGES } from "@/lib/engine/pipeline";
 import { Button, Card, Eyebrow, Note, Tag, cx } from "./ui";
 
@@ -7,7 +7,7 @@ export interface StageView { status: "running" | "done" | "error"; ms?: number; 
 
 export function Welcome({ onStart, onSample }: { onStart: () => void; onSample: () => void }) {
   const steps = [
-    ["Connect your books", "Upload a QuickBooks export. We read expense lines, vendors and amounts. Nothing else."],
+    ["Connect your books", "Sign in to QuickBooks, Xero, Zoho Books or FreshBooks, or upload a CSV. We read expense lines, vendors and amounts."],
     ["See what moves your costs", "We measure how much of your spending follows a market price, and how hard a bad year would hit your profit."],
     ["Know what can be protected", "For each risk we check whether a real financial instrument tracks it. If nothing does, we say so."],
     ["Watch a payout settle", "Replay a real price shock and see a funded test payout arrive in seconds."],
@@ -38,13 +38,25 @@ export function Welcome({ onStart, onSample }: { onStart: () => void; onSample: 
   );
 }
 
-export function Connect({ onRun }: { onRun: (csv: string, region: string, label: string) => void }) {
+interface LedgerProvider { id: string; name: string; reads: string; configured: boolean; missing?: string[] }
+
+export function Connect({ onRun, connectError }: { onRun: (csv: string, region: string, label: string) => void; connectError?: string | null }) {
   const [region, setRegion] = useState("PADD2");
   const [consent, setConsent] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(connectError ?? null);
+  const [ledgers, setLedgers] = useState<LedgerProvider[] | null>(null);
   const [drag, setDrag] = useState(false);
   const [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  useEffect(() => { setErr(connectError ?? null); }, [connectError]);
+  useEffect(() => {
+    fetch("/api/connect/status").then((r) => r.json()).then((body) => setLedgers(body.providers ?? [])).catch(() => setLedgers([]));
+  }, []);
+
+  const connect = (id: string) => {
+    if (!consent) return setErr("Confirm you have the right to share this data before connecting.");
+    window.location.assign(`/api/connect/${id}?region=${encodeURIComponent(region)}`);
+  };
 
   const take = async (file: File) => {
     setErr(null);
@@ -63,19 +75,31 @@ export function Connect({ onRun }: { onRun: (csv: string, region: string, label:
   };
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-5xl">
       <header className="mb-7 animate-rise">
         <Eyebrow>Step 1</Eyebrow>
         <h1 className="mt-2 font-display text-[40px] leading-tight tracking-tight">Connect your accounting records</h1>
-        <p className="mt-2 max-w-2xl text-[15px] text-muted">We need 12 to 24 months of expense transactions. Choose how to bring them in.</p>
+        <p className="mt-2 max-w-2xl text-[15px] text-muted">We need 12 to 24 months of expense transactions. Sign in, or upload an export.</p>
       </header>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <Card className="flex flex-col">
-          <div className="flex items-center justify-between"><p className="text-[15px] font-medium">QuickBooks Online</p><Tag tone="neutral">Not connected</Tag></div>
-          <p className="mt-2 flex-1 text-[13px] leading-relaxed text-muted">A direct connection is not set up in this prototype. It needs Intuit developer keys that are not configured, so we are not going to pretend it works.</p>
-          <p className="mt-3 text-[13px] text-ink">Use an export instead: <span className="text-muted">Reports → Transaction Detail by Account → Export to CSV.</span></p>
-          <Button variant="secondary" disabled className="mt-4 w-full">Connect QuickBooks</Button>
+          <div className="flex items-center justify-between"><p className="text-[15px] font-medium">Sign in to the books</p><Tag tone="info">Read only</Tag></div>
+          <p className="mt-2 text-[13px] leading-relaxed text-muted">The owner logs in at their own software and approves access. We pull 24 months of lines and analyze them in this session. The login is not stored.</p>
+          <ul className="mt-4 divide-y divide-line/70">
+            {(ledgers ?? []).map((p) => (
+              <li key={p.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{p.name}</p>
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{p.configured ? p.reads : `Set ${(p.missing ?? []).join(" and ") || "the client id and secret"} on the server.`}</p>
+                </div>
+                <Button variant="secondary" disabled={!p.configured} onClick={() => connect(p.id)} className="shrink-0 px-3 py-2 text-[13px]">{p.configured ? "Connect" : "Needs keys"}</Button>
+              </li>
+            ))}
+            {ledgers === null && <li className="py-3 text-[13px] text-muted">Checking which connections are configured…</li>}
+          </ul>
+          <p className="mt-2 text-[12px] leading-relaxed text-faint">Each app needs a redirect URL of <span className="text-ink">/api/connect/quickbooks/callback</span>, and the same path with xero, zoho, or freshbooks. QuickBooks Desktop has no cloud sign-in, so use a CSV. Wave does not return historical ledger lines.</p>
         </Card>
+        <div className="grid content-start gap-4">
         <Card className={cx("flex flex-col transition-colors", drag && "border-shield bg-shield-soft")}>
           <div className="flex items-center justify-between"><p className="text-[15px] font-medium">Upload an export</p><Tag tone="good">Works now</Tag></div>
           <div
@@ -93,11 +117,12 @@ export function Connect({ onRun }: { onRun: (csv: string, region: string, label:
           <p className="mt-2 flex-1 text-[13px] leading-relaxed text-muted">John&apos;s Trucking LLC: 10 trucks in the Midwest, 3,315 transactions over 24 months. The ledger is generated, but its fuel prices follow the real EIA Midwest diesel index. It goes through the same importer as an upload.</p>
           <Button variant="secondary" onClick={sample} disabled={busy} className="mt-4 w-full">{busy ? "Loading…" : "Use sample company"}</Button>
         </Card>
+        </div>
       </div>
       {err && <div role="alert" className="mt-4 rounded-xl border border-rust-line bg-rust-soft px-4 py-3 text-[13px] text-rust">{err}</div>}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <Card>
-          <p className="text-[15px] font-medium">Before you upload</p>
+          <p className="text-[15px] font-medium">Before you continue</p>
           <label className="mt-3 block text-[13px] text-muted" htmlFor="region">Where do you buy most of your fuel?</label>
           <select id="region" value={region} onChange={(e) => setRegion(e.target.value)} className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm">
             <option value="PADD2">Midwest (EIA PADD 2)</option>
@@ -113,8 +138,8 @@ export function Connect({ onRun }: { onRun: (csv: string, region: string, label:
           <p className="text-[15px] font-medium">What we read and what happens to it</p>
           <ul className="mt-3 space-y-2 text-[13px] leading-relaxed text-muted">
             <li><span className="text-ink">Read:</span> transaction date, type, vendor or customer name, account, memo and amount.</li>
-            <li><span className="text-ink">Not read:</span> bank logins, card numbers, payroll detail, or anything outside the file.</li>
-            <li><span className="text-ink">Storage:</span> the file is analyzed in memory for this session and is not saved to a database.</li>
+            <li><span className="text-ink">Not read:</span> bank passwords, card numbers, or payroll tax forms.</li>
+            <li><span className="text-ink">Storage:</span> the sign-in token is discarded after the pull. The lines are analyzed in this session and are not saved to a database.</li>
             <li><span className="text-ink">Sharing:</span> nothing from your file is sent to a market, an insurer or a blockchain.</li>
           </ul>
         </Card>
