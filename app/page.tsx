@@ -20,9 +20,9 @@ function Feature({ id, label, title, children, fragment, flip }: {
   id?: string; label: string; title: ReactNode; children: ReactNode; fragment: ReactNode; flip?: boolean;
 }) {
   return (
-    <section id={id} className="scroll-mt-20 py-20 md:py-[112px]">
+    <section id={id} className="scroll-mt-20 py-8 md:py-14">
       <div className={cx(wrap, "grid items-center gap-10 md:gap-16 lg:grid-cols-[0.85fr_1.15fr]")}>
-        <div className={cx("max-w-[480px]", flip && "lg:order-2 lg:justify-self-end")}>
+        <div className={cx("max-w-[480px] lg:sticky lg:top-24", flip && "lg:order-2 lg:justify-self-end")}>
           <Reveal><p className="text-[13px] font-[550] text-jade">{label}</p></Reveal>
           <Reveal i={1}><h2 className={cx(h2, "mt-4")}>{title}</h2></Reveal>
           <Reveal i={2}><div className={cx(body, "mt-5 space-y-4")}>{children}</div></Reveal>
@@ -129,7 +129,7 @@ export default async function Landing() {
         </section>
 
         {/* How it works: the sample fleet in three steps */}
-        <section id="how" aria-labelledby="story" className="scroll-mt-20 pb-20 md:pb-[112px]">
+        <section id="how" aria-labelledby="story" className="scroll-mt-20 pb-12 md:pb-16">
           <div className={wrap}>
             <Reveal><h2 id="story" className="text-[13px] font-[500] text-faint">How it works, with {d.company}, a 10-truck fleet, {coverFrom} to {coverTo}</h2></Reveal>
             <ol className="mt-6 grid gap-px overflow-hidden rounded-[16px] border border-line/8 bg-line/[0.07] md:grid-cols-3">
@@ -203,7 +203,7 @@ export default async function Landing() {
         <Rule />
 
         {/* Integrations */}
-        <section id="integrations" aria-labelledby="integrations-title" className="scroll-mt-20 py-20 md:py-[112px]">
+        <section id="integrations" aria-labelledby="integrations-title" className="scroll-mt-20 py-10 md:py-16">
           <div className={cx(wrap, "grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16")}>
             <SectionHead id="integrations-title" title="Works with the books you keep" lede="Connect your accounting system or upload an export. CostShield does the rest." />
             <dl className="divide-y divide-line/[0.07] border-y border-line/[0.07]">
@@ -222,7 +222,7 @@ export default async function Landing() {
         <Rule />
 
         {/* Security and privacy */}
-        <section id="security" aria-labelledby="security-title" className="scroll-mt-20 py-20 md:py-[112px]">
+        <section id="security" aria-labelledby="security-title" className="scroll-mt-20 py-10 md:py-16">
           <div className={wrap}>
             <SectionHead id="security-title" title="Security and privacy" lede="Built so you never have to trust us with more than you need to." />
             <div className="mt-12 grid gap-px overflow-hidden rounded-[16px] border border-line/8 bg-line/[0.07] sm:grid-cols-2 lg:grid-cols-3">
@@ -241,7 +241,7 @@ export default async function Landing() {
         <Rule />
 
         {/* Who it's for */}
-        <section aria-labelledby="who-title" className="py-20 md:py-[112px]">
+        <section aria-labelledby="who-title" className="py-10 md:py-16">
           <div className={cx(wrap, "grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16")}>
             <SectionHead id="who-title" title="Who it's for" lede="Small businesses whose biggest cost is set by a market they can't control." />
             <div>
@@ -267,7 +267,7 @@ export default async function Landing() {
         <Rule />
 
         {/* FAQ */}
-        <section id="faq" aria-labelledby="faq-title" className="scroll-mt-20 py-20 md:py-[112px]">
+        <section id="faq" aria-labelledby="faq-title" className="scroll-mt-20 py-10 md:py-16">
           <div className={cx(wrap, "grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16")}>
             <SectionHead id="faq-title" title="Questions" />
             <dl className="divide-y divide-line/[0.07] border-y border-line/[0.07]">
@@ -284,7 +284,7 @@ export default async function Landing() {
         </section>
 
         {/* Final call to action */}
-        <section className="pb-24 pt-4 md:pb-[128px]">
+        <section className="pb-16 pt-2 md:pb-24">
           <div className={wrap}>
             <Reveal>
               <div className={cx(surface, lift, "px-6 py-12 md:px-14 md:py-16")}>

@@ -4,7 +4,7 @@ import { LogoMark } from "@/components/brand/logo";
 import type { LandingData, MonthRow } from "./data";
 import { cx, monYear, pct1, usd0 } from "./kit";
 
-const NAV = ["Overview", "Your risks", "Protection", "Simulate", "Payout"];
+const NAV = ["Books", "Risks", "Protection", "What if", "Payouts"];
 
 function Ev({ e }: { e: "C" | "V" | "A" }) {
   const t = { C: "Calculated from data", V: "Verified public data", A: "Assumption" }[e];
@@ -41,15 +41,15 @@ function Window({ d }: { d: LandingData }) {
         <LogoMark size={16} />
         <span className="font-[550] text-ink2">{d.company}</span>
         <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden className="text-faint"><path d="M4.5 2.5 8 6l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-        <span className="text-muted">Your risks</span>
-        <span className="ml-auto hidden text-faint sm:inline">Sample company, simulation</span>
+        <span className="text-muted">Risks</span>
+        <span className="ml-auto hidden text-faint sm:inline">Sample company, test mode</span>
       </div>
       <div className="flex">
         {/* Sidebar */}
         <aside className="hidden w-[200px] shrink-0 border-r border-line/6 p-3 md:block">
           <ul className="space-y-0.5 text-[13px]">
             {NAV.map((n) => (
-              <li key={n} className={cx("flex h-8 items-center rounded-[7px] px-2.5", n === "Your risks" ? "bg-well/70 font-[550] text-ink shadow-[inset_0_1px_0_rgb(var(--ink)/0.05)]" : "text-muted")}>{n}</li>
+              <li key={n} className={cx("flex h-8 items-center rounded-[7px] px-2.5", n === "Risks" ? "bg-well/70 font-[550] text-ink shadow-[inset_0_1px_0_rgb(var(--ink)/0.05)]" : "text-muted")}>{n}</li>
             ))}
           </ul>
           <p className="mb-1 mt-6 px-2.5 text-[12px] text-faint">Sources</p>

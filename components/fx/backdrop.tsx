@@ -5,6 +5,8 @@
  *   PriceTrace  real weekly diesel prices crossing a dashed strike, drawn once
  *   TickField   a sparse grid of tiny crosses
  *   MarginRuler a measured scale down the left margin
+ *   PriceLevels the page as a giant price chart: a hairline per $0.25 of diesel, $6.50 at the
+ *               top to $3.00 at the foot, with the $4.36 protection strike dashed in ember
  * Static, hairline only, ink lines at or under ~6% and ember under ~12%. Every piece fades
  * toward the content column. No glows, gradients of light, noise or animation.
  *
@@ -16,6 +18,7 @@
 import { SteppedC } from "@/components/graphics/stepped-c";
 import { PriceTrace } from "@/components/graphics/price-trace";
 import { MarginRuler, TickField } from "@/components/graphics/texture";
+import { PriceLevels } from "@/components/graphics/price-levels";
 
 export function Backdrop({ variant = "app" }: { variant?: "landing" | "app" }) {
   return (
@@ -28,6 +31,9 @@ export function Backdrop({ variant = "app" }: { variant?: "landing" | "app" }) {
 function Landing() {
   return (
     <>
+      {/* The whole page is a price chart: $6.50 at the top, $3.00 at the foot, labels at the ruler. */}
+      <PriceLevels />
+
       {/* Hero: the mark, top right, cropped by the edge, with a few crosses in the corner. */}
       <div className="absolute inset-x-0 top-0 h-[760px] opacity-60 sm:opacity-100">
         <TickField id="bd-l-ticks-top" alpha={0.04} fadeX={[[0, 0], [0.58, 0], [1, 1]]} fadeY={[[0, 1], [0.45, 0.6], [0.85, 0]]} className="absolute inset-0" />
@@ -78,6 +84,8 @@ function Landing() {
 function App() {
   return (
     <>
+      {/* A lighter chart: every $0.50 plus the strike, in the side margins only, no labels. */}
+      <PriceLevels step={0.5} inset={[6, 94]} alpha={0.035} ember={0.09} mode="margins" labels={false} />
       <div className="absolute inset-x-0 top-0 h-[560px] opacity-60 sm:opacity-100">
         <TickField id="bd-a-ticks" alpha={0.035} fadeX={[[0, 0], [0.62, 0], [1, 1]]} fadeY={[[0, 1], [0.7, 0]]} className="absolute inset-0" />
         <SteppedC
