@@ -1,6 +1,6 @@
 
 
-I’d give CostShield one clear brand and two distinct workspaces: a simple app for business owners, and a more detailed workspace for the firms providing protection. My recommendation is the Cobalt direction shown above—white, ink, cobalt, and IBM Plex Sans.
+I’d give Covenant one clear brand and two distinct workspaces: a simple app for business owners, and a more detailed workspace for the firms providing protection. My recommendation is the Cobalt direction shown above—white, ink, cobalt, and IBM Plex Sans.
 
 The bigger improvement is the product structure. An owner should connect their books, confirm a few facts, review an actual offer, and know when money is moving. The provider needs to assess exposure, quote terms, commit capital, and manage settlement.
 
@@ -16,7 +16,7 @@ Here are the changes that matter most:
 Current design	My recommendation
 Cream, serif headlines, large serif financial figures	Crisp surfaces, one strong sans-serif family, aligned financial numbers
 Eight steps: Connect → Analyze → Risks → Pool → Protection → Simulate → Payout → Onchain record	Persistent customer navigation: Overview, Costs, Protection, Payments
-A required page explaining pool membership	CostShield matches the business automatically; the owner reviews relevant facts and terms
+A required page explaining pool membership	Covenant matches the business automatically; the owner reviews relevant facts and terms
 “Confidence 1.00” and a prominent statistical fit score	Separate data completeness, index suitability, and offer availability
 First impression dominated by a severe modeled loss	Lead with the business’s important costs and the next useful action
 Several connection cards, including unavailable integrations	One prominent working connection, with upload and bookkeeper alternatives
@@ -29,24 +29,24 @@ The PDF is sufficient to review that hierarchy and visual style. Actual responsi
 I would separate the visual identity from the component foundation and the interaction patterns.
 
 My preferred combination
-Layer	Recommendation	How it helps CostShield
-Brand	CostShield’s own typography, colors, spacing, voice, and graphic mark	Gives the product a recognizable identity
+Layer	Recommendation	How it helps Covenant
+Brand	Covenant’s own typography, colors, spacing, voice, and graphic mark	Gives the product a recognizable identity
 Component behavior	Radix Primitives, if it fits the existing React stack	Provides customizable foundations for menus, dialogs, tabs, and disclosures
 Provider interface patterns	IBM Carbon	Useful guidance for tables, filtering, sorting, expandable rows, and professional workflows
 Owner financial experience	Mercury	Inspiration for readable financial summaries that lead back to underlying transactions
 Mobile task design	Ramp	Inspiration for reviewing a decision and taking action with the relevant information together
-Radix Primitives is deliberately unstyled, so it gives you control over the appearance while handling substantial interaction and accessibility behavior. It is a foundation for your design system, rather than a finished CostShield look. 
+Radix Primitives is deliberately unstyled, so it gives you control over the appearance while handling substantial interaction and accessibility behavior. It is a foundation for your design system, rather than a finished Covenant look. 
 
 Carbon’s table patterns are particularly relevant to the provider side: sorting, expansion, filtering, and row actions are established parts of its documented approach. 
 
 If you want a more complete component suite for a fresh build, Mantine is my alternative. Its theme centralizes fonts, colors, spacing, and corner radii. I would choose a foundation after inspecting what the app already uses; changing libraries solely to change the appearance adds unnecessary work. 
 
 What to borrow from successful financial products
-From Mercury: the ability to start with a financial summary and inspect the transactions behind it. Mercury’s Insights documentation describes category-level analysis, underlying transaction views, and correcting suggested classifications. For CostShield, that becomes: “Here is your diesel exposure; here are the purchases behind it; correct anything we misunderstood.” 
+From Mercury: the ability to start with a financial summary and inspect the transactions behind it. Mercury’s Insights documentation describes category-level analysis, underlying transaction views, and correcting suggested classifications. For Covenant, that becomes: “Here is your diesel exposure; here are the purchases behind it; correct anything we misunderstood.” 
 
-From Ramp: mobile screens organized around useful actions. Ramp presents bill and request review with the information needed to approve them. For CostShield, the equivalent is reviewing a protection offer, fixing a missing fact, or checking a payment while away from the desk. 
+From Ramp: mobile screens organized around useful actions. Ramp presents bill and request review with the information needed to approve them. For Covenant, the equivalent is reviewing a protection offer, fixing a missing fact, or checking a payment while away from the desk. 
 
-Those are the patterns I would adapt. CostShield should have its own identity and financial language.
+Those are the patterns I would adapt. Covenant should have its own identity and financial language.
 
 3. The branding direction
 The three boards above explore different personalities using the same underlying product structure.
@@ -79,7 +79,7 @@ Error	#B42318
 Use cobalt to direct attention toward actions and selection. Use green for a confirmed successful state. Most of the application should remain neutral and readable.
 
 Brand expression
-I would keep CostShield for now and explore a clean wordmark with a simple open “C” and horizontal-bar motif. That motif can recur in selected navigation, section dividers, and graphic treatments. It is a design exploration, so the final mark still needs refinement and clearance.
+I would keep Covenant for now and explore a clean wordmark with a simple open “C” and horizontal-bar motif. That motif can recur in selected navigation, section dividers, and graphic treatments. It is a design exploration, so the final mark still needs refinement and clearance.
 
 The headline I would use is:
 
@@ -112,10 +112,10 @@ If QuickBooks is not implemented yet, the live product should honestly offer upl
 
 The connection screen needs a brief explanation of what you use the data for, what happens next, and what connecting does—and does not—authorize.
 
-One specific correction to Claude’s proposed wording: the standard QuickBooks Accounting permission is broad, and the API supports writing records. A promise that CostShield does not change the books must be enforced by your application; it should not be presented as a technically read-only OAuth grant. 
+One specific correction to Claude’s proposed wording: the standard QuickBooks Accounting permission is broad, and the API supports writing records. A promise that Covenant does not change the books must be enforced by your application; it should not be presented as a technically read-only OAuth grant. 
 
 Stage 2: Confirm what matters
-CostShield should infer as much as it reasonably can and ask about consequential gaps.
+Covenant should infer as much as it reasonably can and ask about consequential gaps.
 
 For a trucking business, that could mean:
 
@@ -135,7 +135,7 @@ Do not assume that an accounting connection always gives you usable gallons in t
 The risk pool should happen in the background
 The owner should not need to decide whether they belong in “Gulf Coast diesel cohort 4.”
 
-CostShield can match the exposure using the relevant index, region, currency, period, quantity, and contract terms. The customer-facing explanation can be:
+Covenant can match the exposure using the relevant index, region, currency, period, quantity, and contract terms. The customer-facing explanation can be:
 
 “Your fuel costs appear suitable for protection linked to this regional diesel index.”
 
@@ -172,7 +172,7 @@ For the model we have been discussing:
 
 The business owner pays the premium for the agreed contract.
 The provider commits collateral against its payout obligation.
-CostShield shows each party its own obligation clearly.
+Covenant shows each party its own obligation clearly.
 If normal bank payment and payout rails are implemented, present those in familiar business terms. If the product currently supports only a wallet, explain the supported asset, network, amount, and destination at the relevant payment step.
 
 The brand can be simple while the financial consequences remain explicit.
@@ -200,7 +200,7 @@ I would use four destinations on desktop and in mobile bottom navigation:
 
 Destination	What it answers
 Overview	What needs my attention? What protection do I have?
-Costs	What did CostShield find in my books? What needs correction?
+Costs	What did Covenant find in my books? What needs correction?
 Protection	What offers, scheduled contracts, and active plans do I have?
 Payments	What did I pay? What am I receiving? Where is the transfer?
 Desktop Overview
@@ -224,7 +224,7 @@ Correcting a missing fact.
 Checking a payout.
 Reconnecting an account.
 Getting help.
-Use large, comfortable controls and readable body text. I would make 44–48 px touch targets a CostShield design standard. That is more generous than WCAG 2.2’s general 24 px minimum target rule, which includes exceptions and spacing provisions. 
+Use large, comfortable controls and readable body text. I would make 44–48 px touch targets a Covenant design standard. That is more generous than WCAG 2.2’s general 24 px minimum target rule, which includes exceptions and spacing provisions. 
 
 7. The provider side needs a proper working environment
 I would call this Provider workspace. “Hedger” is ambiguous because the business owner is also hedging its costs.

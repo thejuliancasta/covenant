@@ -21,7 +21,7 @@ SERIES = {
 
 def fetch(name):
     path = os.path.join(RAW, name)
-    req = urllib.request.Request(BASE + name, headers={"User-Agent": "costshield-hackathon/1.0"})
+    req = urllib.request.Request(BASE + name, headers={"User-Agent": "covenant/1.0"})
     with urllib.request.urlopen(req, timeout=60) as r, open(path, "wb") as f:
         f.write(r.read())
     return path

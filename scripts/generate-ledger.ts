@@ -134,7 +134,7 @@ const out = [
   "Date,Transaction Type,Num,Name,Memo/Description,Account,Amount",
   ...rows.map((r) => [mdY(r.date), r.type, r.num, q(r.name), q(r.memo), r.account, money(r.amount)].join(",")),
   "",
-  `"Synthetic sample data generated for the CostShield demo. Not a real company."`,
+  `"Synthetic sample data generated for the Covenant demo. Not a real company."`,
 ];
 mkdirSync("public/sample", { recursive: true });
 writeFileSync("public/sample/johns-trucking.csv", out.join("\n") + "\n");

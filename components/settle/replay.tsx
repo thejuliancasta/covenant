@@ -86,7 +86,7 @@ export function ReplayColumns({ rows, settleMonth, indexLabel }: { rows: ReplayR
       <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted">
         <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-heat/40" />{indexLabel}</span>
         <span className="inline-flex items-center gap-1.5"><i className="h-px w-4 bg-jade" />Protection starts at <span className="num">{ppg(strike)}</span></span>
-        <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-heat/30 ring-1 ring-inset ring-heat/50" />Above the line: CostShield pays this back</span>
+        <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-heat/30 ring-1 ring-inset ring-heat/50" />Above the line: Covenant pays this back</span>
       </div>
     </div>
   );

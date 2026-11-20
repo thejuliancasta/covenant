@@ -72,7 +72,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
     <MotionConfig reducedMotion="user">
       <div className="space-y-6">
         <PageHead eyebrow={`One month for ${company}, using the gallons in your books`} title="What if diesel jumps?"
-          lede="Pick a price rise and see one month: what it adds to your fuel bill, what your surcharges pass on, and what CostShield would pay you back. Simple arithmetic on your own gallons." />
+          lede="Pick a price rise and see one month: what it adds to your fuel bill, what your surcharges pass on, and what Covenant would pay you back. Simple arithmetic on your own gallons." />
 
         <Card>
           <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
@@ -87,7 +87,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
           </div>
 
           <PriceRiseControl className="mt-6" value={rise} onChange={setRise} offset={offset} label="How much diesel rises, per gallon"
-            valueText={`diesel up $${rise.toFixed(2)} a gallon; CostShield would pay you ${usd(s.payout)}`} />
+            valueText={`diesel up $${rise.toFixed(2)} a gallon; Covenant would pay you ${usd(s.payout)}`} />
 
           {/* The answer: what the month costs with protection, next to what it costs without. */}
           <div className="mt-8" aria-live="polite">
@@ -110,7 +110,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
 
           <ol className="mt-6 space-y-2">
             {line("your fuel bill rises", s.extraCost, "text-ink", s.passedThrough > 0 ? `(your fuel surcharges pass ${usd(s.passedThrough)} of it to customers)` : undefined)}
-            {line("CostShield would pay you back", s.payout, "text-jade", s.payout === 0 && rise > 0 ? `(the rise is still under the ${usd(offset, 2)} you cover yourself)` : undefined)}
+            {line("Covenant would pay you back", s.payout, "text-jade", s.payout === 0 && rise > 0 ? `(the rise is still under the ${usd(offset, 2)} you cover yourself)` : undefined)}
           </ol>
 
           <div className="mt-7 text-[13px]">
@@ -121,10 +121,10 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
             </div>
             <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted">
               <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-ink/20" />Passed on by your fuel surcharges</span>
-              <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-jade" />Paid back by CostShield</span>
+              <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-jade" />Paid back by Covenant</span>
               <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-heat/70" />Still on you</span>
             </div>
-            <p className="mt-3 max-w-[70ch] text-[12.5px] leading-[1.55] text-faint">Protection starts once diesel is up {usd(offset, 2)} a gallon. Above that, CostShield would pay back every cent on the <span className="num">{int(covered)}</span> gallons your fuel surcharges don&apos;t cover. Each block on the slider is a 25-cent step{crossed ? `, ${crossed} lit now` : ""}: on Solana the money is paid in whole steps, which is why Payouts shows two numbers.</p>
+            <p className="mt-3 max-w-[70ch] text-[12.5px] leading-[1.55] text-faint">Protection starts once diesel is up {usd(offset, 2)} a gallon. Above that, Covenant would pay back every cent on the <span className="num">{int(covered)}</span> gallons your fuel surcharges don&apos;t cover. Each block on the slider is a 25-cent step{crossed ? `, ${crossed} lit now` : ""}: on Solana the money is paid in whole steps, which is why Payouts shows two numbers.</p>
           </div>
         </Card>
 
@@ -143,12 +143,12 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
               <Row label="Extra fuel cost" hint={`${int(gallons)} gallons × $${rise.toFixed(2)}`}>{usd(s.extraCost)}</Row>
               <Row label="Passed on through fuel surcharges" hint={`${pct(1 - share)} of gallons, if surcharges keep pace`}>−{usd(s.passedThrough)}</Row>
               <Row label="Left for you to pay"><span className="text-heat">{usd(s.exposedCost)}</span></Row>
-              <Row label="CostShield would pay you back" hint={`($${rise.toFixed(2)} − $${offset.toFixed(2)}, if above zero) × ${int(gallons * share)} protected gallons`}><span className="text-jade">−{usd(s.payout)}</span></Row>
+              <Row label="Covenant would pay you back" hint={`($${rise.toFixed(2)} − $${offset.toFixed(2)}, if above zero) × ${int(gallons * share)} protected gallons`}><span className="text-jade">−{usd(s.payout)}</span></Row>
               <Row label="You're out" hint={`${pct(s.offsetShare)} of the hit would be paid back`}>{usd(s.unhedged)}</Row>
               <Row label="What protection costs this month, if bought today" hint={`Estimated price: ${usd(price.premium)} a year, ${ppg(price.premiumPerGallon)} per protected gallon. Bought in ${boughtLabel}: about ${usd(priceThen.premiumPerMonth)} a month`}>{usd(s.premium)}<Ev e="A" /></Row>
               <Row label={<span className="font-medium text-ink">Effect on profit this month</span>} hint={`Without protection: ${usd(s.netWithoutCover)}`}><span className="text-base">{usd(s.net)}</span></Row>
             </div>
-            <div className="mt-4"><Note tone="info" title="Your pump price can differ from the official price">CostShield would pay on the official {area(d.regionLabel)} diesel price (U.S. government data), not your pump price. Yours differs by about ±{ppg(basisStd)} a gallon in a typical month<Ev e={d.fit.method === "ledger-regression" ? "C" : "A"} />, so the real effect on {int(gallons * share)} gallons could be about {usd(s.basisBand)} better or worse (95% range).</Note></div>
+            <div className="mt-4"><Note tone="info" title="Your pump price can differ from the official price">Covenant would pay on the official {area(d.regionLabel)} diesel price (U.S. government data), not your pump price. Yours differs by about ±{ppg(basisStd)} a gallon in a typical month<Ev e={d.fit.method === "ledger-regression" ? "C" : "A"} />, so the real effect on {int(gallons * share)} gallons could be about {usd(s.basisBand)} better or worse (95% range).</Note></div>
           </Card>
         </div>
         <div className="flex justify-end"><Button onClick={onNext} size="lg">See it paid on Solana<Arrow /></Button></div>
@@ -256,7 +256,7 @@ export function Payout({ a, sample = false, detail, onDetail }: { a: Analysis; s
     <MotionConfig reducedMotion="user">
       <div className="space-y-6">
         <PageHead eyebrow={st?.configured ? "Real prices, your gallons, paid on Solana devnet in test dollars" : "Real prices and your gallons, replayed. Nobody sold this policy"}
-          title={result ? <>CostShield paid {company} {usd(result.payoutUsd)} in test dollars, privately.</> : <>Money back for {month}, when diesel averaged ${index.toFixed(2)}</>}
+          title={result ? <>Covenant paid {company} {usd(result.payoutUsd)} in test dollars, privately.</> : <>Money back for {month}, when diesel averaged ${index.toFixed(2)}</>}
           lede={<>Suppose {company} had bought protection in {monthLabel(p.inceptionMonth, true)}, when the official {area(d.regionLabel)} diesel price (U.S. government data) was ${p.inceptionIndex.toFixed(2)}, so protection started at ${p.strike.toFixed(2)}. We replay the real prices against the gallons in its books. {!st ? null : st.configured ? <>Then {month} is paid on Solana devnet, in test dollars. No wallet needed: this demo pays from test wallets.</> : ranEarlier ? <>We settled {month} on Solana devnet, in test dollars; the transactions are linked below.</> : <>This server doesn&apos;t send test payments; the sample fleet&apos;s devnet settlement is linked below.</>}</>} />
 
         {/* Simple view: one headline, the settlement month's two figures, one chart, one button. The rest is in the detailed analysis. */}

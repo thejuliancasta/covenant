@@ -1,5 +1,5 @@
 ---
-description: CostShield UI/UX proposal. Read before changing screens, navigation, copy or colours.
+description: Covenant UI/UX proposal. Read before changing screens, navigation, copy or colours.
 globs: app/**/*.tsx, components/**/*.tsx, app/globals.css, tailwind.config.ts
 alwaysApply: false
 ---

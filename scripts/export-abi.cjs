@@ -1,4 +1,4 @@
-// ARCHIVED: earlier Arc work, not the settlement path (CostShield settles on Solana devnet).
+// ARCHIVED: earlier Arc work, not the settlement path (Covenant settles on Solana devnet).
 // The archived ABI now lives at lib/chain/arc/abi.ts; this script still writes the old path.
 // Writes lib/chain/abi.ts from the Foundry build output.
 const a = require("../contracts/out/CostShieldVault.sol/CostShieldVault.json");

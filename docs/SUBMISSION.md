@@ -2,16 +2,16 @@
 
 ## Devpost fields
 
-**Project name:** CostShield
+**Project name:** Covenant
 
 **Short description:** A price cap on your biggest bill, set up from your books, that pays you back on its own.
 
 **Main track:** DeFi and Onchain Applications. **Chain award:** Best use of Solana. **Bounty:** Gemini Prediction Markets.
 
 **Hook (first line of the description):**
-"When fuel spikes, airlines are fine and small trucking companies go under. The difference is that big companies buy protection in advance. CostShield gives every small business that protection, straight from its books, and it pays out by itself."
+"When fuel spikes, airlines are fine and small trucking companies go under. The difference is that big companies buy protection in advance. Covenant gives every small business that protection, straight from its books, and it pays out by itself."
 
-CostShield is a simulation in devnet test dollars. Nothing is for sale, and no insurer or backer has signed up.
+Covenant is a simulation in devnet test dollars. Nothing is for sale, and no insurer or backer has signed up.
 
 **What problem does it solve?**
 Our sample company is a 10-truck Midwest fleet (a synthetic ledger built on real diesel prices). It keeps about $6,841 a year after every bill. It spends $581,354 a year on diesel, a price it does not control. A bad diesel year, the kind that comes about once every 20 years, costs it $56,018: 8.2 times its yearly profit.
@@ -19,22 +19,22 @@ Our sample company is a 10-truck Midwest fleet (a synthetic ledger built on real
 Airlines and big shippers buy protection against fuel spikes in advance. Small businesses never do: it is complex, it has minimum sizes, and nobody offers it to them. And protection on a public blockchain would expose the business: its gallons show its volume, and a payout shows when its margins are under stress.
 
 **What did you build?**
-CostShield does three things:
+Covenant does three things:
 
-1. **Reads the books.** The business uploads an accounting export. CostShield sorts every transaction with fixed rules, reads the gallons off each fuel receipt and measures what a spike would cost after the fuel surcharges customers already pay. No AI model guesses any number; each one traces to a line in the books or a public dataset. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built and unit-tested but switched off in the demo.
+1. **Reads the books.** The business uploads an accounting export. Covenant sorts every transaction with fixed rules, reads the gallons off each fuel receipt and measures what a spike would cost after the fuel surcharges customers already pay. No AI model guesses any number; each one traces to a line in the books or a public dataset. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built and unit-tested but switched off in the demo.
 2. **Prices protection on the cost that could sink it.** Protection pays when the official diesel price from the U.S. Energy Information Administration, averaged over the month for the business's region, goes above a line. For the sample fleet, protection bought in November 2025 starts at $4.36 a gallon and has a model price of about $361 a month.
 3. **Pays the business back on its own.** The backer sets the money aside in advance on Solana. When the official price is above the line, the business signs once and the program pays: no claim, no adjuster, no waiting. Replayed on real prices, the sample fleet's protection would have paid back $25,952 from November 2025 to October 2026.
 
 It also says no. Payroll, insurance and leases cannot be protected this way, and the app says so. Every Gemini market it tests is shown as rejected or "signal only", with the reason.
 
 **What makes it different?**
-Most cover for small businesses pays for a bad day: a rained-out Saturday, a cold morning. CostShield protects against a bad year: the one cost that can close the business.
+Most cover for small businesses pays for a bad day: a rained-out Saturday, a cold morning. Covenant protects against a bad year: the one cost that can close the business.
 
 - **Measured, not guessed.** The loss comes from the business's own books (3,315 transactions for the sample fleet, the gallons on every receipt, less what fuel surcharges already pass on), not from a sentence the owner types. No AI model estimates any number.
-- **Business-sized.** A prediction-market contract can only cover as much as its order book holds, often a few hundred dollars, and it ends within days. CostShield covers a $56,018 bad year for a full 12-month term, because the risk sits with a backer whose money is locked on Solana before cover starts, not with whoever is selling on an order book that day.
+- **Business-sized.** A prediction-market contract can only cover as much as its order book holds, often a few hundred dollars, and it ends within days. Covenant covers a $56,018 bad year for a full 12-month term, because the risk sits with a backer whose money is locked on Solana before cover starts, not with whoever is selling on an order book that day.
 - **Private.** On a public chain, a business's payouts reveal its volume and when its margins are under stress. With Helius Privacy Rings the amounts are encrypted, the public sees only that the rules were followed, and the business can prove its cover to a lender with a read-only viewing key.
 - **Tested on history.** Replayed on every 12-month period since 2015 and on real prices from November 2025 to October 2026, with the 25-cent-step trade-off shown next to the exact figure ($5,070 paid in 7 of 8 steps against $5,776 for September 2026).
-- **Prediction markets for what they do best.** CostShield reads Gemini's live oil markets to price the protection, and is honest that they can't carry the risk yet.
+- **Prediction markets for what they do best.** Covenant reads Gemini's live oil markets to price the protection, and is honest that they can't carry the risk yet.
 
 **How does it work?**
 A TypeScript engine on the server does the analysis: it imports the CSV, sorts transactions with fixed rules, fits the price the business paid per gallon against the official regional price, sizes a 1-in-5 and a 1-in-20 year from EIA history, prices the protection with a standard options model (Black-76), and replays it over 131 rolling 12-month periods from 2015.
@@ -43,7 +43,7 @@ A TypeScript engine on the server does the analysis: it imports the CSV, sorts t
 
 *How we use Helius Privacy Rings.* The money in each step's vault and every payout are encrypted balances, owned by a program-derived address and spent by the program through Privacy Rings. The program enforces the rules without seeing the amounts. The public can see that a step paid, not how much, so a competitor or customer cannot work out the business's gallons or margins. The business can give its lender a read-only viewing key: the lender's page (`/lender`) shows each step's line, how much was set aside and whether it paid, and the key cannot move money. The honest trade-off: because the program cannot read encrypted amounts, it pays in whole 25-cent steps. In September 2026 the official Midwest price averaged $6.35 against a line of $4.357, so 7 of 8 steps paid, $5,070, against $5,776 by the exact formula; the last $706 did not fill a step, and the app shows both numbers. Amounts are hidden from the public, not from everyone: Helius's prover sees them to build the proof (inside attested hardware), and in this demo our server holds the test keys and does the lender's decryption.
 
-*How we use Gemini Prediction Markets.* At every analysis CostShield calls Gemini's public Prediction Markets API live (`/v1/prediction-markets/events` and `/v1/book/{symbol}`). It reads the oil-price ladder (yes/no contracts on whether Brent crude will be above each price), treats the prices as the odds of each level, and turns that curve into the size of move traders expect. That expected move sets today's price of protection: a jumpier market makes protection cost more. It also screens every live Commodities and Economics market as a way to carry the risk. Markets with no link to a cost in the books are rejected with that reason; the related ones get five checks: does it settle on the price the business pays, does it track that cost over 12 months, does it last at least half the 12-month cover, are enough contracts on offer to cover a month for a group of fleets, and is it quoted both ways. Today none passes: Gemini lists no diesel market, Brent explains 77% of 12-month diesel moves against 96% for wholesale diesel, the oil markets expire in days, and the displayed size covers about one fleet. So the app labels the Brent ladder "signal only", not a hedge, and shows what building the cap from it would cost and how much could not be filled. CostShield places no orders on Gemini, and the November 2025 price uses an assumed 35% volatility, not Gemini.
+*How we use Gemini Prediction Markets.* At every analysis Covenant calls Gemini's public Prediction Markets API live (`/v1/prediction-markets/events` and `/v1/book/{symbol}`). It reads the oil-price ladder (yes/no contracts on whether Brent crude will be above each price), treats the prices as the odds of each level, and turns that curve into the size of move traders expect. That expected move sets today's price of protection: a jumpier market makes protection cost more. It also screens every live Commodities and Economics market as a way to carry the risk. Markets with no link to a cost in the books are rejected with that reason; the related ones get five checks: does it settle on the price the business pays, does it track that cost over 12 months, does it last at least half the 12-month cover, are enough contracts on offer to cover a month for a group of fleets, and is it quoted both ways. Today none passes: Gemini lists no diesel market, Brent explains 77% of 12-month diesel moves against 96% for wholesale diesel, the oil markets expire in days, and the displayed size covers about one fleet. So the app labels the Brent ladder "signal only", not a hedge, and shows what building the cap from it would cost and how much could not be filled. Covenant places no orders on Gemini, and the November 2025 price uses an assumed 35% volatility, not Gemini.
 
 **What makes it unique?**
 It starts from the books, not from a list of markets: the owner learns what is worth protecting, what is not, and why. It can say no: it rejects hedges that do not track the cost and labels every number as verified, calculated, estimated or assumed. It uses prediction markets for what they are good at (reading what traders expect) instead of pretending they are a hedge. The rule for paying is public and enforced by the program, while the amounts stay private. And one link gives a lender or factoring company read-only proof that the business is protected and was paid.
@@ -57,7 +57,7 @@ Fuel-card integration so gallons are measured, verifying the four ledger sign-in
 
 | Time | Screen | Say |
 | --- | --- | --- |
-| 0:00 | Landing page (`/`) | "A bad diesel year costs a small trucking fleet many times its profit. Big carriers hedge. Small ones can't. CostShield starts from their books." |
+| 0:00 | Landing page (`/`) | "A bad diesel year costs a small trucking fleet many times its profit. Big carriers hedge. Small ones can't. Covenant starts from their books." |
 | 0:15 | Books (`/app`) | "You upload a QuickBooks export. Sign-in for four ledgers is written but not switched on in this demo, so I'll use a sample 10-truck fleet: a synthetic ledger built on real diesel prices. It goes through the same importer." |
 | 0:25 | Analysis | "These are real pipeline stages with measured run times. Stage six is a live call to Gemini Prediction Markets." |
 | 0:40 | Your risks | "3,315 transactions, one risk worth protecting. Fuel is 26% of revenue. A 1-in-20 year costs eight times annual profit after surcharges. Payroll, insurance and leases are 73% of spend and we say plainly that nothing hedges them." |

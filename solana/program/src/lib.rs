@@ -1,4 +1,4 @@
-//! CostShield steps: index-triggered payout steps for a fuel price cap, whose
+//! Covenant steps: index-triggered payout steps for a fuel price cap, whose
 //! collateral is a program-owned Helius Privacy Rings private balance.
 //!
 //! Adapted from Equity Floor, our first idea for this hackathon, written during

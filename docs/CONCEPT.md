@@ -1,12 +1,12 @@
-# CostShield: concept, customer workflows and UI/UX
+# Covenant: concept, customer workflows and UI/UX
 
 Nov 20, 2026 · @Julian Castaneda
 
-> **Context file.** This is the current definition of the CostShield idea: what the product is, who carries the risk, how a customer moves from sign-up to payout, and how the desktop and mobile apps should work. Read it before changing product behaviour, copy or screens. Sections 1 to 6 are the concept. Section 7 is a snapshot of the build and the hackathon plan on the day this was written, and section 8 records the decisions made after it. The code in this repo implements one slice of the concept (US diesel for a fleet); `README.md` and `docs/PRODUCT.md` describe what is actually built.
+> **Context file.** This is the current definition of the Covenant idea: what the product is, who carries the risk, how a customer moves from sign-up to payout, and how the desktop and mobile apps should work. Read it before changing product behaviour, copy or screens. Sections 1 to 6 are the concept. Section 7 is a snapshot of the build and the hackathon plan on the day this was written, and section 8 records the decisions made after it. The code in this repo implements one slice of the concept (US diesel for a fleet); `README.md` and `docs/PRODUCT.md` describe what is actually built.
 
 ## 1. The concept in one page
 
-CostShield lets any business connect its books, see which outside price or weather shocks can hurt its margins, and buy protection that pays cash automatically when a public index crosses an agreed level. Big companies have trading desks for this. Small and mid-sized businesses have nothing.
+Covenant lets any business connect its books, see which outside price or weather shocks can hurt its margins, and buy protection that pays cash automatically when a public index crosses an agreed level. Big companies have trading desks for this. Small and mid-sized businesses have nothing.
 
 **What the customer gets**
 
@@ -43,13 +43,13 @@ Keep these out of scope at the start, as your notes already say: payroll, rent, 
 
 ## 2. Router vs. risk-taker
 
-Start as the router: CostShield measures, pools, runs the price competition and settles, while specialists hold the risk and post the collateral. This is the direction from your earlier chats, and it is the better business. No balance sheet, revenue grows with volume, and CostShield never sets the price of protection.
+Start as the router: Covenant measures, pools, runs the price competition and settles, while specialists hold the risk and post the collateral. This is the direction from your earlier chats, and it is the better business. No balance sheet, revenue grows with volume, and Covenant never sets the price of protection.
 
 | Actor | Role | What they want |
 | --- | --- | --- |
 | Members | Businesses buying protection | Budget certainty, easy onboarding, fast payouts, a fair price |
 | Specialists | Market makers, insurers, reinsurers, energy traders who cover pools | Premium for risks they can price and hedge, in sizes worth their time |
-| CostShield | Router and marketplace operator | A fee on premium, growing volume, few disputes |
+| Covenant | Router and marketplace operator | A fee on premium, growing volume, few disputes |
 | Regulated partner | Exchange or fronting insurer that gives the legal wrapper | Fees, volume, compliance |
 | Index providers | Publish the settlement prices (EIA, NOAA, exchanges, national statistics offices) | Data fees in some cases |
 | Distribution partners | Accounting apps, POS, fuel cards, banks, lenders | Revenue share, more value for their users |
@@ -58,11 +58,11 @@ Start as the router: CostShield measures, pools, runs the price competition and 
 
 **The contract.** A capped call on the index: payout per unit = min(max(0, index - strike), cap - strike). The maximum loss is known in advance, so it can be fully collateralized.
 
-**Routing is wider than markets.** For some costs the best protection is not a derivative at all: a fixed-rate electricity plan, a fuel-card price lock, a forward with the flour mill, a bank FX forward. A router that says "take the fixed-rate plan, here is the referral" earns trust and a referral fee. This is what separates CostShield from the other hackathon entries that only hedge on Gemini.
+**Routing is wider than markets.** For some costs the best protection is not a derivative at all: a fixed-rate electricity plan, a fuel-card price lock, a forward with the flour mill, a bank FX forward. A router that says "take the fixed-rate plan, here is the referral" earns trust and a referral fee. This is what separates Covenant from the other hackathon entries that only hedge on Gemini.
 
 **Three versions of the model**
 
-| Version | CostShield does | Revenue | Main risk |
+| Version | Covenant does | Revenue | Main risk |
 | --- | --- | --- | --- |
 | A. Pure router (start here) | Exposure data, pooling, auction, settlement rails | 10% to 15% take rate on premium, plus an analytics subscription | Getting both sides to show up |
 | B. Router plus best-execution advice | A, plus referrals to off-market options (fixed-rate plans, price locks, forwards) | A, plus referral fees | Conflicts of interest must be disclosed |
@@ -102,7 +102,7 @@ You can support all businesses and all countries without building 14 products, b
 - **Unified accounting APIs.** Providers such as Codat, Merge and Rutter expose many accounting systems through one integration. Build against one of those plus CSV upload as the universal fallback, not against each package.
 - **Stablecoin settlement.** Collateral and payouts in USDC on one chain means a specialist in Chicago can cover a pool of bakeries in Bogota without correspondent banking. This is the real answer to "why onchain?" for the judges.
 
-**The router model is also what makes global possible.** CostShield does not need a licence to carry risk in 50 countries if a local regulated partner carries it. It needs the data layer and the marketplace.
+**The router model is also what makes global possible.** Covenant does not need a licence to carry risk in 50 countries if a local regulated partner carries it. It needs the data layer and the marketplace.
 
 **Limits to say out loud**
 
@@ -127,15 +127,15 @@ Build Version A as the core product, use Version B as the main way customers arr
 
 ### Version A: Connect and choose (self-serve, recommended core)
 
-The owner comes to CostShield directly, connects the books, and picks protection from a ranked list.
+The owner comes to Covenant directly, connects the books, and picks protection from a ranked list.
 
 1. **Sign up.** Email, business name, country. Nothing else yet. Analysis is free and needs no identity check.
-2. **Connect accounting.** QuickBooks, Xero, others through a unified API, or CSV upload. The owner signs in on the provider's own consent screen. CostShield never sees the password, only reads the books and never changes them, and connecting authorizes no trades.
+2. **Connect accounting.** QuickBooks, Xero, others through a unified API, or CSV upload. The owner signs in on the provider's own consent screen. Covenant never sees the password, only reads the books and never changes them, and connecting authorizes no trades.
 3. **Automatic analysis (under a minute).** Classify 12 to 24 months of expenses, map each cost to a risk factor and region, measure volatility and fit.
 4. **Fill the gaps.** Ask only what the books cannot say: gallons or kWh behind a dollar total, where the fleet runs, whether customers already pay a fuel surcharge. Offer a fuel-card or utility connection in place of typing.
 5. **Risk profile.** "We analyzed your business." Exposures ranked by dollars at risk in a bad year, each with one of the four statuses from section 3.
 6. **Build a plan.** For a protectable exposure, choose how much to cover (capped at verified spend), the trigger level and the period. Show the live price, the maximum payout, the coverage score, and the plain list of when it will not pay.
-7. **Verify and agree.** Business verification, eligibility check, disclosures, e-signature. The screen names the regulated provider that carries the risk. CostShield is shown as the platform, not the insurer.
+7. **Verify and agree.** Business verification, eligibility check, disclosures, e-signature. The screen names the regulated provider that carries the risk. Covenant is shown as the platform, not the insurer.
 8. **Pay and set the payout account.** Premium by bank debit, card or stablecoin. Payouts to a bank account or a business wallet.
 9. **Cover starts.** Collateral is confirmed before the period begins. The owner sees "Fully funded" with a proof link.
 10. **Monitor.** Index against trigger, projected payout this month, alerts when the trigger is close.
@@ -145,24 +145,24 @@ What the customer receives in full: a risk report they keep even if they buy not
 
 ### Version B: Embedded (recommended for distribution)
 
-The owner never visits CostShield first. The offer appears inside a tool they already use, which already has their data and their trust.
+The owner never visits Covenant first. The offer appears inside a tool they already use, which already has their data and their trust.
 
 1. Inside their accounting app, fuel-card portal, POS or bank dashboard, a card says: "Diesel is 38% of your expenses. A 60 cent rise costs you about $6,000 a month. See protection."
 2. One tap shares the data the partner already holds. No separate sign-up, no second connection.
-3. Steps 5 to 11 of Version A run inside the partner's screens or a CostShield panel within them.
+3. Steps 5 to 11 of Version A run inside the partner's screens or a Covenant panel within them.
 4. Premium is added to an existing bill or debited from the account on file. Payouts land in the same account.
 
 Why it matters: at $180 to $540 of revenue per business, acquisition has to be nearly free. An accountant or bookkeeper portal is the same idea with a person in the loop: one advisor reviews risk profiles for 50 clients and recommends plans.
 
 ### Version C: Autopilot (budget-first)
 
-The owner sets a goal, and CostShield keeps the cover in place.
+The owner sets a goal, and Covenant keeps the cover in place.
 
 1. Sign up and connect, as in A.
 2. The owner states a goal in their own terms: "Keep my fuel cost under $4.20 a gallon" or "Spend at most $300 a month on protection".
-3. CostShield proposes a standing plan across every protectable exposure and shows the worst and best case for the year.
+3. Covenant proposes a standing plan across every protectable exposure and shows the worst and best case for the year.
 4. One approval, with hard limits: maximum monthly premium, maximum price per period, pause at any time.
-5. Each period CostShield enters the new auction within those limits, resizes to current spend, and reports what it did. If the price exceeds the limit it does not buy and tells the owner.
+5. Each period Covenant enters the new auction within those limits, resizes to current spend, and reports what it did. If the price exceeds the limit it does not buy and tells the owner.
 6. Payouts and ledger entries as in A.
 
 This is the stickiest version, and the one with the most duty of care. It should come after A has real renewal data.
@@ -171,7 +171,7 @@ This is the stickiest version, and the one with the most duty of care. It should
 
 |  | A. Connect and choose | B. Embedded | C. Autopilot |
 | --- | --- | --- | --- |
-| Entry point | CostShield site or app | Partner's product | CostShield, after A |
+| Entry point | Covenant site or app | Partner's product | Covenant, after A |
 | Owner effort | About 10 minutes | About 2 minutes | One setup, then none |
 | Acquisition cost | High | Low | None (existing customers) |
 | Depends on | Marketing | A signed partner | Trust and renewal history |
@@ -224,7 +224,7 @@ Desktop is where the owner onboards, studies the risk profile and builds plans. 
 2. Every plan shows what it does not cover, on the same screen as the price.
 3. One coverage score, 0 to 100, with a sentence: "This plan tracks about 80% of how your fuel cost moves."
 4. Status chips use the same four words everywhere.
-5. Name the risk-bearing provider on every plan. CostShield is the platform.
+5. Name the risk-bearing provider on every plan. Covenant is the platform.
 6. Automate what the data shows, ask only what it cannot.
 7. Customer words: "payout account", "funded", "receipt". Wallet addresses, transaction hashes and market names live in the Technical view.
 8. Local by default: language, currency, litres or gallons, date format. Build English and Spanish first.
@@ -300,7 +300,7 @@ The two optional items are the cheapest way to make "all businesses, globally" v
 
 **What to say, so the claim is big and still true**
 
-- "CostShield pools by risk, not by industry, so the same engine serves a fleet in Illinois and a bakery in Bogota."
+- "Covenant pools by risk, not by industry, so the same engine serves a fleet in Illinois and a bakery in Bogota."
 - "Today one pool is live end to end on testnet: US diesel. The engine already tells every other business which of its costs are protectable, which are better handled another way, and which are not hedgeable yet."
 - "We are the router. Specialists carry the risk and post collateral. We never set the price."
 - "Stablecoin settlement is what lets a risk-taker in one country cover a pool in another."
@@ -351,4 +351,4 @@ Built from the team's notes and screenshots and three earlier planning chats, wh
 
 - Cost-protection platform feasibility
 - IB - UBC - Hackathon (router model, pooling, auction, unit economics)
-- CostShield hackathon product strategy (build status at the time)
+- Covenant hackathon product strategy (build status at the time)

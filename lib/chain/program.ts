@@ -1,5 +1,5 @@
 /**
- * Low-level Solana plumbing for the CostShield steps program: the Helius
+ * Low-level Solana plumbing for the Covenant steps program: the Helius
  * Privacy Rings client, v1 transaction send and simulate (with @solana/kit),
  * PDAs, instruction builders and account decoders.
  * Adapted from Equity Floor, our first idea for this hackathon, written during

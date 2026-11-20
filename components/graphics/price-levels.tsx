@@ -2,7 +2,7 @@
  * PriceLevels: the page as a giant, almost invisible price chart.
  * Hairlines run down the full height of the container, one per diesel price level, from
  * `top` dollars at the top to `bottom` dollars at the foot, in $0.25 steps (the steps
- * CostShield pays in). The protection strike is a faint dashed ember line.
+ * Covenant pays in). The protection strike is a faint dashed ember line.
  * Lines hold their strength in the side margins and drop to a quarter behind the content
  * column; labels appear in the left margin only where the gutter is wide enough.
  */

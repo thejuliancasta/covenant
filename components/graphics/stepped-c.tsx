@@ -1,5 +1,5 @@
 /*
- * SteppedC: the CostShield mark drawn as an architectural outline at very large scale.
+ * SteppedC: the Covenant mark drawn as an architectural outline at very large scale.
  * Each bar of the logo becomes a hairline outline, and its edges continue as faint
  * construction lines, like the setting-out lines on a drawing. The mark is anchored to
  * one side of its band and cropped by that edge; the ember cap is the only warm line.

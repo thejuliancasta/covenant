@@ -1,10 +1,10 @@
-# CostShield: agent context
+# Covenant: agent context
 
 Read this first. It is short on purpose. Details live in the files it points to.
 
 ## What this is
 
-CostShield is our entry in the UBC 2026 Hackathon (University Blockchain Conference, UT Austin). A small business brings its accounting ledger; CostShield classifies the expenses, measures which costs follow a public market price, tests whether anything really hedges them, prices and backtests a diesel price cap, and settles a replayed price shock as a private payout on Solana devnet. Everything is a simulation with devnet test dollars.
+Covenant is our entry in the UBC 2026 Hackathon (University Blockchain Conference, UT Austin). A small business brings its accounting ledger; Covenant classifies the expenses, measures which costs follow a public market price, tests whether anything really hedges them, prices and backtests a diesel price cap, and settles a replayed price shock as a private payout on Solana devnet. Everything is a simulation with devnet test dollars.
 
 Team: Julian Castaneda (`thejuliancasta`) and Aabis (`GitBolt`).
 

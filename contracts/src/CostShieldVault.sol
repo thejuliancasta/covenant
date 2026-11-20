@@ -8,7 +8,7 @@ interface IERC20 {
 }
 
 /// @title CostShieldVault
-/// @notice Fully collateralised price-cap vault for the CostShield prototype.
+/// @notice Fully collateralised price-cap vault for the Covenant prototype.
 ///         TESTNET SIMULATION ONLY. Not insurance, not an offer of derivatives.
 ///
 /// Economic design

@@ -23,14 +23,14 @@ The user found Revision 2 messy and the background art stock-like. The target is
 5. **Elegant and clean.** Fewer cards and borders, more space, larger quiet type, one strong idea per screen. Typography and the artwork carry the hierarchy, not boxes.
 6. **Speed over QA.** Only `npm run build` must pass. Skip screenshot and mobile QA.
 
-Branch `ui-redesign`. Goal: a completely unique CostShield interface with custom graphics and micro-interactions throughout, in a dark theme, following the user's UI skill (`~/.codex/skills/user-interface-design/SKILL.md` and `visual-reference.md`; read both in full). UI only: engine, chain, API routes, scripts and tests do not change. Every number stays real.
+Branch `ui-redesign`. Goal: a completely unique Covenant interface with custom graphics and micro-interactions throughout, in a dark theme, following the user's UI skill (`~/.codex/skills/user-interface-design/SKILL.md` and `visual-reference.md`; read both in full). UI only: engine, chain, API routes, scripts and tests do not change. Every number stays real.
 
 ## Brief
 
 - **Surface.** Cool blue-slate dark. Tokens are already in `tailwind.config.ts` and `app/globals.css` (colors `bg`, `sunken`, `raised`, `panel`, `well`, text ladder `ink` → `ink2` → `muted` → `faint`, borders `line` at /10 to /14). Never pure black or white.
 - **Color roles.** `jade` = action, focus, selection, protection in force. `heat` = a cost a market moves, a price above a trigger. `cipher` = encrypted or private state. `rust` = refusal, loss. Everything else is neutral. Never wash a panel in a color.
 - **Type.** Geist only (drop Instrument Serif and its import). Headings weight 560 to 600, tracking about -0.04em, line-height ~1.0; body 1.5 line-height with its own max width; `tabular-nums` on every number; Geist Mono only for hashes, addresses and transaction ids. Sentence case everywhere. No eyebrows, no tracked uppercase labels, no ornamental monospace.
-- **Logo.** Reuse the existing shield in `app/icon.svg` and the text "CostShield". Do not invent a mark.
+- **Logo.** Reuse the existing shield in `app/icon.svg` and the text "Covenant". Do not invent a mark.
 - **Primary visual.** Real EIA diesel history rendered as pressure against a cap (below).
 
 ## One idea: pressure and release

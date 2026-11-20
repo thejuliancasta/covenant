@@ -1,5 +1,5 @@
 /**
- * npm run solana:setup -- prepare Solana devnet for CostShield settlement.
+ * npm run solana:setup -- prepare Solana devnet for Covenant settlement.
  *   1. Reuse or create the underwriter, oracle and fleet wallets (.solana-keys/ or SOLANA_*_KEY).
  *   2. Top up SOL for fees and rent from the payer (.solana-keys/payer.json or SOLANA_PAYER_KEY).
  *   3. Reuse the tUSD mint registered with Privacy Rings (or create and register one).

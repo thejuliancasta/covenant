@@ -258,7 +258,7 @@ export function Protection({ a, onNext, onBack, detail, onDetail }: { a: Analysi
   const today = p.priceToday, then = p.priceAtInception;
   const waterfall: [string, string, string][] = [
     ["You", "Pay what protection costs, monthly", "Pays monthly"],
-    ["CostShield", "Measures exposure, prices, verifies the trigger. Holds no risk and no customer money.", "Software and distribution"],
+    ["Covenant", "Measures exposure, prices, verifies the trigger. Holds no risk and no customer money.", "Software and distribution"],
     ["Licensed insurer", "Would legally owe the payout. None has agreed to: this is the missing piece.", "Not confirmed"],
     ["Reinsurer", "Would carry the gap between retail and wholesale diesel.", "Not confirmed"],
     ["ULSD options hedge", "Would fund the benchmark part of claims.", "Modelled"],
@@ -276,7 +276,7 @@ export function Protection({ a, onNext, onBack, detail, onDetail }: { a: Analysi
     const failed = a.hedges.filter((h) => !h.status.startsWith("viable"));
     return (
       <div className="space-y-4">
-        <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, CostShield would pay you the difference.`}
+        <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, Covenant would pay you the difference.`}
           lede={`It pays on the gallons in your books that your fuel surcharges don't pass on, using the official ${region} diesel price (U.S. government data). No claim to file: when a month's official price is above the line, a program on Solana pays you from money set aside in advance.`} />
         <Card>
           <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
@@ -305,7 +305,7 @@ export function Protection({ a, onNext, onBack, detail, onDetail }: { a: Analysi
 
   return (
     <div className="space-y-4">
-      <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, CostShield would pay you the difference.`}
+      <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, Covenant would pay you the difference.`}
         lede={`Over the last ${p.replay.length} months it would have paid you ${usd(p.totalPayout)}. It pays on the gallons in your books that your fuel surcharges don't pass on, using the official ${region} diesel price (U.S. government data). A program on Solana pays from money set aside in advance, so there is no claim to file.`} />
       <DetailSwitch detail={detail} onDetail={onDetail} />
 
@@ -424,7 +424,7 @@ export function Protection({ a, onNext, onBack, detail, onDetail }: { a: Analysi
       <Reveal>
         <Card>
           <CardTitle>Who would pay you</CardTitle>
-          <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">CostShield would never owe or fund a payout itself. This is the chain a real product needs, and how much of it exists today.</p>
+          <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">Covenant would never owe or fund a payout itself. This is the chain a real product needs, and how much of it exists today.</p>
           {detail && <ol className="mt-4 grid gap-3 md:grid-cols-3">
             {waterfall.map(([who, what, status], i) => (
               <motion.li key={who} initial={{ y: 10 }} whileInView={{ y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3, delay: i * 0.06, ease: [0.2, 0.8, 0.2, 1] }}

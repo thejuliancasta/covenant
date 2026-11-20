@@ -1,5 +1,5 @@
 /**
- * CostShield mark, "Stepped C": a C monogram built from the protection steps.
+ * Covenant mark, "Stepped C": a C monogram built from the protection steps.
  * The ember top arm is the cap; the stepped back is the ladder of $0.25 plates.
  */
 export function LogoMark({ size = 22, className }: { size?: number; className?: string }) {
@@ -18,7 +18,7 @@ export function Logo({ size = 22, className }: { size?: number; className?: stri
   return (
     <span className={`inline-flex items-center gap-2.5 ${className ?? ""}`}>
       <LogoMark size={size} />
-      <span className="text-[16px] font-[600] tracking-[-0.03em] text-ink">CostShield</span>
+      <span className="text-[16px] font-[600] tracking-[-0.03em] text-ink">Covenant</span>
     </span>
   );
 }

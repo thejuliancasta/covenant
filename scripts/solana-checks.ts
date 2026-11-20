@@ -1,5 +1,5 @@
 /**
- * npm run solana:checks -- on-chain enforcement and privacy checks for the CostShield
+ * npm run solana:checks -- on-chain enforcement and privacy checks for the Covenant
  * steps program on Solana devnet (adapted from the checks for Equity Floor, our first
  * idea for this hackathon, written during the event and set aside on Nov 20).
  * Lands deliberately invalid transactions (skipPreflight) and asserts the program's

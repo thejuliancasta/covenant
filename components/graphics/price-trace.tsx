@@ -1,7 +1,7 @@
 /*
  * PriceTrace: one real diesel price line, drawn once, crossing a dashed strike.
  * Weekly Midwest (PADD 2) retail diesel from EIA since 2021. Where the price runs above
- * the strike, the line turns ember: that is the stretch CostShield would pay back.
+ * the strike, the line turns ember: that is the stretch Covenant would pay back.
  * The line fades out through the middle of the band so it never sits behind body text.
  */
 import { DIESEL_PADD2 } from "./diesel-trace-data";

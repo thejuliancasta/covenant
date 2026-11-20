@@ -83,23 +83,23 @@ export default async function Landing() {
   ];
   const stack = [
     { k: "Your books", h: "Finds the cost that can sink you",
-      b: `CostShield sorts every transaction, reads the gallons off each fuel receipt and works out what a spike costs after the fuel surcharges your customers already pay. Every number traces back to a line in your books or a public dataset. No AI guesses in the numbers.`,
+      b: `Covenant sorts every transaction, reads the gallons off each fuel receipt and works out what a spike costs after the fuel surcharges your customers already pay. Every number traces back to a line in your books or a public dataset. No AI guesses in the numbers.`,
       n: "Upload a CSV export from any accounting system. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built but switched off in this demo." },
     { k: "U.S. Energy Information Administration", h: "Draws the line",
       b: `Protection pays on the government's official weekly diesel price for your region, averaged over the month. Not on anyone's say-so, and not on a claim you have to file.` },
     { k: "Solana", h: "Makes the payout certain",
-      b: `Before your protection starts, the backer locks the most it could ever pay into vaults that only CostShield's Solana program can open. Each month the official price is posted on chain once. If it is over the line, you sign once and the program releases your money. The backer can't block it or take it back.`,
+      b: `Before your protection starts, the backer locks the most it could ever pay into vaults that only Covenant's Solana program can open. Each month the official price is posted on chain once. If it is over the line, you sign once and the program releases your money. The backer can't block it or take it back.`,
       n: `Money the protection never needed goes back to the backer, but only after every month of the term has come in under the line.` },
     { k: "Helius Privacy Rings", h: "Keeps the amounts yours",
       b: `The money in each vault and every payout are encrypted balances. The program enforces the rules without seeing the amounts, and the public can see that you were paid, not how much. So a competitor or a customer can't work out your gallons or your margins.`,
       n: `Because the program can't read encrypted amounts, it pays in whole 25-cent steps: ${usd0(s.payout)} for ${monYear(s.month, true)} instead of the exact ${usd0(d.policy.rows.find((r) => r.month === s.month)?.payout ?? s.payout)}. We show both.` },
     { k: "Gemini Prediction Markets", h: "Prices the protection",
-      b: `CostShield reads Gemini's live oil-price markets, yes-or-no contracts on where Brent crude will be, and turns their prices into how big a move traders expect. That sets today's price of protection: the jumpier the market, the more it costs.`,
+      b: `Covenant reads Gemini's live oil-price markets, yes-or-no contracts on where Brent crude will be, and turns their prices into how big a move traders expect. That sets today's price of protection: the jumpier the market, the more it costs.`,
       n: `It also tests every live Gemini market as a way to carry the risk. Today none qualifies (there is no diesel market, and they end within days), so the app says so instead of pretending.` },
   ];
 
   const security = [
-    { t: "We only read", b: "CostShield reads your transactions and never changes, categorizes or posts anything back to your accounting system." },
+    { t: "We only read", b: "Covenant reads your transactions and never changes, categorizes or posts anything back to your accounting system." },
     { t: "Your file isn't stored", b: "An uploaded export is processed in memory and discarded when the analysis ends." },
     { t: "Funded before you're covered", b: "The most the protection could ever pay is locked on Solana before the cover starts. In this simulation, in test dollars." },
     { t: "Amounts hidden from the public", b: "Payouts and balances are encrypted with Helius Privacy Rings. Only you, and whoever you give a viewing key to, can read them." },
@@ -109,9 +109,9 @@ export default async function Landing() {
 
   const faq = [
     { q: "Why does this need a blockchain?", a: "So the payout doesn't depend on anyone's promise. The money is locked before your cover starts, the rules are code anyone can read, and the money is released when the posted price crosses your line. Nobody can delay it or dispute it. Helius Privacy Rings adds what a public blockchain lacks: privacy for your amounts." },
-    { q: "Why not just buy a prediction-market contract?", a: "A contract pays on one event, and you can only buy as much as its order book holds, often a few hundred dollars. Gemini lists no diesel market at all; the closest, on Brent crude, ends within days, and a fleet needs a year. So CostShield uses those markets as a price signal and puts the risk with a backer whose money is locked on Solana for the whole term." },
-    { q: "Is this insurance?", a: "It is protection that pays when an official price crosses a line, not after a claim. It is not for sale. A real version would need a licensed insurer or partner to back the payouts, and none has agreed to. Today CostShield is a simulation that pays in test dollars." },
-    { q: "What if my pump price is different?", a: "It can be. Protection pays on the official price, so before you buy, CostShield shows how closely your own price has followed it, from your receipts." },
+    { q: "Why not just buy a prediction-market contract?", a: "A contract pays on one event, and you can only buy as much as its order book holds, often a few hundred dollars. Gemini lists no diesel market at all; the closest, on Brent crude, ends within days, and a fleet needs a year. So Covenant uses those markets as a price signal and puts the risk with a backer whose money is locked on Solana for the whole term." },
+    { q: "Is this insurance?", a: "It is protection that pays when an official price crosses a line, not after a claim. It is not for sale. A real version would need a licensed insurer or partner to back the payouts, and none has agreed to. Today Covenant is a simulation that pays in test dollars." },
+    { q: "What if my pump price is different?", a: "It can be. Protection pays on the official price, so before you buy, Covenant shows how closely your own price has followed it, from your receipts." },
     { q: "Why is the payout in 25-cent steps?", a: `Because the amounts are encrypted, the Solana program can't do arithmetic on them. So the money is set aside in fixed steps, one for every 25 cents above the line, and the program releases each step the price passed. In ${monYear(s.month, true)} that paid ${usd0(s.payout)} in ${s.paidSteps} steps. A future version could pay to the cent.` },
     { q: "What does it cost?", a: `The scan is free and nothing is for sale. The model price for the sample fleet is ${usd0(d.policy.premiumPerMonth)} a month if bought in ${monYear(d.policy.inceptionMonth, true)}. Today's price follows how much Gemini's live oil markets expect prices to move. Both are estimates, not quotes.` },
     { q: "Do I need crypto?", a: "No. You see dollars. In this simulation payouts settle in test dollars on Solana's test network. Paying into a bank account is not built yet." },
@@ -139,7 +139,7 @@ export default async function Landing() {
             </Reveal>
             <Reveal immediate i={2}>
               <p className="mt-6 max-w-[560px] text-[16px] leading-[1.6] text-muted md:text-[18px]">
-                Airlines lock in what they pay for fuel. Small businesses can&apos;t. CostShield reads your books, finds the cost that could sink you, and sets a line. When that price goes above it, money already locked on Solana comes back to you on its own, and only you can see how much.
+                Airlines lock in what they pay for fuel. Small businesses can&apos;t. Covenant reads your books, finds the cost that could sink you, and sets a line. When that price goes above it, money already locked on Solana comes back to you on its own, and only you can see how much.
               </p>
             </Reveal>
             <Reveal immediate i={3}><Actions /></Reveal>
@@ -177,20 +177,20 @@ export default async function Landing() {
         <section id="different" aria-labelledby="different-title" className="scroll-mt-20 pb-12 md:pb-16">
           <div className={wrap}>
             <SectionHead id="different-title" title="Built for a bad year, not a bad day"
-              lede="Cover for one rained-out Saturday is easy to sell. The losses that close small businesses are slower and bigger: a cost that stays high for months. That is what CostShield is for." />
+              lede="Cover for one rained-out Saturday is easy to sell. The losses that close small businesses are slower and bigger: a cost that stays high for months. That is what Covenant is for." />
             <Reveal i={1}>
               <div className="mt-10 overflow-hidden rounded-[16px] border border-line/8">
                 <div className="hidden grid-cols-[180px_1fr_1fr] gap-x-6 border-b border-line/[0.07] bg-panel/40 px-6 py-3 text-[13px] md:grid">
                   <span />
                   <span className="text-faint">Cover for a bad day</span>
-                  <span className="font-[550] text-jade">CostShield</span>
+                  <span className="font-[550] text-jade">Covenant</span>
                 </div>
                 <dl className="divide-y divide-line/[0.07]">
                   {versus.map((r) => (
                     <div key={r.k} className="grid gap-x-6 gap-y-2 px-6 py-5 md:grid-cols-[180px_1fr_1fr]">
                       <dt className="text-[13px] text-faint md:text-[14px]">{r.k}</dt>
                       <dd className="text-[14px] leading-[1.55] text-muted"><span className="mr-1.5 text-faint md:hidden">Bad-day cover:</span>{r.day}</dd>
-                      <dd className="text-[15px] leading-[1.55] text-ink"><span className="mr-1.5 font-[550] text-jade md:hidden">CostShield:</span>{r.us}</dd>
+                      <dd className="text-[15px] leading-[1.55] text-ink"><span className="mr-1.5 font-[550] text-jade md:hidden">Covenant:</span>{r.us}</dd>
                     </div>
                   ))}
                 </dl>
@@ -198,7 +198,7 @@ export default async function Landing() {
             </Reveal>
             <Reveal i={2}>
               <p className={cx(body, "mt-6 max-w-[720px]")}>
-                Prediction markets still matter here, for what they do best. CostShield reads Gemini&apos;s live oil markets to see how big a move traders expect, and that sets the price of your protection. The risk itself sits with a backer whose money is locked for the whole year.
+                Prediction markets still matter here, for what they do best. Covenant reads Gemini&apos;s live oil markets to see how big a move traders expect, and that sets the price of your protection. The risk itself sits with a backer whose money is locked for the whole year.
               </p>
             </Reveal>
           </div>
@@ -207,7 +207,7 @@ export default async function Landing() {
         <Rule />
 
         <Feature label="Cost scan" title="Finds the costs a price you don't control can hurt" fragment={<ExposureBars d={d} />}>
-          <p>Upload your books and CostShield sorts every transaction, reads the gallons off each fuel receipt, and measures what a price spike would really cost you after the surcharges your customers already pay.</p>
+          <p>Upload your books and Covenant sorts every transaction, reads the gallons off each fuel receipt, and measures what a price spike would really cost you after the surcharges your customers already pay.</p>
           <p>For {d.company} that is one cost: diesel, {Math.round(d.diesel.share * 100)}% of everything the fleet earns, at a price nobody in the company controls.</p>
         </Feature>
 
@@ -237,8 +237,8 @@ export default async function Landing() {
             </div>
           }
         >
-          <p>You see a monthly price for protecting your gallons. It follows how much traders expect oil to move, which CostShield reads from Gemini&apos;s live prediction markets. It is an estimate, not a quote.</p>
-          <p>When nothing can fairly protect a cost, CostShield says so instead of selling you something that won&apos;t pay.</p>
+          <p>You see a monthly price for protecting your gallons. It follows how much traders expect oil to move, which Covenant reads from Gemini&apos;s live prediction markets. It is an estimate, not a quote.</p>
+          <p>When nothing can fairly protect a cost, Covenant says so instead of selling you something that won&apos;t pay.</p>
         </Feature>
 
         <Feature label="Automatic payouts" title="When prices spike, the money comes back on its own" fragment={<ProtectionChart d={d} />}>

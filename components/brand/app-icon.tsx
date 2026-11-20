@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-/** The CostShield mark from app/icon.svg on a full square: x, y, width, height on a 48-unit grid, fill, opacity. */
+/** The Covenant mark from app/icon.svg on a full square: x, y, width, height on a 48-unit grid, fill, opacity. */
 const BARS = [
   [17, 6, 24, 5.6, "#bfe6d6", 1],
   [11, 13.1, 15, 5.6, "#f7f8f8", 0.9],

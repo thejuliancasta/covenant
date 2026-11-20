@@ -229,7 +229,7 @@ export async function* runPipeline(csv: string, opts: PipelineOptions = {}): Asy
       sampleLines: expenses.slice(-250).reverse().map((l) => ({ date: l.date, vendor: l.vendor, memo: l.memo, account: l.account, amount: l.amount, category: l.category, rule: l.rule, confidence: l.confidence, quantity: l.quantity, quantitySource: l.quantitySource })),
       financials: fin, diesel, others, wholesale, pool, markets, hedges, backtest, backtestNational, policy,
       eligibility: { available: false, reasons: [
-        "CostShield is a simulation. It is not an offer of insurance or derivatives.",
+        "Covenant is a simulation. It is not an offer of insurance or derivatives.",
         "No licensed insurer or surplus-lines carrier has agreed to owe these payouts.",
         "The ULSD options hedge is modelled, not executed.",
       ] },

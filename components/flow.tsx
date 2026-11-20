@@ -152,7 +152,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
       <div className="min-h-screen bg-bg lg:grid lg:grid-cols-[232px_minmax(0,1fr)]">
         {/* Sidebar (desktop) */}
         <aside className="sticky top-0 hidden h-screen flex-col px-3 pb-4 pt-4 lg:flex">
-          <Link href="/" className="flex h-9 items-center rounded-[6px] px-2 transition-colors duration-150 hover:bg-line/[0.04]" aria-label="CostShield home">
+          <Link href="/" className="flex h-9 items-center rounded-[6px] px-2 transition-colors duration-150 hover:bg-line/[0.04]" aria-label="Covenant home">
             <Logo size={20} />
           </Link>
           <nav className="mt-6 grid gap-0.5" aria-label="Steps">
@@ -168,7 +168,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
         {/* Top bar (narrow) */}
         <header className="sticky top-0 z-30 bg-bg/80 backdrop-blur-md lg:hidden">
           <div className="flex h-14 items-center justify-between gap-3 px-4">
-            <Link href="/" className="flex h-10 items-center" aria-label="CostShield home"><Logo size={20} /></Link>
+            <Link href="/" className="flex h-10 items-center" aria-label="Covenant home"><Logo size={20} /></Link>
             <span className="flex items-center gap-2"><ThemeToggle />{judgeButton("h-8 px-3")}</span>
           </div>
           <nav ref={mobileNav} className="flex gap-0.5 overflow-x-auto px-2 pb-1 [scrollbar-width:none]" aria-label="Steps, as tabs">

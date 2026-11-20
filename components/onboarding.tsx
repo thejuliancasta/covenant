@@ -33,7 +33,7 @@ export function Welcome({ onStart, onSample }: { onStart: () => void; onSample: 
             Protect your business from rising costs and unexpected economic shocks.
           </motion.h1>
           <motion.p variants={rise} className="mt-5 max-w-[52ch] text-[16px] leading-[1.6] text-muted sm:text-[17px]">
-            Large companies have treasury teams to hedge fuel, energy and rates. CostShield reads your accounting records, finds the costs a market controls, and shows what protection would pay when prices jump.
+            Large companies have treasury teams to hedge fuel, energy and rates. Covenant reads your accounting records, finds the costs a market controls, and shows what protection would pay when prices jump.
           </motion.p>
           <motion.div variants={rise} className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Button onClick={onStart} size="lg">Analyze my business<Arrow /></Button>
@@ -62,7 +62,7 @@ export function Welcome({ onStart, onSample }: { onStart: () => void; onSample: 
 
 interface LedgerProvider { id: string; name: string; reads: string; configured: boolean; missing?: string[] }
 
-/** Your books joined to CostShield. Solid when the server holds keys; broken when it does not. */
+/** Your books joined to Covenant. Solid when the server holds keys; broken when it does not. */
 function LinkGlyph({ ready }: { ready: boolean }) {
   return (
     <span aria-hidden className={cx("inline-flex shrink-0 items-center gap-1 transition-opacity duration-200", ready ? "opacity-100" : "opacity-45")}>
@@ -196,7 +196,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
     <div className="mx-auto max-w-5xl">
       <motion.header initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.2, 0.8, 0.2, 1] }} className="mb-8">
         <h1 className={cx("text-[28px] leading-[1.1] sm:text-[34px] sm:leading-[1.08]", display)}>Connect your books</h1>
-        <p className="mt-3 max-w-2xl text-[15px] leading-[1.6] text-muted sm:text-base">CostShield reads your books, finds the cost a market controls (for a trucking fleet, diesel), measures what a price spike would do to your profit, and shows what protection would pay you back. We only read your books and never change them. Uploaded files aren&apos;t stored.</p>
+        <p className="mt-3 max-w-2xl text-[15px] leading-[1.6] text-muted sm:text-base">Covenant reads your books, finds the cost a market controls (for a trucking fleet, diesel), measures what a price spike would do to your profit, and shows what protection would pay you back. We only read your books and never change them. Uploaded files aren&apos;t stored.</p>
       </motion.header>
 
       <Card className="mb-4">

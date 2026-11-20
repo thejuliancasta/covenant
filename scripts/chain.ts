@@ -1,5 +1,5 @@
 /**
- * ARCHIVED: earlier work, not the settlement path. CostShield settles on Solana devnet
+ * ARCHIVED: earlier work, not the settlement path. Covenant settles on Solana devnet
  * (lib/chain/server.ts, scripts/solana-*.ts). The Arc vault was not deployed:
  * deployments/arc-testnet.json holds no addresses. Do not run `deploy` or `demo`: they
  * overwrite the README's "Deployed program" block with Arc details.

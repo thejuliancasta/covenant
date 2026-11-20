@@ -1,8 +1,8 @@
-# CostShield
+# Covenant
 
 **A price cap on your biggest bill, set up from your books, that pays you back on its own.**
 
-Other cover pays for a bad day. CostShield protects a small business from a bad year: the cost that can close it, measured from its books, backed by money locked on Solana, and private.
+Other cover pays for a bad day. Covenant protects a small business from a bad year: the cost that can close it, measured from its books, backed by money locked on Solana, and private.
 
 > This is a simulation. It is not an offer of insurance or derivatives. Nothing is for sale, and no insurer or backer has signed up. It takes no real premiums, places no orders and pays no real money. Devnet test dollars only.
 
@@ -24,17 +24,17 @@ Our sample company is a 10-truck Midwest fleet (a synthetic ledger built on real
 
 Airlines and big shippers buy protection against fuel spikes in advance. Small businesses never do: it is complex, it has minimum sizes, and nobody offers it to them.
 
-## What CostShield does
+## What Covenant does
 
-1. **Reads your books.** Upload an accounting export. CostShield sorts every transaction, finds the cost a market controls (for the fleet, diesel) and measures what a spike would cost the business.
+1. **Reads your books.** Upload an accounting export. Covenant sorts every transaction, finds the cost a market controls (for the fleet, diesel) and measures what a spike would cost the business.
 2. **Prices protection on that cost.** Protection pays when the official diesel price for the region goes above a line. For the sample fleet, protection bought in November 2025 starts at $4.36 a gallon and has a model price of about $361 a month.
 3. **Pays you back on its own.** Money is set aside in advance on Solana. When the official monthly price is above the line, the business signs once and the program pays. No claim, no adjuster, no waiting. Replayed on real prices, the sample fleet's protection would have paid back $25,952 from November 2025 to October 2026.
 
 ## What each piece does
 
-**Your books.** CostShield reads an accounting export (QuickBooks Online "Transaction Detail" or any CSV with Debit/Credit columns), sorts every transaction with fixed rules, reads the gallons off each fuel receipt and measures what a spike costs after the fuel surcharges customers already pay. Every number traces to a line in the books or a public dataset; no AI model guesses any number. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built and unit-tested but switched off in the demo; it only reads the books and never changes them. Code: `lib/engine/pipeline.ts` (with `ingest.ts`, `classify.ts`, `exposure.ts`), `lib/ledger/`.
+**Your books.** Covenant reads an accounting export (QuickBooks Online "Transaction Detail" or any CSV with Debit/Credit columns), sorts every transaction with fixed rules, reads the gallons off each fuel receipt and measures what a spike costs after the fuel surcharges customers already pay. Every number traces to a line in the books or a public dataset; no AI model guesses any number. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built and unit-tested but switched off in the demo; it only reads the books and never changes them. Code: `lib/engine/pipeline.ts` (with `ingest.ts`, `classify.ts`, `exposure.ts`), `lib/ledger/`.
 
-**The U.S. Energy Information Administration (EIA) price.** Protection pays on the official weekly diesel price for the business's region, averaged per month, not on anyone's say-so. The price at your pump will not match it exactly, so CostShield shows how closely it has followed, from the business's own receipts. Code: `lib/data/` (EIA snapshots, each with its source and fetch time), `lib/engine/exposure.ts`.
+**The U.S. Energy Information Administration (EIA) price.** Protection pays on the official weekly diesel price for the business's region, averaged per month, not on anyone's say-so. The price at your pump will not match it exactly, so Covenant shows how closely it has followed, from the business's own receipts. Code: `lib/data/` (EIA snapshots, each with its source and fetch time), `lib/engine/exposure.ts`.
 
 **The Solana program.** Before cover starts, the backer locks the full amount the protection could ever pay, in 25-cent steps (25 cents a gallon each, 8 steps up to $2.00 above the line), in vaults only the program can open. Each month the official price is posted once, with a fingerprint (sha256) of the government data file; if it is at or above a step's line, the business signs once and the program releases that step, and the backer cannot block it or take it back. Unused money goes back to the backer only after every month of the term has been posted below the line, and each step pays once, only to its business. It runs on devnet, where our run funded and settled one month (September 2026); one price-reporting key posts the price, and the program stores the file's fingerprint rather than reading the file itself. Code: `solana/program/src/lib.rs`, `lib/chain/server.ts`. Transactions: [Deployed program](#deployed-program).
 
@@ -42,7 +42,7 @@ Airlines and big shippers buy protection against fuel spikes in advance. Small b
 
 **The trade-off: 25-cent steps.** Because the program cannot read encrypted amounts, it cannot work out an exact payout, so it pays in whole steps. In September 2026 the official Midwest price averaged $6.35 against a line of $4.357: 7 of 8 steps paid, $5,070, against $5,776 by the exact formula. The last $706 did not fill a step. The payout screen shows both numbers.
 
-**Gemini Prediction Markets.** CostShield reads Gemini's live oil-price markets (yes/no contracts on whether Brent crude will be above a price) and turns their prices into the size of move traders expect. That sets today's price of protection: a jumpier market makes protection cost more. It also tests every live Gemini market as a way to carry the risk, and today none qualifies (there is no diesel market, and the oil markets expire in days against a 12-month cover), so the app says so instead of pretending. The November 2025 price uses an assumed 35% volatility, not Gemini, and CostShield places no orders. Code: `lib/engine/gemini.ts`, `evaluateMarkets` in `lib/engine/pipeline.ts`.
+**Gemini Prediction Markets.** Covenant reads Gemini's live oil-price markets (yes/no contracts on whether Brent crude will be above a price) and turns their prices into the size of move traders expect. That sets today's price of protection: a jumpier market makes protection cost more. It also tests every live Gemini market as a way to carry the risk, and today none qualifies (there is no diesel market, and the oil markets expire in days against a 12-month cover), so the app says so instead of pretending. The November 2025 price uses an assumed 35% volatility, not Gemini, and Covenant places no orders. Code: `lib/engine/gemini.ts`, `evaluateMarkets` in `lib/engine/pipeline.ts`.
 
 **The lender link.** After a settlement, the business can send its lender a link to `/lender` that carries read-only viewing keys. The page shows each step's line, how much was set aside and whether it paid; the keys can read the amounts and cannot move money. No lender has used it yet, and in this demo our server does the decryption. Code: `app/lender`, `lib/chain/lender.ts`.
 
@@ -90,7 +90,7 @@ Secrets live in `.env.local` (Helius devnet API key) and `.solana-keys/` (wallet
 
 All addresses are also in [`deployments/solana-devnet.json`](deployments/solana-devnet.json). Solana devnet only.
 
-- CostShield program: [`DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114`](https://explorer.solana.com/address/DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114?cluster=devnet)
+- Covenant program: [`DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114`](https://explorer.solana.com/address/DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114?cluster=devnet)
 - Helius Privacy Rings program: `ring1GaLCuJnkUMVkX2JeZLTTX17wKsV4fZmPVzXANW`
 - tUSD test mint (6 decimals, Rings asset 427): `FQKedE1cBThwLvc1FJ1xr5b3DPYGVwRNVKrQVSHmCfv8`
 - Oracle `2RECf7GfWRSw8U73tyWJ1ZhTJ5U21FRHPjEaXxTa7EsH` · underwriter `D4VUvtQh3ad8j1FF48ZNNAc9fN1oZC8F241pcuQMEUua` · fleet `2gfZPF6tSUkUbEApUNzZNFxh1fqcMhMoCybKR1VSVY8N`
@@ -144,7 +144,7 @@ Server (Next.js route handlers, Node runtime)
         |                                  |
         v                                  v
 Gemini public REST API            Solana devnet
-(events, order books)               CostShield program (solana/program, Pinocchio)
+(events, order books)               Covenant program (solana/program, Pinocchio)
                                       step accounts, oracle reports, release, reclaim
                                     Helius Privacy Rings
                                       encrypted tUSD balances, step vaults owned by the program
@@ -152,7 +152,7 @@ Gemini public REST API            Solana devnet
 
 No database. An uploaded file is processed in memory for the request and is not stored.
 
-## How CostShield uses Solana
+## How Covenant uses Solana
 
 The settlement program is a Pinocchio program on Solana devnet, adapted from Equity Floor, our first idea for this hackathon, written during the event and set aside on Nov 20 (`solana/program`). It keeps public terms and private money apart:
 
@@ -181,13 +181,13 @@ A fleet's covered gallons reveal its volume. A payout reveals margin stress. Shi
 
 Caveats, stated plainly:
 
-- The key travels in the URL fragment, which browsers do not send with page requests. In this demo, though, the `/lender` page posts the share to the CostShield server, which does the decryption. A production version would decrypt in the lender's browser.
+- The key travels in the URL fragment, which browsers do not send with page requests. In this demo, though, the `/lender` page posts the share to the Covenant server, which does the decryption. A production version would decrypt in the lender's browser.
 - The demo server holds every party's keys and all step viewing keys. It decrypts the fleet's and underwriter's balances for display.
 - Helius's prover sees plaintext amounts inside attested hardware (a TEE).
 - Trigger prices and the number of steps are public. Anyone who knows the step size and the fleet's covered gallons could infer amounts. The gallons are not published.
 - Depositing tUSD into a private balance (the public onramp) reveals the deposit amount.
 
-## How CostShield uses Gemini Prediction Markets
+## How Covenant uses Gemini Prediction Markets
 
 Endpoints (public, no key): `GET /v1/prediction-markets/events?status=active&category=…` and `GET /v1/book/{instrumentSymbol}`. Used at analysis time, live:
 
@@ -196,7 +196,7 @@ Endpoints (public, no key): `GET /v1/prediction-markets/events?status=active&cat
 - **Implied volatility.** A ladder of "Brent above K" binaries is a survival curve. The engine fits a lognormal to the two-sided quotes and annualises the slope. That implied volatility is the volatility input to today's cap price, replacing an options data feed the project cannot license. If Gemini cannot be reached or lists no usable ladder, today's price uses an assumed 40%. The November 2025 price in the replay always uses an assumed 35%, not Gemini.
 - **Ladder replication.** The engine sizes the binary ladder that would replicate one fleet-month of cap, walks each ask book, and reports cost and unfilled size.
 
-CostShield places no orders and Gemini markets do not settle the program.
+Covenant places no orders and Gemini markets do not settle the program.
 
 ## Economic design and risk assumptions
 
@@ -207,7 +207,7 @@ CostShield places no orders and Gemini markets do not settle the program.
 - **Basis risk.** The index is not the business's pump price. The engine measures the gap from ledger gallons and shows it. An index cover cannot remove it. Steps add a little more: a month just below the next trigger pays up to $0.25 a gallon less than the linear cap.
 - **Pricing.** Black-76 on EIA spot with a flat forward curve, one volatility, mid-month expiries and a 30% load. No skew, no bid/offer. Real cost would be higher. Pricing uses the linear cap, which slightly overstates the stepped cover's value.
 - **Oracle.** One trusted key. The server recomputes the monthly mean from its own EIA data, ignores prices sent by the browser, and posts the mean on chain with the data file's sha256. This is a trusted oracle, disclosed as such.
-- **Premium and who pays whom.** No premium is collected, on chain or off. The program has no premium instruction, the fleet pays nothing, and the underwriter funds the steps with its own test dollars. The premium on screen is a model price. Its 30% load is the only allowance for a carrier's costs and margin, and no fee for CostShield is modelled. In a real programme the fleet would pay the premium to a licensed carrier, and none has agreed to that.
+- **Premium and who pays whom.** No premium is collected, on chain or off. The program has no premium instruction, the fleet pays nothing, and the underwriter funds the steps with its own test dollars. The premium on screen is a model price. Its 30% load is the only allowance for a carrier's costs and margin, and no fee for Covenant is modelled. In a real programme the fleet would pay the premium to a licensed carrier, and none has agreed to that.
 - **Maximum loss.** The underwriter's loss on a policy month is capped at the 8 funded steps: $2.00 per gallon times covered gallons. A month above `K + $2.00` pays no more. The on-chain demo policy funds one month's steps.
 - **Upgrade authority.** The program is upgradeable. One team wallet, the one that deployed it (`84ZgVXHPfpYML8E3o63aLqMo69Z4A6o4cxUY4r7xuWRE`), can replace its code. A production program would give that up or put it behind a multisig.
 - **Unfinished runs.** Nothing on chain expires. If a settlement run stops midway, the remaining steps stay open and funded. One devnet policy (`2c7cb8f46c1f57c2`) was in that state when read at 4:25 AM Central on Nov 20: 3 steps paid, 5 open. Releasing or reclaiming them needs each step's vault key, which the server that ran the settlement keeps on its own disk. There is no recovery tool.
@@ -231,7 +231,7 @@ More in [docs/MODEL.md](docs/MODEL.md) and [docs/LIMITATIONS.md](docs/LIMITATION
 
 ## Earlier work: the Arc vault
 
-CostShield was first built to settle on Arc testnet. That work is archived, not the settlement path, and the vault was not deployed: `deployments/arc-testnet.json` holds no addresses. What remains in the repo for reference:
+Covenant was first built to settle on Arc testnet. That work is archived, not the settlement path, and the vault was not deployed: `deployments/arc-testnet.json` holds no addresses. What remains in the repo for reference:
 
 - `contracts/src/CostShieldVault.sol`, a fully collateralised USDC vault with 15 Foundry tests (`npm run test:contracts`).
 - `lib/chain/arc/`, `scripts/chain.ts` and `scripts/export-abi.cjs`, with the `chain` and `abi` npm scripts. `viem` is a dependency only for these.

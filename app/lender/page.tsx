@@ -69,7 +69,7 @@ export default function LenderPage() {
         </p>
         <header className="sticky top-0 z-30 bg-bg/80 backdrop-blur-md backdrop-saturate-150">
           <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-[var(--page-gutter)]">
-            <Link href="/" className="-ml-2 flex min-h-10 items-center gap-2.5 rounded-control px-2 transition-transform duration-150 ease-out active:scale-[0.98]" aria-label="CostShield home">
+            <Link href="/" className="-ml-2 flex min-h-10 items-center gap-2.5 rounded-control px-2 transition-transform duration-150 ease-out active:scale-[0.98]" aria-label="Covenant home">
               <Logo />
             </Link>
             <span className="inline-flex items-center gap-2 whitespace-nowrap text-[13px] font-medium text-cipher">
@@ -84,10 +84,10 @@ export default function LenderPage() {
             : state.kind === "none" ? (<>
               <PageHead eyebrow="Payout proof" title="No payout proof found." lede="This page lets a lender or factoring company check a business's diesel protection: how much money was locked on Solana to pay it, and what was paid. Open the link the business shared with you: it ends in # followed by a long code that carries read-only viewing keys." />
               <Card className="max-w-3xl">
-                <p className="max-w-[70ch] text-[13.5px] leading-[1.6] text-muted">A business creates the link on CostShield&apos;s Payouts screen after a settlement, under &quot;Proof for your lender&quot;. The amounts on Solana are encrypted with Helius Privacy Rings; the viewing keys let you read how much was set aside for each step and whether it paid. They cannot move money.</p>
+                <p className="max-w-[70ch] text-[13.5px] leading-[1.6] text-muted">A business creates the link on Covenant&apos;s Payouts screen after a settlement, under &quot;Proof for your lender&quot;. The amounts on Solana are encrypted with Helius Privacy Rings; the viewing keys let you read how much was set aside for each step and whether it paid. They cannot move money.</p>
                 <div className="mt-5">
                   <Link href="/" className="group/btn inline-flex min-h-10 items-center justify-center gap-2 rounded-control bg-jade px-[18px] py-2.5 text-sm font-medium text-jade-ink transition-[background-color,transform] duration-150 ease-out hover:bg-jade/90 active:scale-[0.98]">
-                    Go to CostShield
+                    Go to Covenant
                     <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="-mr-0.5 transition-transform duration-150 ease-out group-hover/btn:translate-x-0.5"><path d="M3 8h9.2M8.6 4.2 12.4 8l-3.8 3.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </Link>
                 </div>
@@ -102,7 +102,7 @@ export default function LenderPage() {
             : (<>
               <PageHead eyebrow={`Read-only, policy ${state.share.policyId}`}
                 title={state.kind === "ok" ? <>Payout proof: <span className="num">{tusd(state.view.totalPaid, 0)}</span> paid for {period}</> : state.kind === "error" ? <>This payout proof could not be checked.</> : <>Payout proof for {period}</>}
-                lede={<>A business protected its diesel bill with CostShield. A backer locked money for {state.share.steps.length} steps in vaults on Solana devnet that only the program can open; each step pays the business when the official {region} diesel price is above its line. The amounts are encrypted with Helius Privacy Rings, hidden from the public. This link&apos;s read-only viewing keys let you read them. They cannot move money.</>} />
+                lede={<>A business protected its diesel bill with Covenant. A backer locked money for {state.share.steps.length} steps in vaults on Solana devnet that only the program can open; each step pays the business when the official {region} diesel price is above its line. The amounts are encrypted with Helius Privacy Rings, hidden from the public. This link&apos;s read-only viewing keys let you read them. They cannot move money.</>} />
 
               {state.kind === "loading" && <Pending share={state.share} />}
 
@@ -127,7 +127,7 @@ export default function LenderPage() {
                     <li className="flex gap-2.5 text-ink2"><Mark />See the business&apos;s other balances or transfers.</li>
                   </ul>
                 </div>
-                <p className="mt-5 max-w-[90ch] text-[12px] leading-[1.6] text-faint">The keys travel in the part of the link after #, which browsers do not send when loading this page. To decrypt, this page sends them to the CostShield server, which reads the balances on Solana devnet. Anyone with the link can read these amounts. The program cannot check encrypted funding amounts itself; this decryption is that check.</p>
+                <p className="mt-5 max-w-[90ch] text-[12px] leading-[1.6] text-faint">The keys travel in the part of the link after #, which browsers do not send when loading this page. To decrypt, this page sends them to the Covenant server, which reads the balances on Solana devnet. Anyone with the link can read these amounts. The program cannot check encrypted funding amounts itself; this decryption is that check.</p>
               </Card>
             </>)}
         </main>

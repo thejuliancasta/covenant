@@ -114,7 +114,7 @@ export function LenderShareCard({ r, company }: { r: SettlementResult; company: 
         </button>
       </div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-[52ch] text-xs leading-[1.5] text-faint">Anyone holding the link can read these amounts, so send it only to your lender. The lender page asks the CostShield server to decrypt with the keys in the link.</p>
+        <p className="max-w-[52ch] text-xs leading-[1.5] text-faint">Anyone holding the link can read these amounts, so send it only to your lender. The lender page asks the Covenant server to decrypt with the keys in the link.</p>
         <a href={shareFragment(r.lenderShare)} target="_blank" rel="noreferrer"
           className="inline-flex min-h-10 items-center gap-1.5 text-[13.5px] font-medium text-ink2 underline-offset-4 transition-colors duration-150 hover:text-ink hover:underline">
           Open the lender view<ArrowOut />

@@ -27,7 +27,7 @@ export function Nav() {
       scrolled ? "border-line/8 bg-bg/75" : "border-transparent bg-bg/0",
     )}>
       <nav aria-label="Main" className={cx(wrap, "flex h-16 items-center gap-8")}>
-        <Link href="/" aria-label="CostShield home" className="-ml-1 rounded-control px-1 py-1"><Logo size={20} /></Link>
+        <Link href="/" aria-label="Covenant home" className="-ml-1 rounded-control px-1 py-1"><Logo size={20} /></Link>
         <ul className="hidden items-center gap-1 md:flex">
           {LINKS.map((l) => (
             <li key={l.href}>

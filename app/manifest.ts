@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
 
-/** Lets a phone add CostShield to its home screen and open it full-screen, without the browser bars. */
+/** Lets a phone add Covenant to its home screen and open it full-screen, without the browser bars. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "CostShield (simulation)",
-    short_name: "CostShield",
+    name: "Covenant (simulation)",
+    short_name: "Covenant",
     description: "Find the costs that markets move in a small business's books, and see what protecting them would have paid. A simulation with devnet test dollars.",
     start_url: "/app",
     scope: "/",

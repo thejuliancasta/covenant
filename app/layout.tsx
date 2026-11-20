@@ -7,11 +7,11 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "CostShield: cost protection for small businesses (simulation)",
-  description: "Connect your books. CostShield finds the costs that markets move, says which can be protected and which cannot, and shows a funded, private payout on Solana devnet.",
+  title: "Covenant: cost protection for small businesses (simulation)",
+  description: "Connect your books. Covenant finds the costs that markets move, says which can be protected and which cannot, and shows a funded, private payout on Solana devnet.",
   // Home screen: with app/manifest.ts and app/apple-icon.tsx, the hosted app opens full-screen under its own icon and name.
-  applicationName: "CostShield",
-  appleWebApp: { capable: true, title: "CostShield", statusBarStyle: "default" },
+  applicationName: "Covenant",
+  appleWebApp: { capable: true, title: "Covenant", statusBarStyle: "default" },
   other: { "apple-mobile-web-app-capable": "yes" }, // older iOS reads this name; Next writes the newer mobile-web-app-capable
   formatDetection: { telephone: false }, // iOS must not turn figures into phone links
 };

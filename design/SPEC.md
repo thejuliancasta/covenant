@@ -1,4 +1,4 @@
-# CostShield UI/UX spec
+# Covenant UI/UX spec
 
 The screens in `screens/` are the picture. This file is the rules behind them. Where the two disagree, this file wins and the screen should be fixed.
 
@@ -32,7 +32,7 @@ Sidebar on desktop, bottom tab bar on a phone.
 | Destination | Answers | Screens |
 | --- | --- | --- |
 | Overview | What needs my attention? What protection do I have? | `m5-overview`, `d1-overview` |
-| Costs | What did CostShield find in my books? What needs correcting? | `m3-costs`, `d2-costs` |
+| Costs | What did Covenant find in my books? What needs correcting? | `m3-costs`, `d2-costs` |
 | Protection | What offers, scheduled plans and active plans do I have? | `m4-offer`, `d3-offer` |
 | Payments | What did I pay? What am I receiving? Where is the transfer? | `m6-payment` |
 
@@ -81,7 +81,7 @@ Use exactly these words. Do not invent synonyms per screen.
 
 - The owner pays the premium for the agreed contract.
 - The provider commits collateral against its payout obligation.
-- CostShield takes a fee from the premium.
+- Covenant takes a fee from the premium.
 
 Each side sees its own obligation. The owner sees "Payout funded: in full". The provider sees premium, platform fee, net premium, maximum obligation and required collateral together, before committing (`p1-provider`). Premium is never presented as profit.
 
@@ -106,7 +106,7 @@ Tables sort, filter and expand. Numbers are right-aligned with tabular figures. 
 1. Dollars before units, units before percentages. No contract counts.
 2. Sentences an owner could repeat to their spouse. "Every 10 cents on diesel costs you $1,000 a month."
 3. Never "read-only" about QuickBooks. The standard accounting scope can write. Say "We only read your books and never change them", and make the app enforce it.
-4. Name the provider on every plan. CostShield is the platform.
+4. Name the provider on every plan. Covenant is the platform.
 5. No pool names, cohort ids, confidence decimals or fit statistics in the main flow. Offer "Why this match?" for anyone who wants them.
 6. Every simulated number is labelled as sample or simulation.
 7. No crypto or trading vocabulary in the owner app.

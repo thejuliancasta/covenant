@@ -9,6 +9,7 @@ Newest first. One or two lines each: what was decided, why, and where the detail
 
 ## 2026-11-20
 
+- **Renamed CostShield to Covenant.** Every product, docs and code mention changed. Kept on purpose: the archived Arc contract `CostShieldVault`, the Rust crate `costshield_steps` (the deployed program's build name) and internal storage and cookie keys (`costshield-import`, `costshield-theme`, `costshield_oauth`). The Stepped C mark stays: C for Covenant.
 - **Copy pass: product copy, README and Devpost text follow `docs/MESSAGING.md`,** which states what each technology does; no hackathon framing in product copy (simulation notices stay).
 - **Payouts says "steps", never "chunks".** One word for the 25-cent units on the Payouts screen and its settlement views. `docs/PLAIN_LANGUAGE.md` is changed to match. The landing page and the lender page still say "chunks".
 - **The Books screen plays one short sequence and waits for a button.** Counter, sorted category bars, then "1 risk worth protecting found" and a button to Risks; the per-stage timings moved behind "Show details". The pacing delays and the automatic move to Risks are removed.
@@ -38,13 +39,13 @@ Newest first. One or two lines each: what was decided, why, and where the detail
 - **Ledger sign-in added** for QuickBooks, Xero, Zoho Books and FreshBooks, connecting to each provider directly (`lib/ledger/`). CSV upload stays as the fallback that always works.
 - **Settlement moved from Arc testnet to Solana devnet with Helius Privacy Rings.** Chain award changed to Best use of Solana. Reasons: covered gallons and payouts stay private, the fleet can prove cover to a lender with a read-only viewing key, and parametric USDC cover on Arc already exists among other entries. See `docs/SOLANA_PORT.md`. The Arc vault stays in `contracts/` as archived work.
 - **Lender page added.** A shared link gives a lender read-only proof of each step's trigger, funded amount and paid status.
-- **Router model.** CostShield measures, pools, runs the price competition and settles. Specialists carry the risk and post collateral. CostShield never sets the price. See `docs/CONCEPT.md` section 2.
+- **Router model.** Covenant measures, pools, runs the price competition and settles. Specialists carry the risk and post collateral. Covenant never sets the price. See `docs/CONCEPT.md` section 2.
 - **Pool by risk, not by industry.** A pool is one index, one region, one period. Business type is only for onboarding and marketing. See `docs/CONCEPT.md`.
 - **Pitch the platform for every business, demo one journey that fully works** (US diesel for a fleet). Other exposures are sized and labelled, not priced.
 
 ## 2026-11-19
 
-- **Hackathon project is CostShield**: ledger-driven cost protection for small businesses. Main track: DeFi and Onchain Applications.
+- **Hackathon project is Covenant**: ledger-driven cost protection for small businesses. Main track: DeFi and Onchain Applications.
 - **Diesel for small trucking fleets is the first wedge.** Transparent index, repeatable consumption, a liquid hedge behind it.
 - **Deterministic engine, no LLM in the pipeline.** Every number is labelled verified, calculated, estimated or assumed.
 - **The product is allowed to say no.** A hedge that fails on index, tenor, depth or fit is shown as rejected, with the reason.

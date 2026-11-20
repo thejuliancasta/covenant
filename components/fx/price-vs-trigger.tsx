@@ -6,7 +6,7 @@ import { SPRING_FLUID, tok, useSize } from "./motion";
 /*
  * "Price vs. where protection starts" (docs/PLAIN_LANGUAGE.md). One bar per month for
  * the diesel price in dollars a gallon, one dashed line where protection starts, and the
- * part of each bar above the line in the accent (that is the part CostShield pays back).
+ * part of each bar above the line in the accent (that is the part Covenant pays back).
  * No dollar amounts sit on the bars: hover, tap or arrow keys pick a month, and one readout
  * under the chart gives that month's money back. The line is named on the price axis and in
  * the legend, so its label never covers a bar. Month labels are spaced about 84 px apart,
@@ -29,7 +29,7 @@ const gap = (d: number) => (d < 1 ? `${Math.round(d * 100)}¢` : `$${d.toFixed(2
 export function monthSentence(m: PriceMonth, trigger: number): string {
   const d = m.price - trigger;
   const head = `${longLabel(m.label)}: diesel averaged $${m.price.toFixed(2)} a gallon, ${gap(Math.abs(d))} ${d > 0 ? "above" : "below"} where protection starts.`;
-  return m.payout > 0 ? `${head} CostShield would have paid you ${money(m.payout)}.` : `${head} No money back that month.`;
+  return m.payout > 0 ? `${head} Covenant would have paid you ${money(m.payout)}.` : `${head} No money back that month.`;
 }
 
 export function PriceVsTrigger({ months, trigger, selected, onSelect, height = 260, compact = false, readout }: {
@@ -129,7 +129,7 @@ export function PriceVsTrigger({ months, trigger, selected, onSelect, height = 2
       <figcaption className="mt-3">
         <p className="flex flex-wrap gap-x-5 gap-y-1 text-[12px] text-muted">
           {!compact && <span className="inline-flex items-center gap-2"><i aria-hidden className="h-2.5 w-2.5 rounded-[2px] bg-ink/25" />Diesel price that month</span>}
-          {!compact && <span className="inline-flex items-center gap-2"><i aria-hidden className="h-2.5 w-2.5 rounded-[2px] bg-jade" />The part CostShield would pay back</span>}
+          {!compact && <span className="inline-flex items-center gap-2"><i aria-hidden className="h-2.5 w-2.5 rounded-[2px] bg-jade" />The part Covenant would pay back</span>}
           <span className="inline-flex items-center gap-2"><i aria-hidden className="w-4 border-t border-dashed border-ink/60" />Protection starts at <span className="num text-ink2">${trigger.toFixed(2)}</span> a gallon</span>
         </p>
         {big ? (

@@ -1,5 +1,5 @@
 /**
- * Solana devnet configuration for CostShield settlement (Helius Privacy Rings).
+ * Solana devnet configuration for Covenant settlement (Helius Privacy Rings).
  * Public addresses come from deployments/solana-devnet.json, overridable by env.
  * Secrets (Helius API key, wallet keys) are read in lib/chain/keys.ts, never here.
  */

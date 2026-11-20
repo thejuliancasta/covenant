@@ -1,4 +1,4 @@
-# CostShield UI/UX proposal
+# Covenant UI/UX proposal
 
 This folder is a design proposal, not shipped code. Nothing here is imported by the app. It exists so Aabis, Julian and any coding agent can see the intended experience, argue with it, and build from it.
 

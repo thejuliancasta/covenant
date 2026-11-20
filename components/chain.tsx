@@ -68,7 +68,7 @@ export function LockIcon({ className }: { className?: string }) {
   return <svg width="9" height="10" viewBox="0 0 9 10" aria-hidden className={className}><rect x="0.5" y="4.25" width="8" height="5.25" rx="1.2" fill="currentColor" /><path d="M2.3 4.4V3a2.2 2.2 0 0 1 4.4 0v1.4" stroke="currentColor" strokeWidth="1.1" fill="none" /></svg>;
 }
 
-/** Kept for compatibility: renders the CostShield mark (components/brand/logo.tsx). */
+/** Kept for compatibility: renders the Covenant mark (components/brand/logo.tsx). */
 export function ShieldMark() {
   return <LogoMark size={22} />;
 }
@@ -97,7 +97,7 @@ export function decodeShare(fragment: string): LenderShare {
   const s = j as Partial<LenderShare>;
   const ok = !!s && typeof s.policyId === "string" && typeof s.region === "string" && typeof s.period === "number" && Array.isArray(s.steps) && s.steps.length > 0
     && s.steps.every((x) => x && typeof x.index === "number" && typeof x.account === "string" && typeof x.vault === "string" && typeof x.viewingKey === "string");
-  if (!ok) throw new Error("The link opened, but it does not contain a CostShield coverage share.");
+  if (!ok) throw new Error("The link opened, but it does not contain a Covenant coverage share.");
   return s as LenderShare;
 }
 
