@@ -1,0 +1,18 @@
+---
+description: Rules for the risk engine, ledger import and their tests.
+globs: lib/engine/**, lib/ledger/**, lib/data/**, tests/**, app/api/analyze/**, app/api/connect/**
+alwaysApply: false
+---
+
+Read `docs/MODEL.md` before changing any formula, and `docs/PRODUCT.md` for the acceptance criteria.
+
+- The pipeline is deterministic. No LLM calls, no randomness outside the seeded sample-ledger generator.
+- Every number shown to a user carries an evidence label: verified, calculated, estimated or assumed. Keep the label accurate when you change where a number comes from.
+- Unmatched expense lines stay "unclassified". Do not guess a category.
+- Index fit is only measured from gallons actually present in the ledger. Never compute a fit from estimated gallons.
+- A Gemini market is presented as a hedge only if it passes every screen (index, tenor, depth, fit). If Gemini is unreachable, say so and fall back to the labelled assumption.
+- Scenario and payout outputs are plain arithmetic on visible inputs. Keep them reproducible by hand.
+- Ledger sign-in: request the narrowest scopes each provider offers, only read, never write to a customer's books, never log tokens. A provider with no client id and secret configured must show as unavailable, not as a working button.
+- Data files in `lib/data/` are real public series (EIA and others). Do not hand-edit them; regenerate with the scripts in `scripts/`.
+- Any change to engine behaviour needs a test in `tests/`. Run `npm test` and report the result.
+- `lib/engine/types.ts` is shared with the UI. Changing a shape means updating both sides in the same change.
