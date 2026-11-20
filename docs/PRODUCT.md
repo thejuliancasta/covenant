@@ -1,5 +1,9 @@
 # Product requirements and UX specification
 
+Judge mode includes a hypothetical full-year backer-economics view: maximum liability, model premium, replay payout and gross result. It is not a funded LP pool. The devnet settlement funds one month and collects no premium; the full-year capital requirement remains a product constraint.
+
+The lender view reads vault histories sequentially and retries temporary RPC or indexer transport errors. It still rejects an invalid policy/share immediately. The `solana:verify-latest` command can recheck the latest local policy without sending a new transaction.
+
 ## PRD
 
 **Target user.** The owner of a for-hire trucking fleet with roughly 3 to 20 trucks. Fuel is about a fifth to a quarter of cost, margins are under 1%, and part of the freight is hauled with no fuel surcharge. The owner has never traded a derivative and keeps books in QuickBooks.

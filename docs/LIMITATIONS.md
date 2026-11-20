@@ -10,6 +10,9 @@
 
 ## What is simulated
 
+- **Backer economics.** Judge mode shows the full-year maximum liability, model premium, replay payout and gross result. No backer pool, LP shares or onchain premium collection is built. The devnet policy funds only one month; it does not reserve a full year's maximum liability. The 131 rolling 12-month cohorts overlap and do not independently validate an underwriter return.
+- **Lender availability.** Its read-only check depends on Solana RPC and the Privacy Rings indexer. Sequential reads and retries reduce transient rate-limit failures, but the page cannot verify a vault while those services are unavailable.
+
 - **The sample company.** Synthetic. Fuel prices paid are built from the real EIA Midwest index plus seeded noise, so its R² to the index reflects the generator, not a real fleet.
 - **The premium.** A model price on EIA spot with an assumed load. No live options quotes, no skew, no bid/offer. No premium is collected, on chain or off: the program has no premium instruction and the fleet pays nothing.
 - **The oracle.** One trusted key posting public history.

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { Analysis } from "@/lib/engine/pipeline";
+import { backerEconomics } from "@/lib/engine/backer";
 import { int, pct, ppg, usd } from "@/lib/format";
 import { Card, Check, Ev, PageHead, Row, Table, Tag, cx } from "./ui";
 import { AddrLink, Encrypted, LockIcon, tusd, useChainStatus } from "./chain";
@@ -11,6 +12,9 @@ const mono = "font-mono text-[12px]";
 export function Judge({ a, source }: { a: Analysis; source: string }) {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Data provenance");
   const d = a.diesel, m = a.markets, bt = a.backtest, btN = a.backtestNational, w = a.wholesale, p = a.policy;
+  const backer = p ? backerEconomics({ months: p.coverMonths.length, maxCoveredGallonsPerMonth: p.maxCoveredGallonsPerMonth,
+    maxPayoutPerGallon: 2, aggregateLimit: p.aggregateLimit, modelPremium: p.priceAtInception.premium,
+    replayPayout: p.totalPayout }) : null;
   return (
     <div className="min-w-0 space-y-6">
       <PageHead eyebrow="Judge mode · technical view" title="How every number was produced" lede={`Source file: ${source}. Analysis generated ${a.generatedAt}. Business owners never need this screen.`} />
@@ -112,6 +116,17 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
           ]} /></div>
           <p className="mt-2 text-xs text-faint">Each month&apos;s average-price payoff is valued as a European call expiring mid-month. No skew, no bid/offer: real hedge cost would be higher.</p>
         </Card>
+        {backer && <Card>
+          <h2 className="text-[15px] font-medium">Backer economics: hypothetical full-year contract</h2>
+          <div className="mt-3">
+            <Row label="Maximum full-year liability" hint="Lesser of the annual aggregate limit or 12 monthly caps">{usd(backer.maximumLiability)}</Row>
+            <Row label="Model premium, if collected">{usd(backer.modelPremium)}</Row>
+            <Row label="Payout in this historical replay">{usd(backer.replayPayout)}</Row>
+            <Row label="Backer gross result in the replay" hint="Premium minus payout; excludes hedges, fees and capital cost">{usd(backer.grossResult)}</Row>
+            <Row label="Gross result / maximum liability">{backer.returnOnReservedCapital === null ? "—" : pct(backer.returnOnReservedCapital, 1)}</Row>
+          </div>
+          <p className="mt-3 text-xs leading-[1.55] text-faint">This is a stress illustration, not a realized return. No premium is collected, no backer pool exists, and the devnet run funds one month of steps. A real 12-month unhedged contract would need to reserve its entire maximum liability or buy a verified hedge before sale. The 131 rolling cohorts overlap and are not independent underwriting years.</p>
+        </Card>}
       </>)}
 
       {tab === "Gemini markets" && (<>

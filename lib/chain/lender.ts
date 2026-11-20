@@ -17,14 +17,29 @@ export function validShare(s: unknown): s is LenderShare {
 }
 
 export async function lenderView(share: LenderShare): Promise<LenderView> {
-  const steps = await Promise.all(share.steps.map(async (st) => {
-    const data = await fetchProgramAccount(address(st.account));
-    if (!data) throw new Error(`Step account ${st.account} was not found under the program.`);
-    const onchain = decodeStep(data);
-    if (onchain.policyId !== share.policyId || onchain.stepIndex !== st.index) throw new Error(`Step account ${st.account} is not step ${st.index} of policy ${share.policyId}.`);
-    const { funded } = await viewVault(address(st.account), st.vault, st.viewingKey);
-    return { index: st.index, triggerPrice: fromMilli(onchain.triggerMilli), funded: fromBase(funded), paid: onchain.status === "paid" };
-  }));
+  // The public RPC and Rings indexer can throttle concurrent reads. Fetch each
+  // vault in order, retrying only transport failures; malformed shares still
+  // fail immediately instead of being mistaken for a temporary indexer lag.
+  const steps: LenderView["steps"] = [];
+  for (const st of share.steps) {
+    let entry: LenderView["steps"][number] | undefined;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const data = await fetchProgramAccount(address(st.account));
+        if (!data) throw new Error(`Step account ${st.account} was not found under the program.`);
+        const onchain = decodeStep(data);
+        if (onchain.policyId !== share.policyId || onchain.stepIndex !== st.index) throw new Error(`Step account ${st.account} is not step ${st.index} of policy ${share.policyId}.`);
+        const { funded } = await viewVault(address(st.account), st.vault, st.viewingKey);
+        entry = { index: st.index, triggerPrice: fromMilli(onchain.triggerMilli), funded: fromBase(funded), paid: onchain.status === "paid" };
+        break;
+      } catch (e) {
+        const transient = e instanceof Error && /fetch failed|429|timeout|temporarily unavailable/i.test(e.message);
+        if (!transient || attempt === 2) throw e;
+        await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+      }
+    }
+    steps.push(entry!);
+  }
   steps.sort((a, b) => a.index - b.index);
   const r6 = (x: number) => Math.round(x * 1e6) / 1e6;
   const totalFunded = r6(steps.reduce((n, s) => n + s.funded, 0));

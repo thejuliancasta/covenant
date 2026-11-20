@@ -16,6 +16,7 @@
     "solana:setup": "tsx scripts/solana-setup.ts",
     "solana:e2e": "tsx scripts/solana-e2e.ts",
     "solana:checks": "tsx scripts/solana-checks.ts",
+    "solana:verify-latest": "tsx scripts/solana-verify-latest.ts",
     "solana:build": "cd solana/program && cargo build-sbf"
   },
   "dependencies": {

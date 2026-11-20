@@ -38,6 +38,8 @@ Airlines and big shippers buy protection against fuel spikes in advance. Small b
 
 **The Solana program.** Before cover starts, the backer locks the full amount the protection could ever pay, in 25-cent steps (25 cents a gallon each, 8 steps up to $2.00 above the line), in vaults only the program can open. Each month the official price is posted once, with a fingerprint (sha256) of the government data file; if it is at or above a step's line, the business signs once and the program releases that step, and the backer cannot block it or take it back. Unused money goes back to the backer only after every month of the term has been posted below the line, and each step pays once, only to its business. It runs on devnet, where our run funded and settled one month (September 2026); one price-reporting key posts the price, and the program stores the file's fingerprint rather than reading the file itself. Code: `solana/program/src/lib.rs`, `lib/chain/server.ts`. Transactions: [Deployed program](#deployed-program).
 
+**Backer economics are shown, not implemented as a pool.** Judge mode calculates the full 12-month maximum liability as the lesser of the aggregate cap and the sum of monthly maximum payouts. It shows the model premium, the historical replay payout and the backer's hypothetical gross result. The devnet run only funds one month, takes no premium, and has no LP deposits or share accounting. A production 12-month offer would need full-term capital or a verified external hedge before sale.
+
 **Helius Privacy Rings.** The money in each vault and every payout are encrypted balances, and the program enforces the rules without seeing the amounts. The public can see that a step paid, not how much, so a competitor or customer cannot work out the business's gallons or margins. The business can give its lender a read-only viewing key that reads the amounts and cannot move money. Amounts are hidden from the public, not from everyone: Helius's prover sees them to build the proof, and in this demo our server holds the test keys. Code: `lib/chain/rings.ts`.
 
 **The trade-off: 25-cent steps.** Because the program cannot read encrypted amounts, it cannot work out an exact payout, so it pays in whole steps. In September 2026 the official Midwest price averaged $6.35 against a line of $4.357: 7 of 8 steps paid, $5,070, against $5,776 by the exact formula. The last $706 did not fill a step. The payout screen shows both numbers.
@@ -66,7 +68,7 @@ The demo company is a synthetic 10-truck Midwest fleet. Its result: diesel is 26
 ```bash
 npm install
 npm run dev            # http://localhost:3000
-npm test               # 40 unit tests: 31 engine, 9 ledger
+npm test               # engine, ledger and backer-economics tests
 npm run test:contracts # earlier work: 15 Foundry tests for the Arc vault (needs Foundry)
 ```
 
@@ -81,6 +83,7 @@ These commands are for the team's machine. They need a Helius devnet API key in 
 ```bash
 npm run solana:setup   # idempotent: wallets, devnet SOL, tUSD mint and Rings registration, private deposits
 npm run solana:e2e     # one settlement end to end; prints Explorer links
+npm run solana:verify-latest # read-only lender verification of the last local policy
 ```
 
 Secrets live in `.env.local` (Helius devnet API key) and `.solana-keys/` (wallet keypairs). Both are gitignored. Never commit them. Public addresses (program id, mint, role wallets) are written to `deployments/solana-devnet.json`, which is committed and read by the app.
@@ -108,6 +111,8 @@ Evidence on devnet, Nov 20, 2026 (times Central). Amounts and payouts are encryp
 | 3:16 AM | Refused: duplicate report for the same month, error 6011 (`ERR_ALREADY_REPORTED`, shown as `0x177b`) | [`LxKHWJZW…`](https://explorer.solana.com/tx/LxKHWJZW1JbRhmbYUPC9LmK9pjy7XMQ9sTwrDo87obrgmDQgbR9nSeNXUzamvxtpTi9HEkfQbfd76fa9sbiSEqZ?cluster=devnet) |
 
 The $6.350 on chain is the mean of the four September 2026 weeks in the committed EIA snapshot ($6.3505). A judge cannot re-run settlement against this program: it accepts reports only from the oracle key above, which the team holds.
+
+**Fresh devnet verification, 11:29 AM CT November 20.** The team ran the full one-month path again with its local demo keys: [open eight steps](https://explorer.solana.com/tx/37iJ44Axmm4xsHcAgraGjLGa36WsXrnMWfp6USbUAm7VSu2eebGoZHhdte2fsAtymuMHQPoKNsrpAijFRdGWuGtB?cluster=devnet), [fund their private vaults](https://explorer.solana.com/tx/24maW13oEKH5sJ6FYJXs481bKYFKEmXBmUM4GpkUHEYmvKMbTZtW14rkDoTyewr8DNKT2KGqyLGZ5QdXZMhnJ7Mk?cluster=devnet), [release the first triggered step](https://explorer.solana.com/tx/5trnbs4cPhqVmYVT3wLxih9sArEGvgThR1fTgmkmjQmQ3VzEr2wSvw6Azd4c1bbomjWHArvmN3fYBvgZdfpHeMGq?cluster=devnet), and [reclaim the untriggered eighth step](https://explorer.solana.com/tx/4NMCxUk81vNG1d15dcGzyUJGjyRa9jhpiyqBhqGmxmeYU6vX41XXG6YkR1ifvzYaCspLVgwDsnyWy9WgAKoNoqTj?cluster=devnet). Seven steps paid 5,070.22 tUSD as decrypted by the fleet, against 5,776.43 by the exact linear formula. The first lender verification attempt failed on a network fetch after all transfers completed; the read-only recheck then decrypted 5,794.53 tUSD funded and 5,070.22 tUSD paid, matching 7 of 8 public paid flags. `npm run solana:checks` also passed 18/18 on-chain enforcement and privacy checks. These checks do not prove full-year funding or independent oracle correctness.
 <!-- DEPLOYMENT:END -->
 
 ## Architecture
