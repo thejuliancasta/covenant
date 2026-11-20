@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provider workspace · quote review · CostShield design</title>
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="screens.css">
+<script src="app.js"></script>
+</head>
+<body>
+<div class="page">
+<aside class="side"><div class="brand">CostShield</div><span class="ws">Provider workspace</span><nav aria-label="Main"><a href="#" aria-current="page">Opportunities</a><a href="#">Quotes</a><a href="#">Portfolio</a><a href="#">Collateral</a><a href="#">Settlements</a></nav></aside>
+<main class="main">
+<div class="stack tight"><span class="muted">[Provider name] · sample data</span><h1 class="h1" style="font-size:34px">Opportunities</h1></div>
+<div class="cols">
+<section class="card wide"><div class="rowx between wrap"><h2 class="h2">Open demand by index, region and period</h2><span class="chip">All regions</span></div>
+<div class="tablebox"><table>
+<thead><tr><th>Index / region</th><th>Period</th><th>Volume</th><th>Trigger</th><th>Limit</th><th>Businesses</th><th>Status</th></tr></thead>
+<tbody>
+<tr aria-selected="true"><td><b>Midwest diesel</b></td><td>Dec 2026</td><td>8,000 gal</td><td>$4.20</td><td>$5.00</td><td>1</td><td><span class="chip ok">Open</span></td></tr>
+<tr><td>Gulf Coast diesel</td><td>Dec 2026</td><td>30,000 gal</td><td>$4.05</td><td>$4.85</td><td>4</td><td><span class="chip ok">Open</span></td></tr>
+<tr><td>Midwest diesel</td><td>Jan 2027</td><td>50,000 gal</td><td>$4.20</td><td>$5.00</td><td>6</td><td><span class="chip ok">Open</span></td></tr>
+<tr><td>West Coast diesel</td><td>Jan 2027</td><td>25,000 gal</td><td>$5.10</td><td>$5.90</td><td>3</td><td><span class="chip warn">Expiring</span></td></tr>
+</tbody></table></div>
+<p class="small muted">Volume is capped at each business's verified spend. Data quality for the selected row: gallons estimated from spend, region from vendor records, no customer surcharge.</p></section>
+<aside class="card narrow"><h2 class="h2">Quote review</h2><span class="muted small">Midwest diesel · Dec 1 to Dec 31 · monthly average settlement</span>
+<div><div class="kv"><span>Customer premium</span><b>$360.00</b></div><div class="kv"><span>Platform fee (12%)</span><b>$43.20</b></div><div class="kv"><span>Provider premium, before your costs and payouts</span><b>$316.80</b></div><div class="kv"><span>Maximum payout obligation</span><b>$6,400.00</b></div><div class="kv"><span>Collateral required (fully funded)</span><b>$6,400.00</b></div><div class="kv"><span>Collateral released</span><b>After settlement, Jan 2</b></div></div>
+<p class="note">Premium is not profit. You are accepting an obligation of up to $6,400 and funding it in full before cover starts.</p>
+<a class="btn primary" href="#">Submit quote and reserve collateral</a></aside>
+</div>
+</main></div>
+</body>
+</html>

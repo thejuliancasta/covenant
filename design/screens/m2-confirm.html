@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Confirm what matters · CostShield design</title>
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="screens.css">
+<script src="app.js"></script>
+</head>
+<body>
+<main class="phone"><div class="body">
+<div class="rowx between"><a class="btn text" style="padding:0" href="m1-connect.html">Back</a><span class="small muted">Step 2 of 3</span></div>
+<div class="stack tight">
+<h1 class="h1">We found diesel in your books. Check three things.</h1>
+<p class="sub">Your books show what you spent, not always how many gallons. These answers change your offer, so we ask instead of guessing.</p>
+</div>
+<div class="card">
+<div class="field"><div class="rowx between"><label for="gal">Gallons you expect to buy each month</label><span class="chip warn">Estimated</span></div><input id="gal" inputmode="numeric" value="10,000"><span class="small muted">Estimated from $39,900 a month of fuel spend.</span></div>
+<div class="field"><div class="rowx between"><label for="reg">Where you mostly fuel</label><span class="chip">From your vendors</span></div><select id="reg"><option>Midwest</option><option>Gulf Coast</option><option>East Coast</option><option>West Coast</option></select></div>
+<div class="field"><label for="sur">Share of fuel cost your customers cover through a surcharge</label><select id="sur"><option>None</option><option>About a quarter</option><option>About half</option><option>Most of it</option></select></div>
+</div>
+<a class="btn text" href="#">See the purchases behind these numbers</a>
+<a class="btn primary push" href="m3-costs.html">Looks right</a>
+</div></main>
+</body>
+</html>

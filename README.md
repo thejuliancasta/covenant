@@ -1,5 +1,7 @@
 # CostShield
 
+> **Design proposal on this branch:** a reworked UI/UX for the owner app and a provider workspace lives in [`design/`](design/README.md). It is reference material, not shipped code.
+
 **Cost protection for small businesses, starting from the ledger.** A business uploads its accounting export. CostShield classifies the expenses, measures which costs follow a market price, assigns a risk pool, tests whether any real instrument hedges the risk, prices and backtests a diesel price cap, and settles a replayed price shock as a private payout on Solana devnet, using Helius Privacy Rings so the amounts stay encrypted on chain. The business can prove its cover and payouts to its lender with a read-only key.
 
 > This is a simulation built for the UBC 2026 Hackathon. It is not an offer of insurance or derivatives. It takes no real premiums, places no orders and pays no real money. Devnet test dollars only.
