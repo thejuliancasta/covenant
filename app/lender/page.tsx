@@ -56,7 +56,8 @@ export default function LenderPage() {
   }, [check]);
 
   const share = "share" in state ? state.share : null;
-  const region = share ? REGION_LABEL[share.region] ?? share.region : "";
+  // The region in plain words: "Midwest (PADD 2)" becomes "Midwest".
+  const region = share ? (REGION_LABEL[share.region] ?? share.region).replace(/\s*\(PADD \d+\)/, "") : "";
   const period = share ? monthLabel(periodYm(share.period), true) : "";
 
   return (
@@ -81,9 +82,9 @@ export default function LenderPage() {
           {state.kind === "reading" ? <p className="text-[13px] text-muted">Reading the shared link…</p>
 
             : state.kind === "none" ? (<>
-              <PageHead eyebrow="Payout proof" title="No payout proof found." lede="This page shows a fleet's diesel cover and payouts to its lender or factoring company. Open the link the fleet shared with you: it ends in # followed by a long code that carries read-only viewing keys." />
+              <PageHead eyebrow="Payout proof" title="No payout proof found." lede="This page lets a lender or factoring company check a business's diesel protection: how much money was locked on Solana to pay it, and what was paid. Open the link the business shared with you: it ends in # followed by a long code that carries read-only viewing keys." />
               <Card className="max-w-3xl">
-                <p className="max-w-[70ch] text-[13.5px] leading-[1.6] text-muted">A fleet creates the link on CostShield&apos;s payout screen after a settlement, under &quot;Share with your lender&quot;. The viewing keys let you read each protection step&apos;s funded amount and whether it paid. They cannot move money.</p>
+                <p className="max-w-[70ch] text-[13.5px] leading-[1.6] text-muted">A business creates the link on CostShield&apos;s Payouts screen after a settlement, under &quot;Proof for your lender&quot;. The amounts on Solana are encrypted with Helius Privacy Rings; the viewing keys let you read how much was set aside for each step and whether it paid. They cannot move money.</p>
                 <div className="mt-5">
                   <Link href="/" className="group/btn inline-flex min-h-10 items-center justify-center gap-2 rounded-control bg-jade px-[18px] py-2.5 text-sm font-medium text-jade-ink transition-[background-color,transform] duration-150 ease-out hover:bg-jade/90 active:scale-[0.98]">
                     Go to CostShield
@@ -94,14 +95,14 @@ export default function LenderPage() {
             </>)
 
             : state.kind === "bad" ? (<>
-              <PageHead eyebrow="Payout proof" title="This link cannot be read." lede="Ask the fleet to copy the link again from the payout screen. Links are long, and chat apps sometimes cut them off." />
+              <PageHead eyebrow="Payout proof" title="This link cannot be read." lede="Ask the business to copy the link again from the Payouts screen. Links are long, and chat apps sometimes cut them off." />
               <div className="max-w-3xl"><Note tone="warn" title="The shared code is damaged">{state.message}</Note></div>
             </>)
 
             : (<>
               <PageHead eyebrow={`Read-only, policy ${state.share.policyId}`}
                 title={state.kind === "ok" ? <>Payout proof: <span className="num">{tusd(state.view.totalPaid, 0)}</span> paid for {period}</> : state.kind === "error" ? <>This payout proof could not be checked.</> : <>Payout proof for {period}</>}
-                lede={<>A business shared read-only keys for {state.share.steps.length} chunks of money set aside against the official {region} diesel price. Amounts are encrypted on Solana devnet. These keys read them; they cannot move money.</>} />
+                lede={<>A business protected its diesel bill with CostShield. A backer locked money for {state.share.steps.length} steps in vaults on Solana devnet that only the program can open; each step pays the business when the official {region} diesel price is above its line. The amounts are encrypted with Helius Privacy Rings, hidden from the public. This link&apos;s read-only viewing keys let you read them. They cannot move money.</>} />
 
               {state.kind === "loading" && <Pending share={state.share} />}
 
@@ -118,12 +119,12 @@ export default function LenderPage() {
                 <CardTitle>What this link can and cannot do</CardTitle>
                 <div className="mt-4 grid gap-x-10 gap-y-2.5 text-[13.5px] leading-[1.55] md:grid-cols-2">
                   <ul className="space-y-2.5">
-                    <li className="flex gap-2.5 text-ink2"><Mark ok />Decrypt each step&apos;s private balance: how much was funded and whether it paid.</li>
-                    <li className="flex gap-2.5 text-ink2"><Mark ok />Check the public step accounts on Solana Explorer: trigger prices and paid status.</li>
+                    <li className="flex gap-2.5 text-ink2"><Mark ok />Read each step&apos;s encrypted balance: how much was set aside and whether it paid.</li>
+                    <li className="flex gap-2.5 text-ink2"><Mark ok />Check the public step accounts on Solana Explorer: the price each step pays at, and whether it paid.</li>
                   </ul>
                   <ul className="space-y-2.5">
                     <li className="flex gap-2.5 text-ink2"><Mark />Spend or move any funds. A viewing key is not a spending key.</li>
-                    <li className="flex gap-2.5 text-ink2"><Mark />See the fleet&apos;s other balances or transfers.</li>
+                    <li className="flex gap-2.5 text-ink2"><Mark />See the business&apos;s other balances or transfers.</li>
                   </ul>
                 </div>
                 <p className="mt-5 max-w-[90ch] text-[12px] leading-[1.6] text-faint">The keys travel in the part of the link after #, which browsers do not send when loading this page. To decrypt, this page sends them to the CostShield server, which reads the balances on Solana devnet. Anyone with the link can read these amounts. The program cannot check encrypted funding amounts itself; this decryption is that check.</p>
@@ -151,7 +152,7 @@ const PLATE_GRID = "sm:grid-cols-[84px_minmax(0,1fr)_minmax(0,1.5fr)_96px_minmax
 function PlateHead() {
   return (
     <div aria-hidden className={cx("hidden gap-4 px-4 pb-2 text-[12px] text-faint sm:grid", PLATE_GRID)}>
-      <span>Chunk</span><span className="text-right">Pays when price ≥</span><span className="text-right">Set aside in advance</span><span>Status</span><span>Accounts</span>
+      <span>Step</span><span className="text-right">Pays when price ≥</span><span className="text-right">Set aside in advance</span><span>Status</span><span>Accounts</span>
     </div>
   );
 }
@@ -190,7 +191,7 @@ function Pending({ share }: { share: LenderShare }) {
       <ul className="space-y-2">
         {share.steps.map((s) => (
           <li key={s.index} className={cx("grid gap-2 py-3.5 sm:gap-4 sm:px-4", PLATE_GRID)}>
-            <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Chunk {s.index}</span></Cell>
+            <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Step {s.index}</span></Cell>
             <Cell label="Pays when price ≥" className="sm:text-right"><span className="text-[13px] text-faint">reading…</span></Cell>
             <Cell label="Set aside in advance" className="sm:text-right"><CipherGlyphs length={8} seed={`${share.policyId}-${s.index}`} className="text-[15px]" label="Encrypted, not yet decrypted" /></Cell>
             <Cell label="Status"><span className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-cipher"><LockIcon />encrypted</span></Cell>
@@ -221,9 +222,9 @@ function Verified({ share, view }: { share: LenderShare; view: LenderView }) {
         <Card>
           <div className="grid grid-cols-2 gap-x-5 gap-y-6 md:grid-cols-4">
             <Stat label="Set aside in advance" value={tusd(funded, 0)} sub="read with the shared keys" />
-            <Stat label="Paid to the fleet" value={<span className="text-jade">{tusd(paid, 0)}</span>} sub={`${view.steps.filter((s) => s.paid).length} of ${view.steps.length} steps released`} />
-            <Stat label="Chunks set aside or paid" value={`${backed} of ${view.steps.length}`} sub={backed < view.steps.length ? `${view.steps.length - backed} with no balance and no payout` : "every step holds funds or has paid"} />
-            <Stat label="Checked" value={<span className="text-[22px] sm:text-[24px]">{Number.isNaN(checked.getTime()) ? view.checkedAt : checked.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>} sub={`on Solana devnet · ${REGION_LABEL[view.region] ?? view.region}, ${monthLabel(periodYm(view.period), true)}`} />
+            <Stat label="Paid to the business" value={<span className="text-jade">{tusd(paid, 0)}</span>} sub={`${view.steps.filter((s) => s.paid).length} of ${view.steps.length} steps released`} />
+            <Stat label="Steps set aside or paid" value={`${backed} of ${view.steps.length}`} sub={backed < view.steps.length ? `${view.steps.length - backed} with no balance and no payout` : "every step holds funds or has paid"} />
+            <Stat label="Checked" value={<span className="text-[22px] sm:text-[24px]">{Number.isNaN(checked.getTime()) ? view.checkedAt : checked.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>} sub={`on Solana devnet · ${(REGION_LABEL[view.region] ?? view.region).replace(/\s*\(PADD \d+\)/, "")}, ${monthLabel(periodYm(view.period), true)}`} />
           </div>
         </Card>
       </motion.div>
@@ -231,7 +232,7 @@ function Verified({ share, view }: { share: LenderShare; view: LenderView }) {
       <Card>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <CardTitle>Protection steps</CardTitle>
-          <span className="text-[12px] text-faint">public on chain: trigger and status · private: amount</span>
+          <span className="text-[12px] text-faint">public on Solana: the price each step pays at, and whether it paid · encrypted: the amount</span>
         </div>
         <div className="mt-4"><PlateHead /></div>
         <ul className="space-y-2">
@@ -240,7 +241,7 @@ function Verified({ share, view }: { share: LenderShare; view: LenderView }) {
             return (
               <motion.li key={s.index} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, delay: i * STAGGER, ease: [0.2, 0.8, 0.2, 1] }}
                 className={cx("grid gap-2 py-3.5 sm:gap-4 sm:px-4", PLATE_GRID)}>
-                <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Chunk {s.index}</span></Cell>
+                <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Step {s.index}</span></Cell>
                 <Cell label="Pays when price ≥" className="sm:text-right"><span className="num text-[13.5px] text-ink2">{ppg(s.triggerPrice)}</span></Cell>
                 <Cell label="Set aside in advance" className="sm:text-right">
                   <span className="inline-flex items-center gap-2 sm:justify-end">
@@ -258,7 +259,7 @@ function Verified({ share, view }: { share: LenderShare; view: LenderView }) {
         <div className="mt-4">
           <Row label="Total funded">{tusd(view.totalFunded)}</Row>
           <Row label="Total paid"><span className="text-jade">{tusd(view.totalPaid)}</span></Row>
-          <Row label="Policy" hint="Solana devnet, tUSD test dollars (1 tUSD = $1)"><span className="font-mono text-[12.5px]">{view.policyId}</span></Row>
+          <Row label="Policy" hint="Solana devnet, test dollars (1 test dollar = $1)"><span className="font-mono text-[12.5px]">{view.policyId}</span></Row>
         </div>
       </Card>
 

@@ -1,8 +1,10 @@
 # CostShield
 
-**Cost protection for small businesses, starting from the ledger.** A business uploads its accounting export. CostShield classifies the expenses, measures which costs follow a market price, assigns a risk pool, tests whether any real instrument hedges the risk, prices and backtests a diesel price cap, and settles a replayed price shock as a private payout on Solana devnet, using Helius Privacy Rings so the amounts stay encrypted on chain. The business can prove its cover and payouts to its lender with a read-only key.
+**A price cap on your biggest bill, set up from your books, that pays you back on its own.**
 
-> This is a simulation built for the UBC 2026 Hackathon. It is not an offer of insurance or derivatives. It takes no real premiums, places no orders and pays no real money. Devnet test dollars only.
+Other cover pays for a bad day. CostShield protects a small business from a bad year: the cost that can close it, measured from its books, backed by money locked on Solana, and private.
+
+> This is a simulation. It is not an offer of insurance or derivatives. Nothing is for sale, and no insurer or backer has signed up. It takes no real premiums, places no orders and pays no real money. Devnet test dollars only.
 
 | | |
 | --- | --- |
@@ -12,7 +14,41 @@
 | Live demo | _add your deployment URL_ (the hosted demo holds no keys, so private settlement is not enabled there; the devnet evidence is under [Deployed program](#deployed-program)) |
 | Demo video | _add your video link_ |
 
-## What it does
+## The problem
+
+Our sample company is a 10-truck Midwest fleet (a synthetic ledger built on real diesel prices).
+
+- It keeps about **$6,841 a year** after every bill.
+- It spends **$581,354 a year on diesel**, a price it does not control.
+- A bad diesel year, the kind that comes about once every 20 years, costs it **$56,018: 8.2 times its yearly profit**.
+
+Airlines and big shippers buy protection against fuel spikes in advance. Small businesses never do: it is complex, it has minimum sizes, and nobody offers it to them.
+
+## What CostShield does
+
+1. **Reads your books.** Upload an accounting export. CostShield sorts every transaction, finds the cost a market controls (for the fleet, diesel) and measures what a spike would cost the business.
+2. **Prices protection on that cost.** Protection pays when the official diesel price for the region goes above a line. For the sample fleet, protection bought in November 2025 starts at $4.36 a gallon and has a model price of about $361 a month.
+3. **Pays you back on its own.** Money is set aside in advance on Solana. When the official monthly price is above the line, the business signs once and the program pays. No claim, no adjuster, no waiting. Replayed on real prices, the sample fleet's protection would have paid back $25,952 from November 2025 to October 2026.
+
+## What each piece does
+
+**Your books.** CostShield reads an accounting export (QuickBooks Online "Transaction Detail" or any CSV with Debit/Credit columns), sorts every transaction with fixed rules, reads the gallons off each fuel receipt and measures what a spike costs after the fuel surcharges customers already pay. Every number traces to a line in the books or a public dataset; no AI model guesses any number. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built and unit-tested but switched off in the demo; it only reads the books and never changes them. Code: `lib/engine/pipeline.ts` (with `ingest.ts`, `classify.ts`, `exposure.ts`), `lib/ledger/`.
+
+**The U.S. Energy Information Administration (EIA) price.** Protection pays on the official weekly diesel price for the business's region, averaged per month, not on anyone's say-so. The price at your pump will not match it exactly, so CostShield shows how closely it has followed, from the business's own receipts. Code: `lib/data/` (EIA snapshots, each with its source and fetch time), `lib/engine/exposure.ts`.
+
+**The Solana program.** Before cover starts, the backer locks the full amount the protection could ever pay, in 25-cent steps (25 cents a gallon each, 8 steps up to $2.00 above the line), in vaults only the program can open. Each month the official price is posted once, with a fingerprint (sha256) of the government data file; if it is at or above a step's line, the business signs once and the program releases that step, and the backer cannot block it or take it back. Unused money goes back to the backer only after every month of the term has been posted below the line, and each step pays once, only to its business. It runs on devnet, where our run funded and settled one month (September 2026); one price-reporting key posts the price, and the program stores the file's fingerprint rather than reading the file itself. Code: `solana/program/src/lib.rs`, `lib/chain/server.ts`. Transactions: [Deployed program](#deployed-program).
+
+**Helius Privacy Rings.** The money in each vault and every payout are encrypted balances, and the program enforces the rules without seeing the amounts. The public can see that a step paid, not how much, so a competitor or customer cannot work out the business's gallons or margins. The business can give its lender a read-only viewing key that reads the amounts and cannot move money. Amounts are hidden from the public, not from everyone: Helius's prover sees them to build the proof, and in this demo our server holds the test keys. Code: `lib/chain/rings.ts`.
+
+**The trade-off: 25-cent steps.** Because the program cannot read encrypted amounts, it cannot work out an exact payout, so it pays in whole steps. In September 2026 the official Midwest price averaged $6.35 against a line of $4.357: 7 of 8 steps paid, $5,070, against $5,776 by the exact formula. The last $706 did not fill a step. The payout screen shows both numbers.
+
+**Gemini Prediction Markets.** CostShield reads Gemini's live oil-price markets (yes/no contracts on whether Brent crude will be above a price) and turns their prices into the size of move traders expect. That sets today's price of protection: a jumpier market makes protection cost more. It also tests every live Gemini market as a way to carry the risk, and today none qualifies (there is no diesel market, and the oil markets expire in days against a 12-month cover), so the app says so instead of pretending. The November 2025 price uses an assumed 35% volatility, not Gemini, and CostShield places no orders. Code: `lib/engine/gemini.ts`, `evaluateMarkets` in `lib/engine/pipeline.ts`.
+
+**The lender link.** After a settlement, the business can send its lender a link to `/lender` that carries read-only viewing keys. The page shows each step's line, how much was set aside and whether it paid; the keys can read the amounts and cannot move money. No lender has used it yet, and in this demo our server does the decryption. Code: `app/lender`, `lib/chain/lender.ts`.
+
+## The pipeline in detail
+
+Terms used from here on: the *trigger* or *strike* is the line, in dollars a gallon, above which protection pays; the *underwriter* is the backer; *collateral* is the money set aside in advance; the *oracle* is the one key that posts the official price on chain; the *premium* is what protection costs.
 
 1. **Import.** A real CSV importer reads QuickBooks Online "Transaction Detail" exports (including the report rows above the header) and generic exports with Debit/Credit columns. Unreadable rows are counted and reported.
 2. **Classify.** Ordered, deterministic rules map vendor, account and memo to cost categories and risk factors. There is no LLM in the pipeline. Unmatched lines stay "unclassified".
@@ -23,7 +59,7 @@
 7. **Settle privately.** A program on Solana devnet holds the cover as a ladder of steps. The underwriter funds each step in advance from its private balance. An oracle key posts the EIA monthly mean with the data file's sha256. The program lets the fleet release every step whose trigger the index reached, and Privacy Rings pays the fleet in encrypted test dollars (tUSD). Amounts, payouts and balances are encrypted on chain.
 8. **Share with a lender.** The fleet sends its lender a link that carries read-only viewing keys. The lender's page shows each step's trigger, funded amount and whether it paid. The key can decrypt, not spend.
 
-The demo company is a synthetic 10-truck Midwest fleet. Its result: diesel is 26% of revenue, a 1-in-20 price year costs about 8 times annual operating profit after surcharges, and a cap bound in November 2025 would have paid about $25,950 through October 2026 under the linear cap formula. On chain the cap pays in $0.25-per-gallon steps, so a settled month pays the linear amount rounded down to the step.
+The demo company is a synthetic 10-truck Midwest fleet. Its result: diesel is 26% of revenue, a 1-in-20 price year costs about 8 times annual operating profit after surcharges, and a cap bound in November 2025 would have paid $25,952 through October 2026 under the linear cap formula. On chain the cap pays in $0.25-per-gallon steps, so a settled month pays the linear amount rounded down to the step.
 
 ## Run it
 
@@ -123,7 +159,7 @@ The settlement program is a Pinocchio program on Solana devnet, adapted from Equ
 - **Step accounts (public).** Each policy month is a ladder of steps. A step account stores the terms only: the fleet, the underwriter, the index id (EIA regional diesel), the period (YYYYMM), and the trigger price in 1/1000 $ per gallon. Both parties sign when the steps are created. No amount is stored.
 - **Step vaults (private).** Each step's money sits in a Privacy Rings private balance owned by a program-derived address `["vault", step]`. Only the program can sign for it. The underwriter funds all steps in advance in one private transfer.
 - **Oracle reports (public, write-once).** One oracle key posts the EIA monthly mean for a period together with the sha256 of the data file it used. A second report for the same index and period is refused.
-- **Release.** The fleet signs `release` for a step. The program checks that the report is authentic, matches the step's index and period, and is at or above the trigger, then signs for the vault and calls Privacy Rings, which pays the fleet privately. The step is marked paid.
+- **Release.** The fleet signs `release` for a step. The program checks that the report is a genuine report account posted by the oracle key (it does not read the EIA file; it stores the file's sha256), matches the step's index and period, and is at or above the trigger, then signs for the vault and calls Privacy Rings, which pays the fleet privately. The step is marked paid.
 - **Reclaim.** After every period of the term is reported, the underwriter can take back steps that never triggered.
 
 Money is tUSD, a devnet test dollar with 6 decimals, registered with Privacy Rings. 1 tUSD stands for $1. There is no demo scaling.
@@ -157,7 +193,7 @@ Endpoints (public, no key): `GET /v1/prediction-markets/events?status=active&cat
 
 - **Discovery.** Every active Commodities and Economics event is mapped to a cost driver (diesel, natural gas, interest rates) or to nothing, with the reason shown.
 - **Hedge suitability.** Each related market is scored on index match, 12-month fit to the business's cost, tenor against a 12-month cover period, displayed depth against one pool-month, and quote presence. There is no diesel market on Gemini today. The Brent ladders are the closest, and they fail: Brent explains 77% of 12-month retail diesel moves against 96% for ULSD, the ladders expire in days, and depth covers about one fleet. They are reported as "signal only".
-- **Implied volatility.** A ladder of "Brent above K" binaries is a survival curve. The engine fits a lognormal to the two-sided quotes and annualises the slope. That implied volatility is the default volatility input to the cap price, replacing an options data feed the project cannot license.
+- **Implied volatility.** A ladder of "Brent above K" binaries is a survival curve. The engine fits a lognormal to the two-sided quotes and annualises the slope. That implied volatility is the volatility input to today's cap price, replacing an options data feed the project cannot license. If Gemini cannot be reached or lists no usable ladder, today's price uses an assumed 40%. The November 2025 price in the replay always uses an assumed 35%, not Gemini.
 - **Ladder replication.** The engine sizes the binary ladder that would replicate one fleet-month of cap, walks each ask book, and reports cost and unfilled size.
 
 CostShield places no orders and Gemini markets do not settle the program.
@@ -187,7 +223,7 @@ More in [docs/MODEL.md](docs/MODEL.md) and [docs/LIMITATIONS.md](docs/LIMITATION
 | Prediction market quotes and books | Gemini public API, read live | Real |
 | Sample ledger | `scripts/generate-ledger.ts`, fixed seed, fuel prices built on the EIA Midwest index | Synthetic |
 | Shock sizes, fit statistics, backtest | Calculated by the engine from the data above | Calculated |
-| Volatility | Implied from the Gemini Brent ladder, or 40% if Gemini is unreachable | Signal or assumption |
+| Volatility | Today's price: implied from the Gemini Brent ladder, or 40% if Gemini is unreachable. November 2025 price: 35% | Signal or assumption |
 | Premium | Model price | Assumption |
 | Oracle report on chain | Monthly mean recomputed by the server from the EIA snapshot, posted with the file's sha256 by one oracle key | Real data, trusted reporter |
 | Settlement transactions | Solana devnet program and Helius Privacy Rings, test dollars (tUSD) | Real, devnet |

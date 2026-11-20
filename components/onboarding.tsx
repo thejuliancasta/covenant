@@ -196,7 +196,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
     <div className="mx-auto max-w-5xl">
       <motion.header initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.2, 0.8, 0.2, 1] }} className="mb-8">
         <h1 className={cx("text-[28px] leading-[1.1] sm:text-[34px] sm:leading-[1.08]", display)}>Connect your books</h1>
-        <p className="mt-3 max-w-2xl text-[15px] leading-[1.6] text-muted sm:text-base">We only read your books and never change them. Uploaded files aren't stored.</p>
+        <p className="mt-3 max-w-2xl text-[15px] leading-[1.6] text-muted sm:text-base">CostShield reads your books, finds the cost a market controls (for a trucking fleet, diesel), measures what a price spike would do to your profit, and shows what protection would pay you back. We only read your books and never change them. Uploaded files aren&apos;t stored.</p>
       </motion.header>
 
       <Card className="mb-4">
@@ -207,12 +207,12 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
             <div className="relative mt-1.5">
               <select id="region" value={region} onChange={(e) => setRegion(e.target.value)}
                 className="min-h-10 w-full cursor-pointer appearance-none rounded-control border border-line/[.14] bg-well py-2.5 pl-3.5 pr-10 text-sm text-ink transition-[border-color] duration-150 hover:border-line/25">
-                <option value="PADD2">Midwest (EIA PADD 2)</option>
+                <option value="PADD2">Midwest</option>
                 <option value="US">Other / U.S. average</option>
               </select>
               <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted"><path d="m4.5 6.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
-            <p className="mt-1.5 text-[12px] leading-[1.45] text-faint">Sets the price index your costs are compared with. Two regions are bundled in this prototype.</p>
+            <p className="mt-1.5 text-[12px] leading-[1.45] text-faint">Protection pays on the official weekly diesel price for this region (U.S. government data). Two regions are available in this demo.</p>
           </div>
           <motion.label ref={consentRef} animate={shake} className={cx("flex min-h-11 cursor-pointer items-start gap-3 py-2 text-[14px] leading-5 transition-[color] duration-150",
             consent ? "text-ink" : err && /Confirm/.test(err) ? "text-rust" : "text-ink2 hover:text-ink")}>
@@ -233,7 +233,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="flex flex-col">
           <div className="flex items-center justify-between gap-3"><CardTitle>Try a sample fleet</CardTitle><Tag tone="info">Synthetic data</Tag></div>
-          <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">John&apos;s Trucking LLC: 10 trucks in the Midwest, 3,315 transactions over 24 months. The ledger is generated, but its fuel prices follow the real EIA Midwest diesel index. It goes through the same importer as an upload.</p>
+          <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">John&apos;s Trucking LLC: 10 trucks in the Midwest, 3,315 transactions over 24 months. The books are made up; the diesel prices in them are real (the official Midwest price, U.S. government data). It goes through the same importer as an upload.</p>
           <div className="mt-auto pt-4"><Button size="lg" onClick={sample} disabled={busy}>{busy ? "Loading…" : <>Try the sample fleet<Arrow /></>}</Button></div>
         </Card>
         <Card className="flex flex-col">
@@ -281,7 +281,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
             ["Read", "transaction date, type, vendor or customer name, account, memo and amount."],
             ["Not read", "bank passwords, card numbers, or payroll tax forms."],
             ["Storage", "the sign-in token is discarded after the pull. The lines are analyzed in this session and are not saved to a database."],
-            ["Sharing", "nothing from your file is sent to a market, an insurer or a blockchain."],
+            ["Sharing", "nothing from your file goes to a market or an insurer. If you settle a payout, the amounts worked out from your gallons go to Solana devnet, encrypted and hidden from the public."],
           ] as const).map(([k, v]) => (
             <div key={k}><dt className="font-medium text-ink">{k}</dt><dd className="mt-0.5 text-muted">{v.charAt(0).toUpperCase() + v.slice(1)}</dd></div>
           ))}
@@ -332,7 +332,7 @@ function StatusMark({ v }: { v?: StageView }) {
 /** Product wording for each pipeline stage; the server's own wording stays in the docs. */
 const STEP_LABEL: Record<string, string> = {
   classify: "Sorting costs", financials: "Measuring where the money goes", exposure: "Matching prices you don't control",
-  pool: "Comparing with similar businesses", markets: "Checking live markets", price: "Pricing protection",
+  pool: "Comparing with similar businesses", markets: "Reading Gemini's live oil markets", price: "Pricing protection",
 };
 function stepLabel(id: string, v: StageView | undefined, read: number) {
   if (id === "ingest") return Number.isFinite(read) ? `Reading ${read.toLocaleString("en-US")} transactions` : "Reading transactions";
@@ -407,7 +407,7 @@ export function Analyzing({ stages, error, source, onBack, onNext, result }: { s
               <div className="books-found mt-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t border-line/[0.08] pt-5" role="status">
                 <div className="min-w-0">
                   <p className={cx("text-[22px] leading-[1.15] sm:text-[26px]", display)}>{risks === 1 ? "1 risk worth protecting found" : "No risk worth protecting found"}</p>
-                  <p className="mt-1.5 text-[13.5px] leading-[1.5] text-muted">{risks === 1 ? "Fleet fuel: its price follows the diesel market." : "Risks shows every cost we checked and why."}</p>
+                  <p className="mt-1.5 text-[13.5px] leading-[1.5] text-muted">{risks === 1 ? "Diesel: its price is set by a market you don't control." : "Risks shows every cost we checked and why."}</p>
                 </div>
                 <Button size="lg" onClick={onNext}>{risks === 1 ? "See your risk" : "See what we checked"}<Arrow /></Button>
               </div>

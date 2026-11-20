@@ -68,8 +68,8 @@ export function PriceRiseControl({ value, onChange, offset, max = 3, step = 0.05
       {/* Zone labels above the column */}
       <div aria-hidden className="relative h-5 text-[12px]">
         <div className="absolute inset-y-0" style={{ left: `${INSET}px`, right: `${INSET}px` }}>
-          {absorbW > 0.11 && <span className="absolute top-0 hidden -translate-x-1/2 whitespace-nowrap text-faint sm:inline" style={{ left: `${(absorbW / 2) * 100}%` }}>You absorb</span>}
-          <span className="absolute top-0 whitespace-nowrap pl-1 text-jade" style={{ left: `${absorbW * 100}%` }}>Cap plates, $0.25 a gallon each</span>
+          {absorbW > 0.11 && <span className="absolute top-0 hidden -translate-x-1/2 whitespace-nowrap text-faint sm:inline" style={{ left: `${(absorbW / 2) * 100}%` }}>You cover this</span>}
+          <span className="absolute top-0 whitespace-nowrap pl-1 text-jade" style={{ left: `${absorbW * 100}%` }}>Paid back in {Math.round(PLATE * 100)}-cent steps</span>
         </div>
       </div>
       <div className="relative mt-1.5 h-[72px]">

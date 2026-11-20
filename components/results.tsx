@@ -10,6 +10,8 @@ import { PriceVsTrigger } from "./fx/price-vs-trigger";
 import { SPRING_FLUID, tok } from "./fx/motion";
 
 const MARKET = new Set(["fleet_fuel", "natural_gas", "electricity", "interest"]);
+/** The region in plain words: "Midwest (PADD 2)" becomes "Midwest". */
+const area = (label: string) => label.replace(/\s*\(PADD \d+\)/, "");
 /** Inner panel: a hairline sub-surface inside a card. */
 const SUB = "rounded-[10px] border border-line/[0.08] bg-panel/60 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.03)]";
 
@@ -100,7 +102,7 @@ export function Overview({ a, onNext, detail, onDetail }: { a: Analysis; onNext:
         <PageHead eyebrow={span}
           title={bad ? "Diesel is your biggest risk." : "We found no cost risk worth protecting."}
           lede={bad
-            ? <>We read {int(a.lineCount)} transactions. Fuel is {pct(d!.shareOfRevenue)} of your revenue and its price is set by a market you do not control.</>
+            ? <>We read {int(a.lineCount)} transactions. Diesel is {pct(d!.shareOfRevenue)} of your revenue, and its price is set by a market you don&apos;t control. Airlines and big shippers buy protection against fuel spikes in advance. Small businesses almost never do: it&apos;s complex and nobody offers it to them. Next: what it would do for you.</>
             : <>We read {int(a.lineCount)} transactions. None of your market-driven costs is large enough against profit to justify paying for protection.</>} />
         <Card>
           {bad && (
@@ -129,7 +131,7 @@ export function Overview({ a, onNext, detail, onDetail }: { a: Analysis; onNext:
       <PageHead eyebrow={`${a.company ?? "Your business"}, ${monthLabel(f.ttm[0])} to ${monthLabel(f.ttm[f.ttm.length - 1])}`}
         title={d?.material ? `Diesel is your biggest risk: a bad year would cost you ${usd(d.shocks[1].netImpact)}${d.shocks[1].pctOfProfit ? `, ${d.shocks[1].pctOfProfit.toFixed(1)} times your yearly profit` : ""}.` : "We found no cost risk worth protecting."}
         lede={<>We analyzed {int(a.lineCount)} transactions over {f.months.length} months. {d?.material
-          ? <>Fuel is {pct(d.shareOfRevenue)} of your revenue and its price is set by a market you do not control. Most of your other costs either do not follow a market or are too small to matter.</>
+          ? <>Diesel is {pct(d.shareOfRevenue)} of your revenue, and its price is set by a market you don&apos;t control. Most of your other costs either don&apos;t follow a market or are too small to matter.</>
           : <>None of your market-driven costs is large enough against profit to justify paying for protection. Repricing or setting cash aside is the better tool.</>}</>} />
       <DetailSwitch detail={detail} onDetail={onDetail} />
 
@@ -161,7 +163,7 @@ export function Overview({ a, onNext, detail, onDetail }: { a: Analysis; onNext:
               <span className="flex gap-1.5"><Tag tone="neutral">Biggest risk</Tag><Tag tone={d.material ? "warn" : "neutral"}>{d.material ? "Material" : "Not material"}</Tag></span>
             </div>
             <p className="mt-3 text-[13.5px] leading-[1.6] text-muted">
-              You bought about {int(d.gallonsTtm)} gallons for {usd(d.spendTtm)} in the last 12 months. In a 1-in-20 price year that bill rises {pct(d.shocks[1].pct)}.
+              You bought about {int(d.gallonsTtm)} gallons for {usd(d.spendTtm)} in the last 12 months. In a bad year (the kind that comes about once every 20 years) that bill rises {pct(d.shocks[1].pct)}.
               After the fuel surcharges your contract customers already pay, about <span className="font-medium text-ink">{usd(d.shocks[1].netImpact)}</span> lands on you{d.shocks[1].pctOfProfit ? <>, which is <span className="font-medium text-ink">{d.shocks[1].pctOfProfit.toFixed(1)} times</span> your annual operating profit</> : null}.
             </p>
             <ul className="mt-5 grid gap-3.5" aria-label="Price shocks">
@@ -182,15 +184,15 @@ export function Overview({ a, onNext, detail, onDetail }: { a: Analysis; onNext:
           </Card>
 
           {detail && <Card>
-            <CardTitle>Your price per gallon follows the official {d.regionLabel} diesel price</CardTitle>
+            <CardTitle>Your price per gallon follows the official {area(d.regionLabel)} diesel price</CardTitle>
             <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">
               {d.fit.method === "ledger-regression"
-                ? <>R² {d.fit.r2.toFixed(2)} on {d.fit.n} monthly changes.<Ev e="C" /> You pay about {ppg(Math.abs(d.fit.levelBasis))} {d.fit.levelBasis < 0 ? "below" : "above"} the index, and month to month your price strays from it by about ±{ppg(d.fit.residualStd)}. That gap is the basis risk an index payout cannot remove.</>
+                ? <>R² {d.fit.r2.toFixed(2)} on {d.fit.n} monthly changes.<Ev e="C" /> You pay about {ppg(Math.abs(d.fit.levelBasis))} {d.fit.levelBasis < 0 ? "below" : "above"} the official price, and month to month your price strays from it by about ±{ppg(d.fit.residualStd)}. Protection that pays on the official price can&apos;t remove that gap.</>
                 : <>{d.fit.note}<Ev e="A" /></>}
             </p>
             <div className="mt-4">
               <LineChart height={280} x={d.monthly.map((m) => monthLabel(m.month))} yFmt={(v) => `$${v.toFixed(2)}`}
-                lines={[{ label: `EIA ${d.regionLabel} retail diesel`, color: tok("faint"), values: d.monthly.map((m) => m.index), dashed: true }, { label: "Price you paid (fuel-card lines with gallons)", color: tok("heat"), values: d.monthly.map((m) => m.pricePaid), width: 2.4 }]} />
+                lines={[{ label: `Official ${area(d.regionLabel)} diesel price (U.S. government data)`, color: tok("faint"), values: d.monthly.map((m) => m.index), dashed: true }, { label: "Price you paid (fuel-card lines with gallons)", color: tok("heat"), values: d.monthly.map((m) => m.pricePaid), width: 2.4 }]} />
             </div>
           </Card>}
         </Reveal>
@@ -233,7 +235,7 @@ export function Overview({ a, onNext, detail, onDetail }: { a: Analysis; onNext:
           <div className="mt-3 grid gap-x-10 md:grid-cols-2">
             <Row label="Transactions read" hint={`${a.report.format}, header on row ${a.report.headerRow}`}>{int(a.report.imported)} of {int(a.report.rowsRead)}</Row>
             <Row label="Rows skipped" hint={a.report.skipped.map((s) => `${s.reason}: ${s.count}`).join("; ") || "None"}>{a.report.skipped.reduce((s, x) => s + x.count, 0)}</Row>
-            {d && <Row label="Fuel spend with gallons on the record" hint="The rest is estimated as dollars divided by the weekly index">{pct(d.gallonsObservedShare)}</Row>}
+            {d && <Row label="Fuel spend with gallons on the record" hint="The rest is estimated as dollars divided by the official weekly price">{pct(d.gallonsObservedShare)}</Row>}
             {d && <Row label="Share of gallons not surcharged" hint={d.surcharge.note}>{pct(d.unsurchargedShare)}<Ev e="E" /></Row>}
           </div>
           <p className="mt-3 text-[12px] leading-[1.6] text-faint">Labels: <Ev e="V" /> verified public data, <Ev e="C" /> calculated from data, <Ev e="E" /> estimate, <Ev e="A" /> assumption.</p>
@@ -244,20 +246,30 @@ export function Overview({ a, onNext, detail, onDetail }: { a: Analysis; onNext:
   );
 }
 
-export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNext: () => void } & DetailProps) {
+export function Protection({ a, onNext, onBack, detail, onDetail }: { a: Analysis; onNext: () => void; onBack?: () => void } & DetailProps) {
   const d = a.diesel, p = a.policy, bt = a.backtest, m = a.markets;
-  if (!d || !p || !bt) return <Card><p className="text-sm text-muted">No protection candidate: this ledger has no material, hedgeable exposure.</p></Card>;
+  if (!d || !p || !bt) return (
+    <div className="space-y-4">
+      <PageHead title="Nothing here needs protection." lede="No cost in this file follows a market price and is big enough against your profit to be worth protecting. Risks shows every cost we checked and why." />
+      {onBack && <div><Button variant="secondary" onClick={onBack}>Back to Risks</Button></div>}
+    </div>
+  );
   const crude = m.crude;
   const today = p.priceToday, then = p.priceAtInception;
   const waterfall: [string, string, string][] = [
-    ["You", "Pay a monthly premium", "Premium in"],
+    ["You", "Pay what protection costs, monthly", "Pays monthly"],
     ["CostShield", "Measures exposure, prices, verifies the trigger. Holds no risk and no customer money.", "Software and distribution"],
     ["Licensed insurer", "Would legally owe the payout. None has agreed to: this is the missing piece.", "Not confirmed"],
     ["Reinsurer", "Would carry the gap between retail and wholesale diesel.", "Not confirmed"],
     ["ULSD options hedge", "Would fund the benchmark part of claims.", "Modelled"],
-    ["Prediction markets", "0% of funding. Used as a price signal only.", "Live data"],
+    ["Gemini Prediction Markets", "0% of funding. Used only to read how big a move traders expect.", "Live data"],
   ];
   const months = p.replay.map((r) => ({ label: monthLabel(r.month), price: r.index, payout: r.payout }));
+  const region = area(d.regionLabel);
+  const startToday = p.todayIndex + p.strikeOffset;
+  // Today's price uses the move read from Gemini's live oil markets only when that read worked; the replay's purchase month always uses an assumed swing.
+  const fromGemini = m.volatility.evidence === "V";
+  const todayVol = fromGemini ? "It uses the move traders expect, read from Gemini's live oil markets." : m.status === "live" ? "It uses an assumed swing: no Gemini oil market could be used today." : "It uses an assumed swing: Gemini's live markets could not be reached.";
 
   // Simple view: one headline, one number, one chart, one button. The "not available" and "rejected" labels stay, as one line.
   if (!detail) {
@@ -265,7 +277,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
     return (
       <div className="space-y-4">
         <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, CostShield would pay you the difference.`}
-          lede="It pays on the gallons you actually bought and could not pass on to customers, using the official Midwest diesel price (U.S. government data)." />
+          lede={`It pays on the gallons in your books that your fuel surcharges don't pass on, using the official ${region} diesel price (U.S. government data). No claim to file: when a month's official price is above the line, a program on Solana pays you from money set aside in advance.`} />
         <Card>
           <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
             <div>
@@ -275,7 +287,8 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
             <Tag tone="bad">Not available to buy</Tag>
           </div>
           <p className="mt-3 max-w-[62ch] text-[14px] leading-[1.55] text-muted">A replay on real prices, as if you had bought it in {monthLabel(p.inceptionMonth, true)}. Nobody sold this policy.</p>
-          <p className="mt-2 max-w-[62ch] text-[14px] leading-[1.55] text-muted">Model price if bought in {monthLabel(p.inceptionMonth, true)}: <span className="num font-medium text-ink">{usd(then.premium)}</span> for 12 months, about {usd(then.premiumPerMonth)} a month. A model price, not a quote.<Ev e="A" /></p>
+          <p className="mt-2 max-w-[62ch] text-[14px] leading-[1.55] text-muted">Model price if bought in {monthLabel(p.inceptionMonth, true)}: <span className="num font-medium text-ink">{usd(then.premium)}</span> for 12 months, about {usd(then.premiumPerMonth)} a month, using an assumed swing of {pct(then.sigma)} a year. A model price, not a quote.<Ev e="A" /></p>
+          <p className="mt-2 max-w-[62ch] text-[14px] leading-[1.55] text-muted">Bought today it would cost about <span className="num font-medium text-ink">{usd(today.premiumPerMonth)}</span> a month: diesel is already ${p.todayIndex.toFixed(2)}, so protection would start at ${startToday.toFixed(2)}. {todayVol}<Ev e={m.volatility.evidence} /></p>
           <div className="mt-7 border-t border-line/[0.08] pt-6">
             <CardTitle>Diesel price vs. where protection starts</CardTitle>
             <div className="mt-4"><PriceVsTrigger trigger={p.strike} months={months} /></div>
@@ -285,7 +298,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
           <span className="font-[510] text-rust">Not available to buy.</span> {a.eligibility.reasons.slice(1).join(" ")}
           {failed.map((h) => <span key={h.name}> {h.venue}: {h.status === "signal only" ? <><span className="text-heat">signal only</span>, not a hedge.</> : <><span className="text-rust">{h.status}</span> as a hedge.</>}</span>)} The detailed analysis shows the terms, the price and every test.
         </p>
-        <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next="See it pay out" />
+        <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next="Try your own price spike" />
       </div>
     );
   }
@@ -293,7 +306,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
   return (
     <div className="space-y-4">
       <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, CostShield would pay you the difference.`}
-        lede={`Over the last ${p.replay.length} months it would have paid you ${usd(p.totalPayout)}. It pays on the gallons you actually bought and could not pass on to customers, using the official Midwest diesel price (U.S. government data).`} />
+        lede={`Over the last ${p.replay.length} months it would have paid you ${usd(p.totalPayout)}. It pays on the gallons in your books that your fuel surcharges don't pass on, using the official ${region} diesel price (U.S. government data). A program on Solana pays from money set aside in advance, so there is no claim to file.`} />
       <DetailSwitch detail={detail} onDetail={onDetail} />
 
       <Card>
@@ -303,8 +316,8 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
             <PriceVsTrigger trigger={p.strike} months={months} />
           </div>
           <div className="min-w-0">
-            <Row label="What it protects against">Diesel price increases, {d.regionLabel}</Row>
-            <Row label="Price it follows" hint="Monthly average of the weekly price">Official {d.regionLabel} diesel price<Ev e="V" /></Row>
+            <Row label="What it protects against">Diesel price increases, {region}</Row>
+            <Row label="Price it follows" hint="Monthly average of the weekly price">Official {region} diesel price<Ev e="V" /></Row>
             <Row label="Protection starts at" hint={`If bought in ${monthLabel(p.inceptionMonth)}: that month's price ${ppg(p.inceptionIndex)} plus ${usd(p.strikeOffset, 2)}`}>${p.strike.toFixed(2)} a gallon</Row>
             <Row label="Money back each month">(price − ${p.strike.toFixed(2)}) × gallons covered</Row>
             <Row label="Gallons covered" hint="From your own records, not a fixed bet">{pct(p.coveredShare)} of purchases, up to {int(p.maxCoveredGallonsPerMonth)}/month</Row>
@@ -318,7 +331,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
             {[
               "Gallons already billed to customers under a fuel surcharge.",
               `The first ${usd(p.strikeOffset, 2)} per gallon of any increase, and gallons above the monthly cap.`,
-              `The gap between your pump price and the regional index (about ±${ppg(d.fit.residualStd || 0.06)} per gallon month to month).`,
+              `The gap between your pump price and the official price (about ±${ppg(d.fit.residualStd || 0.06)} per gallon month to month).`,
               "Changes in how many miles you run, and every non-fuel cost.",
             ].map((t) => <li key={t} className="flex gap-2.5"><span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-faint" aria-hidden />{t}</li>)}
           </ul>
@@ -330,20 +343,20 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
           <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
             <div>
               <CardTitle>What protection costs</CardTitle>
-              <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">A model price, not a quote.{detail && " Hedge cost is a strip of 12 monthly call options on wholesale diesel (Black-76), divided by 0.70 to cover expenses and margin."}<Ev e="A" /></p>
-              <p className="mt-3 text-[13.5px] leading-[1.6] text-muted">Cover costs {(today.premium / then.premium).toFixed(1)} times more after the 2026 spike, and the strike would sit at {ppg(p.todayIndex + p.strikeOffset)}. Protection is cheapest before you need it.</p>
+              <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">A model price, not a quote.{detail && " Priced as 12 monthly options on wholesale diesel (Black-76 model), divided by 0.70 to cover costs and margin."}<Ev e="A" /></p>
+              <p className="mt-3 text-[13.5px] leading-[1.6] text-muted">The {monthLabel(p.inceptionMonth, true)} price uses an assumed swing of {pct(then.sigma)} a year. Bought today, protection costs {(today.premium / then.premium).toFixed(1)} times more: diesel is already {ppg(p.todayIndex)}, so it would start at {ppg(startToday)}. {todayVol} A jumpier market makes protection cost more. Protection is cheapest before you need it.</p>
               {detail && <p className="mt-3 text-[12px] leading-[1.55] text-faint">Volatility today: {m.volatility.source}<Ev e={m.volatility.evidence} /></p>}
             </div>
             <div className="grid content-start gap-3 sm:grid-cols-2">
               <div className={SUB}>
-                <p className="text-[13px] text-muted">If bound in {monthLabel(p.inceptionMonth)}</p>
+                <p className="text-[13px] text-muted">If bought in {monthLabel(p.inceptionMonth, true)}</p>
                 <p className={cx("num mt-2 text-[28px] leading-none", display)}><CountUp value={then.premium} format={(v) => usd(v)} /></p>
-                <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(then.premiumPerGallon)} per covered gallon{detail && <>, wholesale {ppg(then.forward)}, {pct(then.sigma)} vol</>}</p>
+                <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(then.premiumPerGallon)} per covered gallon, assumed {pct(then.sigma)} swing{detail && <>, wholesale {ppg(then.forward)}</>}</p>
               </div>
               <div className={SUB}>
-                <p className="text-[13px] text-heat">If bound today</p>
+                <p className="text-[13px] text-heat">If bought today</p>
                 <p className={cx("num mt-2 text-[28px] leading-none", display)}><CountUp value={today.premium} format={(v) => usd(v)} /></p>
-                <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(today.premiumPerGallon)} per covered gallon{detail && <>, wholesale {ppg(today.forward)}, {pct(today.sigma)} vol</>}</p>
+                <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(today.premiumPerGallon)} per covered gallon, {pct(today.sigma)} swing {fromGemini ? "from Gemini" : "assumed"}{detail && <>, wholesale {ppg(today.forward)}</>}</p>
               </div>
             </div>
           </div>
@@ -360,7 +373,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
           </div>
           {detail && <div className={cx("mt-6", SUB)}>
             <h3 className="text-[14px] font-medium text-ink">Money back per gallon, by the month protection started</h3>
-            <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.6] text-muted">Each bar is one 12-month period on real {d.regionLabel} prices, with the strike {usd(p.strikeOffset, 2)} above the starting price. Most periods pay nothing. The ones that pay are the years that hurt.</p>
+            <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.6] text-muted">Each bar is one 12-month period on real {region} prices, with protection starting {usd(p.strikeOffset, 2)} above the starting price. Most periods pay nothing. The ones that pay are the years that hurt.</p>
             <div className="mt-4"><Bars values={bt.cohorts.map((c) => c.payoutPerGallon)} labels={bt.cohorts.map((c) => c.inception.slice(0, 4))} readLabels={bt.cohorts.map((c) => monthLabel(c.inception.slice(0, 7), true))} fmt={(v) => `$${v.toFixed(2)}`} height={170} /></div>
           </div>}
         </Card>
@@ -369,7 +382,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
       <Reveal>
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-2"><CardTitle>Can this risk actually be protected?</CardTitle><Tag tone={m.status === "live" ? "good" : "warn"}>{m.status === "live" ? `Gemini live, ${m.scanned} markets scanned` : "Gemini unavailable"}</Tag></div>
-          <p className="mt-1.5 max-w-[80ch] text-[13.5px] leading-[1.6] text-muted">We test each instrument against your cost, not against a price forecast. A market that does not track what you pay is rejected even if it is the only one listed.</p>
+          <p className="mt-1.5 max-w-[80ch] text-[13.5px] leading-[1.6] text-muted">Someone has to carry this risk. We test each way to do it against your cost, including every live Gemini market. A market that doesn&apos;t track what you pay, or expires long before your cover ends, is rejected even if it is the only one listed.</p>
           {!detail && (
             <ul className="mt-4 grid gap-2">
               {a.hedges.map((h) => (
@@ -398,7 +411,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
             <div className={cx("mt-4 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]", SUB)}>
               <div>
                 <h3 className="text-[14px] font-medium text-ink">What the Gemini market is good for</h3>
-                <p className="mt-2 text-[13.5px] leading-[1.6] text-muted">The <span className="font-mono text-[12.5px] text-ink2">{crude.ticker}</span> ladder is a set of yes/no contracts on whether Brent finishes above each price. Read together, their prices are the market&apos;s probability curve for oil. We fit that curve and get an implied volatility of <span className="font-medium text-ink">{pct(crude.implied.sigmaAnnual)}</span> and a median of <span className="font-medium text-ink">${crude.implied.median.toFixed(2)}</span> a barrel.<Ev e="V" /> That volatility is the input our cap price uses today, in place of an options data feed that costs five figures a year.</p>
+                <p className="mt-2 text-[13.5px] leading-[1.6] text-muted">The <span className="font-mono text-[12.5px] text-ink2">{crude.ticker}</span> ladder is a set of yes/no contracts on whether Brent finishes above each price. Read together, their prices are the market&apos;s probability curve for oil. We fit that curve and get an implied volatility of <span className="font-medium text-ink">{pct(crude.implied.sigmaAnnual)}</span> and a median of <span className="font-medium text-ink">${crude.implied.median.toFixed(2)}</span> a barrel.<Ev e="V" /> That expected move sets today&apos;s price of protection, in place of an options data feed that costs five figures a year.</p>
                 <p className="mt-2 text-[12px] leading-[1.55] text-faint">Fit quality R² {crude.implied.fitR2.toFixed(3)} on {crude.implied.nUsed} strikes. Brent explains {pct(crude.relation.r2Annual)} of 12-month retail diesel moves, against {pct(a.wholesale.r2Annual)} for ULSD.<Ev e="C" /></p>
               </div>
               <LineChart height={200} x={crude.implied.points.map((x) => `$${x.strike}`)} yFmt={(v) => pct(v)}
@@ -424,7 +437,7 @@ export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNex
           <div className="mt-4"><Note tone="warn" title="Why you cannot buy this yet">{a.eligibility.reasons.join(" ")}</Note></div>
         </Card>
       </Reveal>
-      <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next="See it pay out" />
+      <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next="Try your own price spike" />
     </div>
   );
 }

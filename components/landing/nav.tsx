@@ -8,7 +8,7 @@ import { cx, wrap } from "./kit";
 const LINKS = [
   { href: "#product", label: "Product" },
   { href: "#how", label: "How it works" },
-  { href: "#integrations", label: "Integrations" },
+  { href: "#technology", label: "Technology" },
   { href: "#security", label: "Security" },
   { href: "#faq", label: "FAQ" },
 ];

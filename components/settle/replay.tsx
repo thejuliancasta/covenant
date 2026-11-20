@@ -34,9 +34,9 @@ export function ReplayColumns({ rows, settleMonth, indexLabel }: { rows: ReplayR
       {/* readout: fixed height so the chart never jumps */}
       <div className="flex min-h-[44px] flex-wrap items-baseline gap-x-3 gap-y-1" aria-live="polite">
         <span className="text-[13px] font-medium text-ink">{monthLabel(a.month, true)}</span>
-        <span className="num text-[13px] text-muted">index <span className={a.triggered ? "text-heat" : "text-ink2"}>{ppg(a.index)}</span></span>
-        <span className="num text-[13px] text-muted">{a.triggered ? <>+{ppg(a.index - a.strike)} above strike</> : "below the strike"}</span>
-        <span className="num text-[13px] text-muted">cap payout <span className={a.triggered ? "text-jade" : "text-ink2"}>{a.triggered ? usd(a.payout) : "$0"}</span> on {int(a.coveredGallons)} gal</span>
+        <span className="num text-[13px] text-muted">official price <span className={a.triggered ? "text-heat" : "text-ink2"}>{ppg(a.index)}</span></span>
+        <span className="num text-[13px] text-muted">{a.triggered ? <>+{ppg(a.index - a.strike)} above the line</> : "below the line"}</span>
+        <span className="num text-[13px] text-muted">money back <span className={a.triggered ? "text-jade" : "text-ink2"}>{a.triggered ? usd(a.payout) : "$0"}</span> on {int(a.coveredGallons)} gal</span>
         {a.month === settleMonth && <span className="text-[12px] text-ink2">settlement month</span>}
       </div>
 
@@ -45,13 +45,13 @@ export function ReplayColumns({ rows, settleMonth, indexLabel }: { rows: ReplayR
         <div aria-hidden className="relative w-9 shrink-0 text-[11px] text-faint" style={{ height: H, marginTop: 20 }}>
           {ticks.map((t) => <span key={t} className="num absolute right-0 translate-y-1/2" style={{ bottom: y(t) * H }}>${t.toFixed(0)}</span>)}
         </div>
-        <ol aria-label="Monthly index against the strike" className="relative flex min-w-0 flex-1 gap-1 sm:gap-1.5">
+        <ol aria-label="Monthly official price against where protection starts" className="relative flex min-w-0 flex-1 gap-1 sm:gap-1.5">
           {rows.map((r, i) => {
             const on = r.month === active, settle = r.month === settleMonth;
             const level = y(r.index), sk = y(strike);
             return (
               <li key={r.month} tabIndex={0}
-                aria-label={`${monthLabel(r.month, true)}: index ${ppg(r.index)}, ${r.triggered ? `${ppg(r.index - r.strike)} above the strike, cap payout ${usd(r.payout)}` : "below the strike, no payout"}`}
+                aria-label={`${monthLabel(r.month, true)}: official price ${ppg(r.index)}, ${r.triggered ? `${ppg(r.index - r.strike)} above the line, money back ${usd(r.payout)}` : "below the line, no money back"}`}
                 onMouseEnter={() => setActive(r.month)} onFocus={() => setActive(r.month)} onClick={() => setActive(r.month)}
                 className="group relative flex min-w-0 flex-1 cursor-default flex-col items-center rounded-[8px] outline-none">
                 <span className={cx("num hidden h-5 whitespace-nowrap text-[11px] transition-colors duration-150 lg:block", r.triggered ? (on ? "text-jade" : "text-jade/70") : "text-transparent")}>
@@ -85,8 +85,8 @@ export function ReplayColumns({ rows, settleMonth, indexLabel }: { rows: ReplayR
       </div>
       <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted">
         <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-heat/40" />{indexLabel}</span>
-        <span className="inline-flex items-center gap-1.5"><i className="h-px w-4 bg-jade" />Strike <span className="num">{ppg(strike)}</span></span>
-        <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-heat/30 ring-1 ring-inset ring-heat/50" />Above the strike: the cap pays on this</span>
+        <span className="inline-flex items-center gap-1.5"><i className="h-px w-4 bg-jade" />Protection starts at <span className="num">{ppg(strike)}</span></span>
+        <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-[3px] bg-heat/30 ring-1 ring-inset ring-heat/50" />Above the line: CostShield pays this back</span>
       </div>
     </div>
   );

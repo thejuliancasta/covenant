@@ -27,7 +27,7 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
     <section aria-label="Two views of the same settlement" className="space-y-4">
       <div className="max-w-2xl">
         <h2 className="text-[22px] font-[550] leading-[1.1] tracking-[-0.022em] text-ink sm:text-[26px]">Two views of the same payment</h2>
-        <p className="mt-2 text-[14px] leading-[1.5] text-muted">What {company} reads with its own keys, beside what everyone else sees on the blockchain.</p>
+        <p className="mt-2 text-[14px] leading-[1.5] text-muted">The amounts are encrypted with Helius Privacy Rings. {company} reads them with its own keys. Everyone else sees the terms and that steps paid, not how much, so a competitor or customer can&apos;t work out its gallons or margins.</p>
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <div className="min-w-0 space-y-6">
@@ -53,7 +53,7 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
         </div>
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">What everyone else sees on the blockchain</h3>
+            <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">What everyone else sees on Solana</h3>
             <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-cipher"><LockIcon />Amounts encrypted</span>
           </div>
           <p className="mt-1 text-[13px] text-muted">The terms and what happened, never the amounts</p>
@@ -95,8 +95,8 @@ export function LenderShareCard({ r, company }: { r: SettlementResult; company: 
   return (
     <Card>
       <h3 className="text-[17px] font-medium leading-6 tracking-[-0.015em] text-ink">Proof for your lender</h3>
-      <p className="mt-2 max-w-[60ch] text-[14px] leading-[1.55] text-ink2">Your lender sees what was set aside and what was paid to you. It can&apos;t move money or see your other accounts.</p>
-      <p className="mt-2 max-w-[60ch] text-[12.5px] leading-[1.55] text-faint">Your lender or factoring company can read this policy&apos;s coverage and payouts with this link but cannot spend: it carries read-only keys for the {r.lenderShare.steps.length} steps of money set aside, and the keys travel in the part of the URL after #, which browsers do not send when loading a page.</p>
+      <p className="mt-2 max-w-[60ch] text-[14px] leading-[1.55] text-ink2">Proof of cover for a loan. This link carries a read-only viewing key: your lender sees how much was set aside for each step and what was paid to you. It can&apos;t move money or see your other accounts.</p>
+      <p className="mt-2 max-w-[60ch] text-[12.5px] leading-[1.55] text-faint">The link holds viewing keys for the {r.lenderShare.steps.length} steps of money set aside. A viewing key is not a spending key. The keys travel in the part of the URL after #, which browsers do not send when loading a page.</p>
       <div className="mt-4 flex min-w-0 flex-col gap-2 sm:flex-row">
         <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-control border border-line/8 bg-bg/40 pl-3 pr-1 transition-[border-color] duration-150 focus-within:border-jade/50">
           <LockIcon className="shrink-0 text-cipher" />

@@ -27,7 +27,7 @@ const NAV: { id: Step; label: string }[] = [
 ];
 
 /** Step list. A short ember mark slides to the active step; steps that need a result say so. */
-function StepNav({ step, enabled, go, id, vertical }: { step: Step; enabled: (s: Step) => boolean; go: (s: Step) => void; id: string; vertical?: boolean }) {
+function StepNav({ step, enabled, why, go, id, vertical }: { step: Step; enabled: (s: Step) => boolean; why: string; go: (s: Step) => void; id: string; vertical?: boolean }) {
   return (
     <LayoutGroup id={id}>
       {NAV.map((n, i) => {
@@ -35,8 +35,8 @@ function StepNav({ step, enabled, go, id, vertical }: { step: Step; enabled: (s:
         return (
           <button
             key={n.id} disabled={!on} onClick={() => go(n.id)} aria-current={active ? "step" : undefined}
-            aria-label={`${n.label}, step ${i + 1} of ${NAV.length}${on ? "" : ". Run an analysis first"}`}
-            title={on ? undefined : "Run an analysis first"}
+            aria-label={`${n.label}, step ${i + 1} of ${NAV.length}${on ? "" : `. ${why}`}`}
+            title={on ? undefined : why}
             className={cx(
               "relative flex shrink-0 items-center gap-3 rounded-[6px] text-[13px] font-[510] transition-[color,background-color] duration-150 ease-out",
               vertical ? "h-9 w-full px-3" : "h-10 px-3",
@@ -131,7 +131,10 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
     const nav = mobileNav.current, cur = nav?.querySelector<HTMLElement>("[aria-current=step]");
     if (nav && cur) nav.scrollTo({ left: cur.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft - (nav.clientWidth - cur.offsetWidth) / 2, behavior: "smooth" });
   }, [step, hasResult]);
-  const enabled = (s: Step) => s === "connect" || hasResult;
+  // What if and Payouts need a diesel risk and a priced policy; Risks and Protection work for any result.
+  const canProtect = !!(analysis?.diesel && analysis?.policy);
+  const enabled = (s: Step) => s === "connect" || (hasResult && (s === "overview" || s === "protection" || canProtect));
+  const why = hasResult ? "Nothing in this file to protect" : "Run an analysis first";
   const view = judge && analysis ? "judge" : step;
   const navStep: Step = judge ? "welcome" : step; // no step is marked while Judge mode is open
   const judgeButton = (extra: string) => (
@@ -153,7 +156,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
             <Logo size={20} />
           </Link>
           <nav className="mt-6 grid gap-0.5" aria-label="Steps">
-            <StepNav id="side" vertical step={navStep} enabled={enabled} go={go} />
+            <StepNav id="side" vertical step={navStep} enabled={enabled} why={why} go={go} />
           </nav>
           <div className="mt-4 flex flex-col gap-2 px-3">{judgeButton("h-8 w-full px-3 text-left")}<ThemeToggle className="w-full" /></div>
           {(analysis?.company || source) && <p className="mt-6 truncate px-3 text-[12px] leading-[1.5] text-muted">{analysis?.company ?? source}</p>}
@@ -169,7 +172,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
             <span className="flex items-center gap-2"><ThemeToggle />{judgeButton("h-8 px-3")}</span>
           </div>
           <nav ref={mobileNav} className="flex gap-0.5 overflow-x-auto px-2 pb-1 [scrollbar-width:none]" aria-label="Steps, as tabs">
-            <StepNav id="top" step={navStep} enabled={enabled} go={go} />
+            <StepNav id="top" step={navStep} enabled={enabled} why={why} go={go} />
           </nav>
         </header>
 
@@ -183,9 +186,9 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
                   {judge && analysis ? <Judge a={analysis} source={source} />
                     : step === "analyzing" ? <Analyzing stages={stages} error={error} source={source} onBack={() => go("connect")} onNext={() => go("overview")} result={analysis} />
                     : analysis && step === "overview" ? <Overview a={analysis} onNext={() => go("protection")} detail={detail} onDetail={setDetail} />
-                    : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} detail={detail} onDetail={setDetail} />
-                    : analysis && step === "simulate" ? <Simulator a={analysis} onNext={() => go("payout")} />
-                    : analysis && step === "payout" ? <Payout a={analysis} sample={source === SAMPLE_LABEL} detail={detail} onDetail={setDetail} />
+                    : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} onBack={() => go("overview")} detail={detail} onDetail={setDetail} />
+                    : analysis && canProtect && step === "simulate" ? <Simulator a={analysis} onNext={() => go("payout")} />
+                    : analysis && canProtect && step === "payout" ? <Payout a={analysis} sample={source === SAMPLE_LABEL} detail={detail} onDetail={setDetail} />
                     : <Connect onRun={run} connectError={connectError} />}
                 </motion.div>
               </AnimatePresence>

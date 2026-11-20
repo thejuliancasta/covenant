@@ -127,8 +127,8 @@ export function PrivatePayout({ d }: { d: LandingData }) {
   const play = on;
   const rows: { k: string; pub: ReactNode; own: ReactNode }[] = [
     { k: "Official price posted", pub: <span className="num text-ink2">{"$"}{s.indexMean.toFixed(3)}/gal</span>, own: <span className="num text-ink2">{"$"}{s.indexMean.toFixed(3)}/gal</span> },
-    { k: "25-cent chunks that would pay", pub: <span className="num text-ink2">{s.paidSteps} of {s.steps.length}</span>, own: <span className="num text-ink2">{s.paidSteps} of {s.steps.length}</span> },
-    { k: "Set aside per chunk", pub: <DecodeText text={usd2(s.stepAmount)} play={false} seed="pub-step" />, own: <DecodeText key={replay} text={usd2(s.stepAmount)} play={play} seed="own-step" className="text-ink2" /> },
+    { k: "25-cent steps paid", pub: <span className="num text-ink2">{s.paidSteps} of {s.steps.length}</span>, own: <span className="num text-ink2">{s.paidSteps} of {s.steps.length}</span> },
+    { k: "Locked per step", pub: <DecodeText text={usd2(s.stepAmount)} play={false} seed="pub-step" />, own: <DecodeText key={replay} text={usd2(s.stepAmount)} play={play} seed="own-step" className="text-ink2" /> },
   ];
   return (
     <Frame title={`Settlement, ${monYear(s.month, true)}`} meta="Sample replay, test dollars">
@@ -158,7 +158,7 @@ export function PrivatePayout({ d }: { d: LandingData }) {
         </div>
       </div>
       <div className="num border-t border-line/6 bg-panel/40 px-4 py-3 text-[12px] text-muted">
-        The amount is encrypted for everyone except the business and whoever it chooses to show.
+        Encrypted with Helius Privacy Rings: hidden from the public, readable by the business and anyone it gives a viewing key.
       </div>
     </Frame>
   );

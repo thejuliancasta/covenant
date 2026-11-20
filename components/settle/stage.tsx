@@ -144,13 +144,13 @@ export function SettlementStage({ m, company, explorer, running, underwriterBala
       {/* Oracle report line */}
       <div ref={reportScope} className="flex min-h-[44px] flex-wrap items-baseline gap-x-4 gap-y-1.5">
         {m.mean !== null ? (<>
-          <span className="text-[13px] text-muted">Official price posted on the blockchain</span>
+          <span className="text-[13px] text-muted">Official price, posted once on Solana</span>
           <span className="num text-[20px] font-[550] tracking-[-0.03em] text-heat">${m.mean.toFixed(3)}<span className="ml-1 text-[13px] font-normal tracking-normal text-muted">a gallon</span></span>
           {m.sha && <HashChip hash={m.sha} />}
           {m.reportTx && <TxChip sig={m.reportTx} explorer={explorer} />}
           {m.reportReused && <span className="text-[12px] text-faint">already posted, reused</span>}
         </>) : (
-          <span className="text-[13px] leading-[1.5] text-muted">{running ? "Waiting for the official price to be posted on the blockchain…" : <>Expected official price from the replay: <span className="num text-ink2">${m.expectedMean.toFixed(3)}</span> a gallon. Not posted yet.</>}</span>
+          <span className="text-[13px] leading-[1.5] text-muted">{running ? "Waiting for the official price to be posted on Solana…" : <>Expected official price from the replay: <span className="num text-ink2">${m.expectedMean.toFixed(3)}</span> a gallon. Not posted yet.</>}</span>
         )}
       </div>
 
@@ -158,7 +158,7 @@ export function SettlementStage({ m, company, explorer, running, underwriterBala
       <div className="mt-5 grid grid-cols-[44px_repeat(3,minmax(0,1fr))] gap-x-2 text-[12px] sm:grid-cols-[60px_repeat(3,minmax(0,1fr))] sm:gap-x-4">
         <span className="self-end text-faint">Pays at price</span>
         <div className="min-w-0"><p className="truncate font-medium text-ink2">The backer</p><p className="num truncate text-faint">{underwriterBalance !== undefined ? tusd(underwriterBalance, 0) : "private balance"}</p></div>
-        <div className="min-w-0"><p className="truncate font-medium text-ink2">Set aside in advance</p><p className="truncate text-faint">{m.funded ? "locked, amounts hidden" : m.opened ? "policy open, terms public" : "expected"}</p></div>
+        <div className="min-w-0"><p className="truncate font-medium text-ink2">Set aside in advance</p><p className="truncate text-faint">{m.funded ? "locked, amounts encrypted" : m.opened ? "policy open, terms public" : "expected"}</p></div>
         <div className="min-w-0 text-right"><p className="truncate font-medium text-ink2">{company}</p><p className="num truncate text-faint">{paid ? `${paid} of ${n} paid` : "wallet"}</p></div>
       </div>
 
@@ -219,7 +219,7 @@ export function SettlementStage({ m, company, explorer, running, underwriterBala
           })}
         </div>
       </LayoutGroup>
-      <p className="sr-only" aria-live="polite">{m.mean !== null ? `Attested mean ${m.mean.toFixed(3)} dollars a gallon. ${m.plates.filter((p) => p.triggered).length} of ${n} steps triggered. ${paid} released.` : ""}</p>
+      <p className="sr-only" aria-live="polite">{m.mean !== null ? `Official price posted: ${m.mean.toFixed(3)} dollars a gallon. ${m.plates.filter((p) => p.triggered).length} of ${n} steps over their line. ${paid} paid.` : ""}</p>
     </div>
   );
 }
@@ -236,7 +236,7 @@ function PayoutMark({ step, tx, explorer, shake }: { step: number; tx: string; e
   return (
     <motion.span ref={scope} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={UI_SPRING}
       className={cx("inline-flex items-center gap-1.5 whitespace-nowrap text-[11.5px] transition-colors duration-300", flash ? "text-rust" : "text-ink2")}>
-      <span className="font-medium">{flash ? "paid, second try refused" : "paid"}</span>
+      <span className="font-medium">{flash ? "paid, second try rejected" : "paid"}</span>
       {!flash && <TxLink sig={tx} explorer={explorer} className="hidden text-[10.5px] !text-inherit xl:inline-flex" />}
       <a href={txUrl(explorer, tx)} target="_blank" rel="noreferrer" aria-label={`Release transaction for step ${step}`} className="relative inline-flex before:absolute before:-inset-3 before:content-[''] xl:hidden"><ArrowOut /></a>
       <span className="sr-only">Step {step} released</span>
@@ -262,7 +262,7 @@ function StatusMark({ status }: { status: StepStatus }) {
     </span>
   );
   if (status === "done") return <span role="img" aria-label="done" className="mt-[3px] flex h-4 w-4 shrink-0 items-center justify-center text-muted"><DrawCheck size={14} /></span>;
-  if (status === "rejected") return <span role="img" aria-label="refused" className="mt-[3px] flex h-4 w-4 shrink-0 items-center justify-center text-rust"><svg viewBox="0 0 12 12" width="11" height="11"><path d="M2.5 2.5 9.5 9.5M9.5 2.5 2.5 9.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg></span>;
+  if (status === "rejected") return <span role="img" aria-label="rejected" className="mt-[3px] flex h-4 w-4 shrink-0 items-center justify-center text-rust"><svg viewBox="0 0 12 12" width="11" height="11"><path d="M2.5 2.5 9.5 9.5M9.5 2.5 2.5 9.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg></span>;
   return <span role="img" aria-label="error" className="mt-[1px] flex h-4 w-4 shrink-0 items-center justify-center text-[13px] font-bold text-rust">!</span>;
 }
 
@@ -271,11 +271,11 @@ const PLAIN: Record<string, string> = {
   oracle: "Read the official diesel price for the month",
   setup: "Check the test wallets and private balances",
   open: "Open the policy on Solana (terms are public)",
-  fund: "The backer sets money aside in advance, privately",
-  report: "Official price posted on the blockchain",
-  stranger: "Someone else tries to post a fake price",
-  release: "Paid to the business, privately",
-  duplicate: "The business tries to collect twice",
+  fund: "The backer locks the money in advance, amounts encrypted",
+  report: "Official price posted once on Solana",
+  stranger: "A wallet that isn't the price reporter tries to post a price",
+  release: "The program pays the business, amounts encrypted",
+  duplicate: "The business tries to collect again",
   reclaim: "Unused money goes back to the backer",
 };
 
@@ -288,13 +288,13 @@ function LogRow({ s, explorer }: { s: StepEvent; explorer: string }) {
         <div className="min-w-0 flex-1">
           <p className={cx("flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[14px] font-medium transition-colors duration-200", s.status === "running" ? "text-ink" : s.status === "done" ? "text-ink2" : "text-ink")}>
             {PLAIN[s.id] ?? s.label}
-            {s.status === "rejected" && <span className="text-[12.5px] font-medium text-rust">refused, as designed</span>}
+            {s.status === "rejected" && <span className="text-[12.5px] font-medium text-rust">rejected, checked before sending</span>}
           </p>
           {s.detail && <p className="mt-1 break-words text-[12px] leading-[1.55] text-faint">{s.detail}</p>}
           {(s.private || s.tx) && (
             <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
               {s.tx && <TxChip sig={s.tx} explorer={explorer} />}
-              {s.private && <span className="inline-flex items-center gap-1.5 text-[12px] text-cipher"><LockIcon />Private: amounts hidden</span>}
+              {s.private && <span className="inline-flex items-center gap-1.5 text-[12px] text-cipher"><LockIcon />Private: amounts encrypted</span>}
             </div>
           )}
         </div>

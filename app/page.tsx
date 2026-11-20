@@ -72,29 +72,49 @@ export default async function Landing() {
     { name: "Interest", status: "Too small to matter", tone: "text-ink2", note: "Under 5% of revenue. Not worth paying to protect." },
   ];
 
-  const integrations = [
-    { k: "Accounting", v: "CSV upload works today, from QuickBooks, Xero or anything else. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built but switched off in this demo." },
-    { k: "Prices", v: "Official diesel prices from the U.S. Energy Information Administration" },
-    { k: "Market signals", v: "Gemini prediction markets, read live" },
-    { k: "Payouts", v: "Solana, with Helius Privacy Rings keeping amounts private" },
+  const s = d.settlement;
+  const versus = [
+    { k: "What it covers", day: "One event: a cold morning, a rained-out Saturday, a lost game.", us: "The cost that can close you. For a fleet, diesel, month after month, for a full year." },
+    { k: "How the loss is found", day: "You guess it, in a sentence.", us: `Measured from your books: ${d.lines.toLocaleString("en-US")} transactions, the gallons on every receipt, less what your fuel surcharges already pass on.` },
+    { k: "How big it can be", day: "Capped by how deep a prediction market's order book is, often a few hundred dollars.", us: `Sized to the business. A bad diesel year costs this fleet ${usd0(d.diesel.shockNet)}, ${d.diesel.shockTimesProfit.toFixed(0)} times its profit.` },
+    { k: "Who pays you", day: "Whoever is selling on the order book that day.", us: "A backer whose money is locked on Solana before your cover starts, and can't be pulled back while you're covered." },
+    { k: "Who sees it", day: "Payouts and exposures are public on chain.", us: "Amounts are encrypted with Helius Privacy Rings. Your lender can check your cover with a read-only key." },
+    { k: "Proof it works", day: "The next event.", us: `Replayed on every 12-month period since ${d.backtest.from.slice(0, 4)}: it would have paid in ${d.backtest.badPaid} of the ${d.backtest.bad} bad ones.` },
+  ];
+  const stack = [
+    { k: "Your books", h: "Finds the cost that can sink you",
+      b: `CostShield sorts every transaction, reads the gallons off each fuel receipt and works out what a spike costs after the fuel surcharges your customers already pay. Every number traces back to a line in your books or a public dataset. No AI guesses in the numbers.`,
+      n: "Upload a CSV export from any accounting system. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built but switched off in this demo." },
+    { k: "U.S. Energy Information Administration", h: "Draws the line",
+      b: `Protection pays on the government's official weekly diesel price for your region, averaged over the month. Not on anyone's say-so, and not on a claim you have to file.` },
+    { k: "Solana", h: "Makes the payout certain",
+      b: `Before your protection starts, the backer locks the most it could ever pay into vaults that only CostShield's Solana program can open. Each month the official price is posted on chain once. If it is over the line, you sign once and the program releases your money. The backer can't block it or take it back.`,
+      n: `Money the protection never needed goes back to the backer, but only after every month of the term has come in under the line.` },
+    { k: "Helius Privacy Rings", h: "Keeps the amounts yours",
+      b: `The money in each vault and every payout are encrypted balances. The program enforces the rules without seeing the amounts, and the public can see that you were paid, not how much. So a competitor or a customer can't work out your gallons or your margins.`,
+      n: `Because the program can't read encrypted amounts, it pays in whole 25-cent steps: ${usd0(s.payout)} for ${monYear(s.month, true)} instead of the exact ${usd0(d.policy.rows.find((r) => r.month === s.month)?.payout ?? s.payout)}. We show both.` },
+    { k: "Gemini Prediction Markets", h: "Prices the protection",
+      b: `CostShield reads Gemini's live oil-price markets, yes-or-no contracts on where Brent crude will be, and turns their prices into how big a move traders expect. That sets today's price of protection: the jumpier the market, the more it costs.`,
+      n: `It also tests every live Gemini market as a way to carry the risk. Today none qualifies (there is no diesel market, and they end within days), so the app says so instead of pretending.` },
   ];
 
   const security = [
-    { t: "We only read", b: "CostShield reads your transactions and never changes your books." },
-    { t: "Your books stay yours", b: "We never change, categorize or post anything back to your accounting system." },
+    { t: "We only read", b: "CostShield reads your transactions and never changes, categorizes or posts anything back to your accounting system." },
     { t: "Your file isn't stored", b: "An uploaded export is processed in memory and discarded when the analysis ends." },
-    { t: "Funded before you're covered", b: "In the simulation, the full amount the protection could pay is set aside on Solana's test network before the cover starts." },
-    { t: "Amounts only you can see", b: "Payouts and balances are encrypted. Only you, and whoever you choose to show, can read them." },
-    { t: "Prices that can't be edited", b: "Each official price is posted once, with a fingerprint of the government file it came from." },
+    { t: "Funded before you're covered", b: "The most the protection could ever pay is locked on Solana before the cover starts. In this simulation, in test dollars." },
+    { t: "Amounts hidden from the public", b: "Payouts and balances are encrypted with Helius Privacy Rings. Only you, and whoever you give a viewing key to, can read them." },
+    { t: "One official price a month", b: "Each month's price is posted on chain once and can't be changed afterwards, with a fingerprint of the government file it came from." },
+    { t: "Rules anyone can check", b: "Who can post a price, when a step pays and when money goes back to the backer are written into the Solana program, the same for everyone." },
   ];
 
   const faq = [
-    { q: "Is this insurance?", a: "It is index-based protection: it pays when an official price crosses a line, not after a claim. It is not for sale. A real version would need a licensed insurer to owe the payouts, and none has agreed to. Today CostShield is a simulation that pays in test dollars." },
-    { q: "What if my pump price is different?", a: "Your pump price can differ from the official one. Before you buy, CostShield shows how closely your price has followed it, from your own receipts." },
-    { q: "Who pays me?", a: "In this simulation, a test backer wallet that sets the full amount aside before the cover starts. In a real version it would be a licensed partner, and none has signed up." },
-    { q: "What does it cost?", a: `The scan is free and nothing is for sale. The model price for the sample fleet is ${usd0(d.policy.premiumPerMonth)} a month if bought in ${monYear(d.policy.inceptionMonth, true)}. That is an estimate, not a quote.` },
-    { q: "Is my data safe?", a: "We only read your books, and uploaded files aren't stored. Payout amounts are encrypted, so only you and the people you choose can see them." },
-    { q: "Do I need crypto?", a: "No. You see dollars. In this simulation payouts settle in test dollars on Solana's test network. Paying into a bank account is not built." },
+    { q: "Why does this need a blockchain?", a: "So the payout doesn't depend on anyone's promise. The money is locked before your cover starts, the rules are code anyone can read, and the money is released when the posted price crosses your line. Nobody can delay it or dispute it. Helius Privacy Rings adds what a public blockchain lacks: privacy for your amounts." },
+    { q: "Why not just buy a prediction-market contract?", a: "A contract pays on one event, and you can only buy as much as its order book holds, often a few hundred dollars. Gemini lists no diesel market at all; the closest, on Brent crude, ends within days, and a fleet needs a year. So CostShield uses those markets as a price signal and puts the risk with a backer whose money is locked on Solana for the whole term." },
+    { q: "Is this insurance?", a: "It is protection that pays when an official price crosses a line, not after a claim. It is not for sale. A real version would need a licensed insurer or partner to back the payouts, and none has agreed to. Today CostShield is a simulation that pays in test dollars." },
+    { q: "What if my pump price is different?", a: "It can be. Protection pays on the official price, so before you buy, CostShield shows how closely your own price has followed it, from your receipts." },
+    { q: "Why is the payout in 25-cent steps?", a: `Because the amounts are encrypted, the Solana program can't do arithmetic on them. So the money is set aside in fixed steps, one for every 25 cents above the line, and the program releases each step the price passed. In ${monYear(s.month, true)} that paid ${usd0(s.payout)} in ${s.paidSteps} steps. A future version could pay to the cent.` },
+    { q: "What does it cost?", a: `The scan is free and nothing is for sale. The model price for the sample fleet is ${usd0(d.policy.premiumPerMonth)} a month if bought in ${monYear(d.policy.inceptionMonth, true)}. Today's price follows how much Gemini's live oil markets expect prices to move. Both are estimates, not quotes.` },
+    { q: "Do I need crypto?", a: "No. You see dollars. In this simulation payouts settle in test dollars on Solana's test network. Paying into a bank account is not built yet." },
   ];
 
   return (
@@ -107,8 +127,8 @@ export default async function Landing() {
         <section className="pt-16 md:pt-[96px]">
           <div className={wrap}>
             <Reveal immediate>
-              <a href="#privacy" className="group/btn inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors duration-150 hover:text-ink">
-                <span className="text-ink2">Payouts are private by default</span>
+              <a href="#different" className="group/btn inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors duration-150 hover:text-ink">
+                <span className="text-ink2">Protection for a bad year, not a bad day</span>
                 <Arrow className="text-faint" />
               </a>
             </Reveal>
@@ -119,7 +139,7 @@ export default async function Landing() {
             </Reveal>
             <Reveal immediate i={2}>
               <p className="mt-6 max-w-[560px] text-[16px] leading-[1.6] text-muted md:text-[18px]">
-                CostShield finds the price spikes that can wipe out a small business and shows what protection would pay back, automatically.
+                Airlines lock in what they pay for fuel. Small businesses can&apos;t. CostShield reads your books, finds the cost that could sink you, and sets a line. When that price goes above it, money already locked on Solana comes back to you on its own, and only you can see how much.
               </p>
             </Reveal>
             <Reveal immediate i={3}><Actions /></Reveal>
@@ -153,10 +173,42 @@ export default async function Landing() {
           </div>
         </section>
 
+        {/* Positioning: a bad year, not a bad day */}
+        <section id="different" aria-labelledby="different-title" className="scroll-mt-20 pb-12 md:pb-16">
+          <div className={wrap}>
+            <SectionHead id="different-title" title="Built for a bad year, not a bad day"
+              lede="Cover for one rained-out Saturday is easy to sell. The losses that close small businesses are slower and bigger: a cost that stays high for months. That is what CostShield is for." />
+            <Reveal i={1}>
+              <div className="mt-10 overflow-hidden rounded-[16px] border border-line/8">
+                <div className="hidden grid-cols-[180px_1fr_1fr] gap-x-6 border-b border-line/[0.07] bg-panel/40 px-6 py-3 text-[13px] md:grid">
+                  <span />
+                  <span className="text-faint">Cover for a bad day</span>
+                  <span className="font-[550] text-jade">CostShield</span>
+                </div>
+                <dl className="divide-y divide-line/[0.07]">
+                  {versus.map((r) => (
+                    <div key={r.k} className="grid gap-x-6 gap-y-2 px-6 py-5 md:grid-cols-[180px_1fr_1fr]">
+                      <dt className="text-[13px] text-faint md:text-[14px]">{r.k}</dt>
+                      <dd className="text-[14px] leading-[1.55] text-muted"><span className="mr-1.5 text-faint md:hidden">Bad-day cover:</span>{r.day}</dd>
+                      <dd className="text-[15px] leading-[1.55] text-ink"><span className="mr-1.5 font-[550] text-jade md:hidden">CostShield:</span>{r.us}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </Reveal>
+            <Reveal i={2}>
+              <p className={cx(body, "mt-6 max-w-[720px]")}>
+                Prediction markets still matter here, for what they do best. CostShield reads Gemini&apos;s live oil markets to see how big a move traders expect, and that sets the price of your protection. The risk itself sits with a backer whose money is locked for the whole year.
+              </p>
+            </Reveal>
+          </div>
+        </section>
+
         <Rule />
 
         <Feature label="Cost scan" title="Finds the costs a price you don't control can hurt" fragment={<ExposureBars d={d} />}>
-          <p>Connect your books and CostShield sorts every transaction, reads the gallons off each fuel receipt, and measures what a price spike would really cost you after the surcharges your customers already pay.</p>
+          <p>Upload your books and CostShield sorts every transaction, reads the gallons off each fuel receipt, and measures what a price spike would really cost you after the surcharges your customers already pay.</p>
+          <p>For {d.company} that is one cost: diesel, {Math.round(d.diesel.share * 100)}% of everything the fleet earns, at a price nobody in the company controls.</p>
         </Feature>
 
         <Feature
@@ -185,34 +237,44 @@ export default async function Landing() {
             </div>
           }
         >
-          <p>A model price for your gallons is shown per month. It is an estimate, not a quote. When nothing can fairly protect a cost, CostShield says so instead of selling you something that won&apos;t pay.</p>
+          <p>You see a monthly price for protecting your gallons. It follows how much traders expect oil to move, which CostShield reads from Gemini&apos;s live prediction markets. It is an estimate, not a quote.</p>
+          <p>When nothing can fairly protect a cost, CostShield says so instead of selling you something that won&apos;t pay.</p>
         </Feature>
 
         <Feature label="Automatic payouts" title="When prices spike, the money comes back on its own" fragment={<ProtectionChart d={d} />}>
-          <p>No claims and no paperwork. Each month the official diesel price is posted, and if it is above where the protection starts, it pays the difference on your gallons. Tested on every 12-month period since {d.backtest.from.slice(0, 4)}, it would have paid in {d.backtest.badPaid} of the {d.backtest.bad} bad ones.</p>
+          <p>No claims and no adjuster. The money is locked on Solana before your protection starts. Each month the official diesel price is posted on chain, and if it is above your line, the program releases the difference on your gallons. Nobody has to approve it.</p>
+          <p>Tested on every 12-month period since {d.backtest.from.slice(0, 4)}, it would have paid in {d.backtest.badPaid} of the {d.backtest.bad} bad ones.</p>
         </Feature>
 
         <Feature id="privacy" label="Private by default" title="Your money is visible to you, not the world" fragment={<PrivatePayout d={d} />} flip>
-          <p>In this simulation payouts settle on Solana's test network, and Helius Privacy Rings keeps every amount encrypted. Anyone can check that the rules were followed. Only you can see what you were paid.</p>
+          <p>On a normal blockchain anyone could read your payouts and work back to your gallons and margins. Helius Privacy Rings encrypts every balance and payout, so the public sees that the rules were followed and that you were paid, but not how much.</p>
+          <p>In this simulation payouts settle in test dollars on Solana&apos;s test network.</p>
           <p className="text-[14px] text-faint">Hover your side to decrypt it again.</p>
         </Feature>
 
         <Feature id="lenders" label="Proof for your lender" title="Show the bank you're covered, in one link" fragment={<LenderView d={d} />}>
-          <p>Send your lender a link with a read-only key. They see how much was set aside and what was paid. The key can read the amounts. It cannot move any money.</p>
+          <p>A fleet with protected fuel costs is a safer loan. Send your lender a link with a read-only viewing key: they see each step, how much was set aside and what was paid, straight from Solana.</p>
+          <p>The key can read your amounts. It can&apos;t move any money.</p>
         </Feature>
 
         <Rule />
 
-        {/* Integrations */}
-        <section id="integrations" aria-labelledby="integrations-title" className="scroll-mt-20 py-10 md:py-16">
+        {/* Technology: what each piece does for the business */}
+        <section id="technology" aria-labelledby="technology-title" className="scroll-mt-20 py-10 md:py-16">
           <div className={cx(wrap, "grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16")}>
-            <SectionHead id="integrations-title" title="Works with the books you keep" lede="Upload an export from your accounting system. CostShield does the rest." />
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <SectionHead id="technology-title" title="What each piece does" lede="Five pieces, each with one job. Together they turn a cost you can't control into money that comes back to you on its own." />
+            </div>
             <dl className="divide-y divide-line/[0.07] border-y border-line/[0.07]">
-              {integrations.map((x, i) => (
-                <Reveal key={x.k} i={i}>
-                  <div className="grid gap-x-8 gap-y-1 py-5 sm:grid-cols-[160px_1fr]">
-                    <dt className="text-[14px] text-faint">{x.k}</dt>
-                    <dd className="text-[15px] text-ink2">{x.v}</dd>
+              {stack.map((x, i) => (
+                <Reveal key={x.k} i={i % 3}>
+                  <div className="grid gap-x-8 gap-y-2 py-6 sm:grid-cols-[180px_1fr]">
+                    <dt className="text-[14px] leading-[1.5] text-faint">{x.k}</dt>
+                    <dd>
+                      <p className="text-[17px] font-[560] tracking-[-0.012em] text-ink">{x.h}</p>
+                      <p className="mt-2 text-[15px] leading-[1.6] text-ink2">{x.b}</p>
+                      {x.n && <p className="mt-2 text-[14px] leading-[1.55] text-muted">{x.n}</p>}
+                    </dd>
                   </div>
                 </Reveal>
               ))}
@@ -244,19 +306,19 @@ export default async function Landing() {
         {/* Who it's for */}
         <section aria-labelledby="who-title" className="py-10 md:py-16">
           <div className={cx(wrap, "grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16")}>
-            <SectionHead id="who-title" title="Who it's for" lede="Small businesses whose biggest cost is set by a market they can't control." />
+            <SectionHead id="who-title" title="Trucks first. Then every small business with a price it can't control." lede="Big companies have whole teams that lock in their costs. A café, a bakery or a contractor has nobody. The same engine reads any set of books and finds the cost a market controls." />
             <div>
               <Reveal>
                 <div className={cx(surface, "px-6 py-6")}>
                   <p className="text-[13px] text-jade">In the simulation today</p>
-                  <p className="mt-2 text-[20px] font-[560] tracking-[-0.015em] text-ink">Trucking fleets</p>
-                  <p className="mt-1 text-[14px] text-muted">Diesel price spikes, measured and priced for your gallons. Not on sale.</p>
+                  <p className="mt-2 text-[20px] font-[560] tracking-[-0.015em] text-ink">Trucking fleets and diesel</p>
+                  <p className="mt-1 text-[14px] text-muted">Measured from the books, priced for the fleet&apos;s gallons, replayed on real prices and settled on Solana&apos;s test network. Not on sale.</p>
                 </div>
               </Reveal>
               <Reveal i={1}>
-                <p className="mt-8 text-[13px] text-faint">Ideas for later, not built</p>
+                <p className="mt-8 text-[13px] text-faint">Next, not built yet</p>
                 <dl className="mt-3 divide-y divide-line/[0.07] border-y border-line/[0.07] text-[15px]">
-                  {[["Restaurants and bakeries", "Natural gas and flour"], ["Farms", "Rainfall"], ["Contractors", "Diesel"]].map(([k, v]) => (
+                  {[["Cafés", "Coffee beans"], ["Bakeries", "Wheat and butter"], ["Restaurants", "Beef and natural gas"], ["Greenhouses", "Natural gas"], ["Contractors and landscapers", "Diesel"], ["Farms", "Rainfall"]].map(([k, v]) => (
                     <div key={k} className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink2">{k}</dt><dd className="text-muted">{v}</dd></div>
                   ))}
                 </dl>
@@ -289,8 +351,8 @@ export default async function Landing() {
           <div className={wrap}>
             <Reveal>
               <div className={cx(surface, lift, "px-6 py-12 md:px-14 md:py-16")}>
-                <h2 className={cx(h2, "max-w-[640px]")}>See what a price spike would cost you</h2>
-                <p className={cx(body, "mt-5 max-w-[520px]")}>Try it on the sample fleet first, or upload an export of your own books to see your numbers.</p>
+                <h2 className={cx(h2, "max-w-[640px]")}>Find the cost that could close your business</h2>
+                <p className={cx(body, "mt-5 max-w-[520px]")}>Try it on the sample fleet, or upload an export of your own books. It takes a minute, and nothing is sold.</p>
                 <Actions />
               </div>
             </Reveal>
@@ -303,11 +365,11 @@ export default async function Landing() {
           <div>
             <Logo size={18} />
             <p className="mt-4 max-w-[40ch] leading-[1.6] text-faint">
-              CostShield is a simulation built for the UBC 2026 Hackathon. Payouts use test dollars on Solana devnet. Not an offer of insurance or derivatives.
+              Price protection for small businesses, paid out on Solana. Today a simulation: payouts use test dollars on Solana devnet. Not an offer of insurance or derivatives.
             </p>
           </div>
           <ul className="space-y-2 leading-[1.6]">
-            {[["Open app", "/app"], ["Try the sample fleet", "/app?sample=1"], ["How it works", "#how"], ["Security", "#security"], ["FAQ", "#faq"]].map(([l, h]) => (
+            {[["Open app", "/app"], ["Try the sample fleet", "/app?sample=1"], ["How it works", "#how"], ["Technology", "#technology"], ["Security", "#security"], ["FAQ", "#faq"]].map(([l, h]) => (
               <li key={l}><Link href={h} className="text-muted transition-colors duration-150 hover:text-ink">{l}</Link></li>
             ))}
           </ul>

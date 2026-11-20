@@ -229,7 +229,7 @@ function SettlementProgram() {
       <h2 className="text-[15px] font-medium">Program safeguards</h2>
       <p className="mt-1 text-[13px] text-muted">The cap pays in steps because the program cannot read encrypted amounts. It checks public prices and signers, and releases whole steps.</p>
       <div className="mt-3"><Table head={["Property", "How the program enforces it", "Error"]} rows={SAFEGUARDS.map(([a1, b, c]) => [a1, b, <span key="c" className={mono}>{c}</span>])} /></div>
-      <p className="mt-2 text-xs text-faint">Error codes are the program&apos;s own (solana/program/src/lib.rs), unchanged from Equity Floor, our first idea for this hackathon, written during the event and set aside on Nov 20, where each was triggered on devnet by an attack test. The demo replays two refusals live: a stranger&apos;s release and a duplicate release.</p>
+      <p className="mt-2 text-xs text-faint">Error codes are the program&apos;s own (solana/program/src/lib.rs), unchanged from Equity Floor, our first idea for this hackathon, written during the event and set aside on Nov 20, where each was triggered on devnet by an attack test. Each settlement also checks two refusals against the live program before sending (simulated, so nothing is sent and no fee is spent): a wallet other than the oracle posting a price report (6002), and a repeat release of a paid step (6007).</p>
     </Card>
     <Card>
       <h2 className="text-[15px] font-medium">Trust assumptions</h2>
