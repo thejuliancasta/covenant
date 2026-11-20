@@ -29,8 +29,8 @@ export async function lenderView(share: LenderShare): Promise<LenderView> {
         if (!data) throw new Error(`Step account ${st.account} was not found under the program.`);
         const onchain = decodeStep(data);
         if (onchain.policyId !== share.policyId || onchain.stepIndex !== st.index) throw new Error(`Step account ${st.account} is not step ${st.index} of policy ${share.policyId}.`);
-        const { funded } = await viewVault(address(st.account), st.vault, st.viewingKey);
-        entry = { index: st.index, triggerPrice: fromMilli(onchain.triggerMilli), funded: fromBase(funded), paid: onchain.status === "paid" };
+        const { funded, unspent } = await viewVault(address(st.account), st.vault, st.viewingKey);
+        entry = { index: st.index, triggerPrice: fromMilli(onchain.triggerMilli), funded: fromBase(funded), unspent: fromBase(unspent), status: onchain.status, paid: onchain.status === "paid" };
         break;
       } catch (e) {
         const transient = e instanceof Error && /fetch failed|429|timeout|temporarily unavailable/i.test(e.message);
@@ -43,9 +43,9 @@ export async function lenderView(share: LenderShare): Promise<LenderView> {
   steps.sort((a, b) => a.index - b.index);
   const r6 = (x: number) => Math.round(x * 1e6) / 1e6;
   const totalFunded = r6(steps.reduce((n, s) => n + s.funded, 0));
-  const totalPaid = r6(steps.filter((s) => s.paid).reduce((n, s) => n + s.funded, 0));
+  const totalPaid = r6(steps.filter((s) => s.paid).reduce((n, s) => n + Math.max(0, s.funded - s.unspent), 0));
   return {
     policyId: share.policyId, region: share.region, period: share.period, steps, totalFunded, totalPaid, checkedAt: new Date().toISOString(),
-    note: "Decrypted with the step viewing keys the fleet shared; paid flags read from the public step accounts. A paid step releases its whole vault to the fleet. Viewing keys cannot spend.",
+    note: "Decrypted funding and remaining balances with the step viewing keys the fleet shared; status flags read from public step accounts. The released amount is what left paid step vaults, not proof of the recipient. The fleet must independently decrypt its own incoming transfers to prove receipt. Viewing keys cannot spend.",
   };
 }

@@ -71,7 +71,7 @@ export interface LenderView {
   policyId: string;
   region: string;
   period: number;
-  steps: { index: number; triggerPrice: number; funded: number; paid: boolean }[];
+  steps: { index: number; triggerPrice: number; funded: number; unspent: number; status: "open" | "paid" | "reclaimed"; paid: boolean }[];
   totalFunded: number;
   totalPaid: number;
   checkedAt: string; // ISO time
