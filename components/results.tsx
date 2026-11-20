@@ -6,7 +6,7 @@ import { Arrow, Button, Card, CardTitle, Check, Ev, Meter, Note, PageHead, Row, 
 import { Bars, LineChart } from "./charts";
 import { CountUp } from "./fx/count";
 import { ExposureColumns } from "./fx/exposure-columns";
-import { CapPlates } from "./fx/cap-plates";
+import { PriceVsTrigger } from "./fx/price-vs-trigger";
 import { SPRING_FLUID, tok } from "./fx/motion";
 
 const MARKET = new Set(["fleet_fuel", "natural_gas", "electricity", "interest"]);
@@ -35,7 +35,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
   return (
     <div className="space-y-4">
       <PageHead eyebrow={`${a.company ?? "Your business"}, ${monthLabel(f.ttm[0])} to ${monthLabel(f.ttm[f.ttm.length - 1])}`}
-        title={d?.material ? "We found one cost risk worth protecting." : "We found no cost risk worth protecting."}
+        title={d?.material ? `Diesel is your biggest risk: a bad year would cost you ${usd(d.shocks[1].netImpact)}${d.shocks[1].pctOfProfit ? `, ${d.shocks[1].pctOfProfit.toFixed(1)} times your yearly profit` : ""}.` : "We found no cost risk worth protecting."}
         lede={<>We analyzed {int(a.lineCount)} transactions over {f.months.length} months. {d?.material
           ? <>Fuel is {pct(d.shareOfRevenue)} of your revenue and its price is set by a market you do not control. Most of your other costs either do not follow a market or are too small to matter.</>
           : <>None of your market-driven costs is large enough against profit to justify paying for protection. Repricing or setting cash aside is the better tool.</>}</>} />
@@ -52,8 +52,8 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
       <Reveal>
         <Card>
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <CardTitle>Where the money goes</CardTitle>
-            <span className="text-[12px] text-faint">Share of expenses and month-to-month swing</span>
+            <CardTitle>Where your money goes</CardTitle>
+            <span className="text-[12px] text-faint">Share of spending, and how much it jumps month to month</span>
           </div>
           <div className="mt-5"><ExposureColumns categories={f.categories.slice(0, 9)} market={MARKET} topTtm={top.ttm} /></div>
           <p className="mt-4 text-[12px] leading-[1.55] text-faint">Swing is the standard deviation of monthly spend divided by its average. {pct(f.classifiedShare)} of spend was classified by rule; anything unmatched is shown as unclassified rather than guessed.</p>
@@ -65,7 +65,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
           <Card>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className={cx("text-[20px] leading-[1.15]", display)}>Diesel prices</h2>
-              <span className="flex gap-1.5"><Tag tone="neutral">Primary risk</Tag><Tag tone={d.material ? "warn" : "neutral"}>{d.material ? "Material" : "Not material"}</Tag></span>
+              <span className="flex gap-1.5"><Tag tone="neutral">Biggest risk</Tag><Tag tone={d.material ? "warn" : "neutral"}>{d.material ? "Material" : "Not material"}</Tag></span>
             </div>
             <p className="mt-3 text-[13.5px] leading-[1.6] text-muted">
               You bought about {int(d.gallonsTtm)} gallons for {usd(d.spendTtm)} in the last 12 months. In a 1-in-20 price year that bill rises {pct(d.shocks[1].pct)}.
@@ -89,7 +89,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
           </Card>
 
           <Card>
-            <CardTitle>Your price per gallon follows the {d.regionLabel} index</CardTitle>
+            <CardTitle>Your price per gallon follows the official {d.regionLabel} diesel price</CardTitle>
             <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">
               {d.fit.method === "ledger-regression"
                 ? <>R² {d.fit.r2.toFixed(2)} on {d.fit.n} monthly changes.<Ev e="C" /> You pay about {ppg(Math.abs(d.fit.levelBasis))} {d.fit.levelBasis < 0 ? "below" : "above"} the index, and month to month your price strays from it by about ±{ppg(d.fit.residualStd)}. That gap is the basis risk an index payout cannot remove.</>
@@ -118,14 +118,14 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
         ) : <div className="hidden lg:block" />}
         <div className="grid content-start gap-4">
           <Card>
-            <CardTitle>Risks with no usable hedge</CardTitle>
+            <CardTitle>Costs nobody can protect</CardTitle>
             <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">{pct(noInstrument.reduce((s, o) => s + o.spendTtm, 0) / f.expensesTtm)} of your spending. No index or traded instrument tracks these costs, so nobody can honestly sell you protection on them.</p>
             <ul className="mt-3">
               {noInstrument.slice(0, 6).map((o) => <Line key={o.category} className="flex items-center justify-between gap-4"><span className="text-ink2">{o.label}</span><span className="num shrink-0 text-muted">{usdK(o.spendTtm)}<span className="text-faint">, {pct(o.shareOfRevenue, 1)} of revenue</span></span></Line>)}
             </ul>
           </Card>
           <Card>
-            <CardTitle>Market-driven, but too small to protect</CardTitle>
+            <CardTitle>Follow a market, but too small to matter</CardTitle>
             <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">These follow a market price, but a bad year would barely move your profit.</p>
             <ul className="mt-3">
               {small.map((o) => (<Line key={o.category}><div className="flex items-center justify-between gap-4"><span className="text-ink2">{o.label}</span><span className="num shrink-0 text-muted">{usdK(o.spendTtm)}{o.impact1in20 !== null && <span className="text-faint">, bad year +{usd(o.impact1in20)}</span>}</span></div><p className="mt-0.5 text-[12px] leading-[1.5] text-faint">{o.reason} Benchmark: {o.benchmark}.</p></Line>))}
@@ -143,7 +143,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
             {d && <Row label="Fuel spend with gallons on the record" hint="The rest is estimated as dollars divided by the weekly index">{pct(d.gallonsObservedShare)}</Row>}
             {d && <Row label="Share of gallons not surcharged" hint={d.surcharge.note}>{pct(d.unsurchargedShare)}<Ev e="E" /></Row>}
           </div>
-          <p className="mt-3 text-[12px] leading-[1.6] text-faint">Labels: <Ev e="V" /> verified public data, <Ev e="C" /> calculated from data, <Ev e="E" /> estimate, <Ev e="A" /> assumption. Open Judge mode for every source and formula.</p>
+          <p className="mt-3 text-[12px] leading-[1.6] text-faint">Labels: <Ev e="V" /> verified public data, <Ev e="C" /> calculated from data, <Ev e="E" /> estimate, <Ev e="A" /> assumption.</p>
         </Card>
       </Reveal>
       <div className="flex justify-end pt-2"><Button onClick={onNext} size="lg">See protection options<Arrow /></Button></div>
@@ -166,23 +166,23 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
   ];
   return (
     <div className="space-y-4">
-      <PageHead title="One candidate: a cap on your diesel price."
-        lede="If the monthly average diesel price in your region rises above a set level, the cap pays the difference on the gallons you actually bought and could not surcharge. Here are the terms, what it would have done, and who would have to stand behind it." />
+      <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, CostShield pays you the difference.`}
+        lede={`Over the last ${p.replay.length} months it would have paid you ${usd(p.totalPayout)}. It pays on the gallons you actually bought and could not pass on to customers, using the official Midwest diesel price (U.S. government data).`} />
 
       <Card>
-        <div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Diesel price cap, 12 months</CardTitle><Tag tone="bad">Not available to buy</Tag></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Diesel price vs. where protection starts</CardTitle><Tag tone="bad">Not available to buy</Tag></div>
         <div className="mt-5 grid gap-8 lg:grid-cols-[1.12fr_0.88fr]">
           <div className="min-w-0">
-            <CapPlates strike={p.strike} rows={p.replay} today={{ index: p.todayIndex, date: p.todayIndexDate }} inception={{ month: p.inceptionMonth, index: p.inceptionIndex }} />
+            <PriceVsTrigger trigger={p.strike} months={p.replay.map((r) => ({ label: monthLabel(r.month), price: r.index, payout: r.payout }))} />
           </div>
           <div className="min-w-0">
-            <Row label="Economic risk">Diesel price increases, {d.regionLabel}</Row>
-            <Row label="Benchmark" hint="Monthly mean of the weekly print">EIA {d.regionLabel} retail diesel<Ev e="V" /></Row>
-            <Row label="Trigger" hint={`Example as if bound in ${monthLabel(p.inceptionMonth)}: index ${ppg(p.inceptionIndex)} + ${usd(p.strikeOffset, 2)}`}>Monthly mean above {ppg(p.strike)}</Row>
-            <Row label="Payout each month">(index − {ppg(p.strike)}) × covered gallons</Row>
-            <Row label="Covered gallons" hint="Purchase-linked: from your own records, not a fixed bet">{pct(p.coveredShare)} of purchases, up to {int(p.maxCoveredGallonsPerMonth)}/month</Row>
-            <Row label="Estimated loss in a 1-in-20 year">{usd(d.shocks[1].netImpact)}<Ev e="C" /></Row>
-            <Row label="Maximum payout, 12 months">{usd(p.aggregateLimit)}</Row>
+            <Row label="What it protects against">Diesel price increases, {d.regionLabel}</Row>
+            <Row label="Price it follows" hint="Monthly average of the weekly price">Official {d.regionLabel} diesel price<Ev e="V" /></Row>
+            <Row label="Protection starts at" hint={`If bought in ${monthLabel(p.inceptionMonth)}: that month's price ${ppg(p.inceptionIndex)} plus ${usd(p.strikeOffset, 2)}`}>${p.strike.toFixed(2)} a gallon</Row>
+            <Row label="Money back each month">(price − ${p.strike.toFixed(2)}) × gallons covered</Row>
+            <Row label="Gallons covered" hint="From your own records, not a fixed bet">{pct(p.coveredShare)} of purchases, up to {int(p.maxCoveredGallonsPerMonth)}/month</Row>
+            <Row label="Cost of a bad year" hint="The kind that comes about once every 20 years">{usd(d.shocks[1].netImpact)}<Ev e="C" /></Row>
+            <Row label="Most it can pay in 12 months">{usd(p.aggregateLimit)}</Row>
           </div>
         </div>
         <div className={cx("mt-6", SUB)}>
@@ -202,7 +202,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
         <Card>
           <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
             <div>
-              <CardTitle>What it would cost</CardTitle>
+              <CardTitle>What protection costs</CardTitle>
               <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">A model price, not a quote. Hedge cost is a strip of 12 monthly call options on wholesale diesel (Black-76), divided by 0.70 to cover expenses and margin.<Ev e="A" /></p>
               <p className="mt-3 text-[13.5px] leading-[1.6] text-muted">Cover costs {(today.premium / then.premium).toFixed(1)} times more after the 2026 spike, and the strike would sit at {ppg(p.todayIndex + p.strikeOffset)}. Protection is cheapest before you need it.</p>
               <p className="mt-3 text-[12px] leading-[1.55] text-faint">Volatility today: {m.volatility.source}<Ev e={m.volatility.evidence} /></p>
@@ -225,14 +225,14 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
 
       <Reveal>
         <Card>
-          <CardTitle>What it would have done since 2015</CardTitle>
+          <CardTitle>Tested on every year since 2015</CardTitle>
           <div className="mt-5 grid gap-x-8 gap-y-6 sm:grid-cols-3">
-            <Stat label="12-month periods that paid" value={<CountUp value={bt.shareOfCohortsPaid * 100} format={(v) => `${v.toFixed(0)}%`} />} sub={`${bt.n} rolling periods`} ev="C" />
-            <Stat label="Average payout" value={<CountUp value={bt.burnPerGallonYear} format={ppg} />} sub="per covered gallon a year" ev="C" />
-            <Stat label="Cost swings removed" value={<CountUp value={bt.varianceReduction * 100} format={(v) => `${v.toFixed(0)}%`} />} sub={`${pct(bt.recoveryInBad)} of the increase recovered in bad years`} ev="C" />
+            <Stat label="Years that paid something" value={<CountUp value={bt.shareOfCohortsPaid * 100} format={(v) => `${v.toFixed(0)}%`} />} sub={`${bt.n} rolling periods`} ev="C" />
+            <Stat label="Average money back" value={<CountUp value={bt.burnPerGallonYear} format={ppg} />} sub="per covered gallon a year" ev="C" />
+            <Stat label="Fuel cost swings removed" value={<CountUp value={bt.varianceReduction * 100} format={(v) => `${v.toFixed(0)}%`} />} sub={`${pct(bt.recoveryInBad)} of the increase recovered in bad years`} ev="C" />
           </div>
           <div className={cx("mt-6", SUB)}>
-            <h3 className="text-[14px] font-medium text-ink">Payout per covered gallon, by the month cover started</h3>
+            <h3 className="text-[14px] font-medium text-ink">Money back per gallon, by the month protection started</h3>
             <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.6] text-muted">Each bar is one 12-month period on real {d.regionLabel} prices, with the strike {usd(p.strikeOffset, 2)} above the starting price. Most periods pay nothing. The ones that pay are the years that hurt.</p>
             <div className="mt-4"><Bars values={bt.cohorts.map((c) => c.payoutPerGallon)} labels={bt.cohorts.map((c) => c.inception.slice(0, 4))} readLabels={bt.cohorts.map((c) => monthLabel(c.inception.slice(0, 7), true))} fmt={(v) => `$${v.toFixed(2)}`} height={170} /></div>
           </div>
@@ -241,7 +241,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
 
       <Reveal>
         <Card>
-          <div className="flex flex-wrap items-center justify-between gap-2"><CardTitle>Can this risk actually be hedged?</CardTitle><Tag tone={m.status === "live" ? "good" : "warn"}>{m.status === "live" ? `Gemini live, ${m.scanned} markets scanned` : "Gemini unavailable"}</Tag></div>
+          <div className="flex flex-wrap items-center justify-between gap-2"><CardTitle>Can this risk actually be protected?</CardTitle><Tag tone={m.status === "live" ? "good" : "warn"}>{m.status === "live" ? `Gemini live, ${m.scanned} markets scanned` : "Gemini unavailable"}</Tag></div>
           <p className="mt-1.5 max-w-[80ch] text-[13.5px] leading-[1.6] text-muted">We test each instrument against your cost, not against a price forecast. A market that does not track what you pay is rejected even if it is the only one listed.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {a.hedges.map((h) => {
@@ -273,7 +273,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
 
       <Reveal>
         <Card>
-          <CardTitle>Who would owe the payout</CardTitle>
+          <CardTitle>Who would pay you</CardTitle>
           <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">CostShield would never owe or fund a payout itself. This is the chain a real product needs, and how much of it exists today.</p>
           <ol className="mt-4 grid gap-3 md:grid-cols-3">
             {waterfall.map(([who, what, status], i) => (
@@ -284,7 +284,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
               </motion.li>
             ))}
           </ol>
-          <div className="mt-4"><Note tone="warn" title="Why you cannot buy this">{a.eligibility.reasons.join(" ")}</Note></div>
+          <div className="mt-4"><Note tone="warn" title="Why you cannot buy this yet">{a.eligibility.reasons.join(" ")}</Note></div>
         </Card>
       </Reveal>
       <div className="flex justify-end pt-2"><Button onClick={onNext} size="lg">Simulate a price shock<Arrow /></Button></div>

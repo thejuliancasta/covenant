@@ -6,8 +6,9 @@ import { getLandingData } from "@/components/landing/data";
 import { Nav } from "@/components/landing/nav";
 import { Reveal } from "@/components/landing/reveal";
 import { ProductWindow } from "@/components/landing/product-window";
-import { CapLadder, ExposureBars, LedgerSort, LenderView, PrivatePayout } from "@/components/landing/fragments";
-import { body, btnPrimary, cx, h2, lift, linkArrow, pct1, surface, usd0, wrap } from "@/components/landing/kit";
+import { Backdrop } from "@/components/fx/backdrop";
+import { ExposureBars, LedgerSort, LenderView, PrivatePayout, ProtectionChart } from "@/components/landing/fragments";
+import { body, btnPrimary, cx, h2, lift, linkArrow, monYear, surface, usd0, wrap } from "@/components/landing/kit";
 
 export const dynamic = "force-static";
 
@@ -19,7 +20,7 @@ function Feature({ id, label, title, children, aside, fragment, flip }: {
   id?: string; label: string; title: ReactNode; children: ReactNode; aside?: ReactNode; fragment: ReactNode; flip?: boolean;
 }) {
   return (
-    <section id={id} className="scroll-mt-20 py-20 md:py-[120px]">
+    <section id={id} className="scroll-mt-20 py-20 md:py-[112px]">
       <div className={cx(wrap, "grid items-center gap-10 md:gap-16 lg:grid-cols-[0.85fr_1.15fr]")}>
         <div className={cx("max-w-[480px]", flip && "lg:order-2 lg:justify-self-end")}>
           <Reveal><p className="text-[13px] font-[500] text-ink2">{label}</p></Reveal>
@@ -35,48 +36,64 @@ function Feature({ id, label, title, children, aside, fragment, flip }: {
 
 export default async function Landing() {
   const d = await getLandingData();
-  const proof = [
-    { v: pct1(d.diesel.share), c: "of the sample fleet's revenue goes to diesel" },
-    { v: `${d.diesel.shockTimesProfit.toFixed(1)}×`, c: "its operating profit, lost in a 1-in-20 diesel year after surcharges" },
-    { v: String(d.backtest.n), c: `rolling 12-month cover years backtested on EIA prices, ${d.backtest.from.slice(0, 4)} to ${d.backtest.to.slice(0, 4)}` },
-    { v: `${d.backtest.badPaid} of ${d.backtest.bad}`, c: "bad diesel years, a quarter a gallon or worse, in which the cap paid" },
+  const rows = d.policy.rows;
+  const coverFrom = monYear(rows[0].month, true), coverTo = monYear(rows[rows.length - 1].month, true);
+  const startsAt = `$${d.policy.strike.toFixed(2)}`;
+  const times = d.diesel.shockTimesProfit;
+
+  const story = [
+    { n: "1", step: "The books", value: `$${Math.round(d.diesel.spendTtm / 1000)}K`, unit: "a year on diesel",
+      text: `Read from ${d.lines.toLocaleString("en-US")} transactions in a QuickBooks export. Diesel is ${Math.round(d.diesel.share * 100)}% of everything the fleet earns.` },
+    { n: "2", step: "The risk", value: `${times.toFixed(0)}×`, unit: "their profit, lost in a bad year",
+      text: `A bad diesel year, the kind that comes about once every 20 years, costs ${usd0(d.diesel.shockNet)} against ${usd0(d.profitTtm)} of profit.` },
+    { n: "3", step: "Money back", value: usd0(d.policy.totalPayout), unit: `paid back through ${coverTo}`,
+      text: `Protection started at ${startsAt} a gallon. Every month diesel went above that, CostShield paid the difference.` },
   ];
+
+  const tracks = [
+    { track: "DeFi and Onchain Applications", kind: "Main track", line: "Small businesses get the price protection big companies use, with the money locked in advance so the payout can't fail.", see: "See it on the Protection screen" },
+    { track: "Best use of Solana", kind: "Chain award", line: "A Solana program holds the backer's money and pays the business automatically when the official price crosses the line. Helius Privacy Rings keeps the amounts private, and the business can prove its cover to a lender with a read-only key.", see: "See it at the payout step" },
+    { track: "Gemini Prediction Markets", kind: "Bounty", line: "CostShield reads live Gemini markets to estimate how likely a price jump is, and says plainly when no market fits.", see: "See it in the analysis" },
+  ];
+
   const verdicts = [
-    { name: "NY Harbor diesel calls", where: "NYMEX", status: "Viable, modelled", tone: "text-jade", note: `R² ${d.wholesaleR2.toFixed(2)} to retail diesel, 12 monthly expiries` },
-    { name: "Crude oil ladders", where: "Gemini", status: "Signal only", tone: "text-ink2", note: "Brent is not diesel, and the ladder expires in days" },
-    { name: "Payroll, leases, repairs", where: "None", status: "No instrument", tone: "text-rust", note: "Nothing trades on these costs" },
+    { name: "Diesel options on NYMEX", status: "Works", tone: "text-jade", note: "Follows the diesel price trucks pay and runs a full year. Priced with a model, not traded." },
+    { name: "Gemini crude oil markets", status: "A signal only", tone: "text-ink2", note: "Crude oil is not diesel, and these markets close within days." },
+    { name: "Payroll, leases, repairs", status: "Can't be protected", tone: "text-rust", note: "Nothing exists that moves with these costs." },
   ];
+
   const details = [
-    { t: "Judge mode", b: "Every number opens to its source, its formula and its inputs: provenance, classification, statistics, Gemini and the settlement program.", m: "5 tabs" },
-    { t: "Evidence on every number", b: "Each figure carries a letter: verified public data, calculated, estimate or assumption. Owners can ignore it; reviewers can read it.", m: "V  C  E  A" },
-    { t: "Live Gemini market reads", b: "Prediction-market ladders are read live and turned into an implied volatility for pricing. They are scored as a hedge, and rejected when they fail.", m: "Index, tenor, depth, fit" },
-    { t: "Write-once oracle reports", b: "The oracle posts the EIA monthly mean with the sha256 of the source file. A period can be reported once.", m: `sha256 ${d.eia.sha256.slice(0, 16)}…` },
-    { t: "Refusals the program enforces", b: "Reports from anyone but the oracle, releases of untriggered steps, releases by anyone but the fleet and double releases are refused on chain.", m: "4 checks" },
-    { t: "Reads real exports", b: "QuickBooks reports with title rows above the header, or any export with debit and credit columns. Unreadable rows are counted, not guessed.", m: `${d.lines.toLocaleString("en-US")} rows, ${d.skipped} skipped` },
+    { t: "Every number shows where it came from", b: "Each figure says whether it is official public data, calculated from data, an estimate or an assumption, and names its source.", m: "V  C  E  A" },
+    { t: "No wallet needed", b: "This demo pays from test wallets on Solana devnet, so a visitor can run the whole thing without devnet SOL or a wallet.", m: "Solana devnet" },
+    { t: "Live Gemini markets", b: "Gemini prices are read live to estimate how much diesel could move. A market that doesn't fit is turned down, with the reason.", m: "Read at analysis time" },
+    { t: "The official price, posted once", b: "The official diesel price is posted on the blockchain with a fingerprint of the government file. It cannot be changed afterwards.", m: `sha256 ${d.eia.sha256.slice(0, 16)}…` },
+    { t: "Rules the program enforces", b: "Only the official price poster can post. Only the business can collect. Nothing pays below the line, and nothing pays twice.", m: "Refused on chain" },
+    { t: "Reads real exports", b: "QuickBooks reports, title rows and all, or any export with debit and credit columns. Rows it can't read are counted, not guessed.", m: `${d.lines.toLocaleString("en-US")} rows, ${d.skipped} skipped` },
   ];
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-bg">
+    <div className="relative isolate min-h-screen overflow-x-clip bg-bg">
+      <Backdrop variant="landing" />
       <Nav />
       <main>
-        {/* Hero */}
-        <section className="pt-16 md:pt-[104px]">
+        {/* Hero: the problem, then what CostShield does */}
+        <section className="pt-16 md:pt-[96px]">
           <div className={wrap}>
             <Reveal immediate>
-              <a href="#privacy" className="group/btn inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors duration-150 hover:text-ink">
-                <span className="text-ink2">Private payouts on Solana devnet</span>
-                <span className="text-faint">with Helius Privacy Rings</span>
+              <a href="#ubc" className="group/btn inline-flex items-center gap-1.5 text-[14px] text-muted transition-colors duration-150 hover:text-ink">
+                <span className="text-ink2">Built for the UBC 2026 Hackathon</span>
+                <span className="hidden text-faint sm:inline">DeFi, Solana and Gemini tracks</span>
                 <Arrow className="text-faint" />
               </a>
             </Reveal>
             <Reveal immediate i={1}>
-              <h1 className="mt-6 max-w-[880px] bg-gradient-to-b from-ink from-30% to-ink/70 bg-clip-text pb-1 text-[40px] font-[540] leading-[1.04] tracking-[-0.032em] text-transparent sm:text-[56px] sm:leading-[1.02] lg:text-[68px]">
-                Protect your business from <br className="hidden sm:block" />the costs a market controls
+              <h1 className="mt-6 max-w-[960px] bg-gradient-to-b from-ink from-30% to-ink/70 bg-clip-text pb-1 text-[38px] font-[540] leading-[1.06] tracking-[-0.032em] text-transparent sm:text-[52px] sm:leading-[1.03] lg:text-[64px]">
+                A small fleet earns {usd0(d.profitTtm)} a year. <br className="hidden md:block" />A bad diesel year costs {usd0(d.diesel.shockNet)}.
               </h1>
             </Reveal>
             <Reveal immediate i={2}>
-              <p className="mt-6 max-w-[560px] text-[16px] leading-[1.6] text-muted md:text-[18px]">
-                CostShield reads your books, measures what a price spike would cost you, and says plainly what can be protected. Payouts settle privately on Solana.
+              <p className="mt-6 max-w-[600px] text-[16px] leading-[1.6] text-muted md:text-[18px]">
+                CostShield finds that risk in a business&apos;s books and pays it back automatically when prices spike, privately, on Solana. Shown here with {d.company}, a 10-truck sample fleet built on real diesel prices.
               </p>
             </Reveal>
             <Reveal immediate i={3}>
@@ -86,47 +103,84 @@ export default async function Landing() {
               </div>
             </Reveal>
           </div>
-          <div id="product" className={cx(wrap, "scroll-mt-20 mt-16 md:mt-20")}>
+          <div id="product" className={cx(wrap, "mt-16 scroll-mt-20 md:mt-20")}>
             <ProductWindow d={d} />
           </div>
         </section>
 
-        {/* Proof */}
-        <section aria-label="The sample company in numbers" className="pb-20 md:pb-[120px]">
+        {/* Three-step story */}
+        <section aria-labelledby="story" className="pb-20 md:pb-[112px]">
           <div className={wrap}>
-            <Reveal><p className="text-[13px] text-faint">From the sample company: {d.company}, a synthetic 10-truck Midwest fleet with real EIA prices.</p></Reveal>
-            <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-[16px] border border-line/8 bg-line/[0.07] lg:grid-cols-4">
-              {proof.map((p, i) => (
-                <Reveal key={p.c} i={i} className="bg-bg">
-                  <div className="h-full px-5 py-6 md:px-6 md:py-8">
-                    <p className="num text-[32px] font-[540] leading-none tracking-[-0.03em] text-ink md:text-[40px]">{p.v}</p>
-                    <p className="mt-3 max-w-[30ch] text-[13px] leading-[1.5] text-muted">{p.c}</p>
-                  </div>
-                </Reveal>
+            <Reveal><h2 id="story" className="text-[13px] font-[500] text-faint">What happened to the sample fleet, from {coverFrom} to {coverTo}</h2></Reveal>
+            <ol className="mt-6 grid gap-px overflow-hidden rounded-[16px] border border-line/8 bg-line/[0.07] md:grid-cols-3">
+              {story.map((s, i) => (
+                <li key={s.n} className="bg-bg">
+                  <Reveal i={i} className="h-full">
+                    <div className="flex h-full flex-col px-6 py-7 md:px-7 md:py-8">
+                      <p className="flex items-center gap-2 text-[13px] text-ink2">
+                        <span className="num text-faint">{s.n}</span>{s.step}
+                        {i < 2 && <Arrow className="ml-auto hidden text-faint md:block" />}
+                      </p>
+                      <p className={cx("num mt-6 text-[40px] font-[540] leading-none tracking-[-0.03em] md:text-[48px]", i === 2 ? "text-jade" : "text-ink")}>{s.value}</p>
+                      <p className="mt-2 text-[15px] text-ink2">{s.unit}</p>
+                      <p className="mt-4 text-[14px] leading-[1.55] text-muted">{s.text}</p>
+                    </div>
+                  </Reveal>
+                </li>
               ))}
-            </div>
+            </ol>
           </div>
         </section>
 
         <Rule />
 
-        <Feature id="how" label="Reads your books" title={<>Starts from the books <br className="hidden md:block" />you already keep</>} fragment={<LedgerSort d={d} />}>
-          <p>Upload a QuickBooks export. Ordered, deterministic rules give every line a category and a confidence, gallons come straight from fuel memos, and any row that cannot be read is counted rather than guessed.</p>
+        {/* Built for UBC 2026 */}
+        <section id="ubc" aria-labelledby="ubc-title" className="scroll-mt-20 py-20 md:py-[112px]">
+          <div className={cx(wrap, "grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16")}>
+            <div>
+              <Reveal><h2 id="ubc-title" className={h2}>Built for UBC 2026</h2></Reveal>
+              <Reveal i={1}><p className={cx(body, "mt-5 max-w-[400px]")}>One working product across three tracks. It is a simulation: test dollars on Solana devnet, never real money.</p></Reveal>
+            </div>
+            <ul className="divide-y divide-line/[0.07] border-y border-line/[0.07]">
+              {tracks.map((t, i) => (
+                <li key={t.track}>
+                  <Reveal i={i}>
+                    <div className="grid gap-x-8 gap-y-2 py-7 md:grid-cols-[200px_1fr]">
+                      <div>
+                        <p className="text-[15px] font-[560] tracking-[-0.01em] text-ink">{t.track}</p>
+                        <p className="mt-1 text-[13px] text-faint">{t.kind}</p>
+                      </div>
+                      <div>
+                        <p className="text-[15px] leading-[1.6] text-muted">{t.line}</p>
+                        <Link href="/app?sample=1" className="group/btn mt-3 inline-flex items-center gap-1 text-[13px] font-[500] text-ink2 transition-colors duration-150 hover:text-ink">{t.see}<Arrow /></Link>
+                      </div>
+                    </div>
+                  </Reveal>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <Rule />
+
+        <Feature id="how" label="1. Reads the books" title={<>Starts from the books <br className="hidden md:block" />you already keep</>} fragment={<LedgerSort d={d} />}>
+          <p>Upload a QuickBooks export. CostShield sorts every line into a category with fixed rules, reads the gallons straight from each fuel receipt, and counts any row it can&apos;t read instead of guessing.</p>
         </Feature>
 
-        <Feature label="Finds what a market controls" title="Finds the costs a market sets" fragment={<ExposureBars d={d} />} flip>
-          <p>Each category is measured as a share of revenue, then the price you paid is tested against public indexes. For the sample fleet, diesel follows the {d.diesel.regionLabel} index with R² {d.diesel.r2.toFixed(2)}. Payroll and leases follow nothing.</p>
+        <Feature label="2. Finds the risk" title="Finds the costs a price you don't control can hurt" fragment={<ExposureBars d={d} />} flip>
+          <p>Diesel is {Math.round(d.diesel.share * 100)}% of the fleet&apos;s revenue, and what it pays at the pump follows the official Midwest diesel price published by the U.S. government. Payroll, leases and repairs don&apos;t follow any price, so there is nothing to protect them with.</p>
         </Feature>
 
         <Feature
-          label="Prices protection honestly"
-          title="Prices the cover, and says no when nothing hedges"
-          fragment={<CapLadder d={d} />}
+          label="3. Prices the protection"
+          title="Says what can be protected, and what can't"
+          fragment={<ProtectionChart d={d} />}
           aside={
             <ul className="divide-y divide-line/[0.06] border-y border-line/[0.06]">
               {verdicts.map((v) => (
                 <li key={v.name} className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-0.5 py-3 text-[13px]">
-                  <span className="text-ink">{v.name} <span className="text-faint">{v.where}</span></span>
+                  <span className="text-ink">{v.name}</span>
                   <span className={v.tone}>{v.status}</span>
                   <span className="col-span-2 text-faint">{v.note}</span>
                 </li>
@@ -134,25 +188,25 @@ export default async function Landing() {
             </ul>
           }
         >
-          <p>A 12-month diesel cap in $0.25 steps, priced as a strip of options with Black-76 and backtested on {d.backtest.n} rolling cover years. Any instrument that fails on index, tenor, depth or fit is rejected, and the page says so.</p>
+          <p>Protection starts at {startsAt} a gallon. Any month diesel goes above it, CostShield pays back the difference on the fuel the business pays for itself. Tested on every year since {d.backtest.from.slice(0, 4)}, it paid in {d.backtest.badPaid} of the {d.backtest.bad} bad ones.</p>
         </Feature>
 
-        <Feature id="privacy" label="Pays privately on Solana" title="The payout is real. The amount stays private." fragment={<PrivatePayout d={d} />} flip>
-          <p>Each step of the cap is funded in advance. An oracle posts the EIA monthly mean, and the program releases every step the price reached. Helius Privacy Rings keeps step amounts, the payout and balances encrypted on chain.</p>
-          <p className="text-[14px] text-faint">Hover the fleet&apos;s view to decode it again.</p>
+        <Feature id="privacy" label="4. Pays back privately" title="The money is real. The amount stays private." fragment={<PrivatePayout d={d} />} flip>
+          <p>The backer sets the money aside in advance. When the official diesel price is posted on the blockchain, a Solana program pays the business automatically. Helius Privacy Rings keeps every amount encrypted, so only the business can read it.</p>
+          <p className="text-[14px] text-faint">Hover the business&apos;s side to decrypt it again.</p>
         </Feature>
 
-        <Feature id="lenders" label="Proves it to your lender" title="Proof for your lender, without a spreadsheet" fragment={<LenderView d={d} />}>
-          <p>Send one link. It carries read-only viewing keys, so your lender sees each step&apos;s trigger, what was funded and what paid. The key can decrypt. It cannot spend.</p>
+        <Feature id="lenders" label="5. Proves it to the bank" title="Proof for your lender in one link" fragment={<LenderView d={d} />}>
+          <p>The business sends its lender a link with a read-only key. The lender sees how much was set aside and how much was paid. The key can read the amounts. It cannot move any money.</p>
         </Feature>
 
         <Rule />
 
         {/* Details */}
-        <section aria-labelledby="details" className="py-20 md:py-[120px]">
+        <section aria-labelledby="details" className="py-20 md:py-[112px]">
           <div className={wrap}>
             <Reveal><h2 id="details" className={cx(h2, "max-w-[640px]")}>Built to be checked</h2></Reveal>
-            <Reveal i={1}><p className={cx(body, "mt-5 max-w-[520px]")}>Every claim on this page traces back to a file, a formula or a transaction you can open.</p></Reveal>
+            <Reveal i={1}><p className={cx(body, "mt-5 max-w-[520px]")}>Every number on this page traces back to a file, a formula or a transaction you can open.</p></Reveal>
             <div className="mt-12 grid gap-px overflow-hidden rounded-[16px] border border-line/8 bg-line/[0.07] sm:grid-cols-2 lg:grid-cols-3">
               {details.map((x, i) => (
                 <Reveal key={x.t} i={i % 3} className="bg-bg">
@@ -170,13 +224,13 @@ export default async function Landing() {
         <Rule />
 
         {/* Final call to action */}
-        <section className="py-24 md:py-[144px]">
-          <div className={cx(wrap)}>
+        <section className="py-24 md:py-[128px]">
+          <div className={wrap}>
             <Reveal>
               <div className={cx(surface, lift, "px-6 py-12 md:px-14 md:py-16")}>
-                <h2 className={cx(h2, "max-w-[620px]")}>Start with the sample company</h2>
+                <h2 className={cx(h2, "max-w-[640px]")}>See it on the sample fleet</h2>
                 <p className={cx(body, "mt-5 max-w-[540px]")}>
-                  Two years of books from a 10-truck fleet, {d.lines.toLocaleString("en-US")} transactions, {usd0(d.revenueTtm)} in revenue and {usd0(d.profitTtm)} of profit. Every number above came from it.
+                  Two years of books, {d.lines.toLocaleString("en-US")} transactions, {usd0(d.profitTtm)} of profit and a diesel bill of {usd0(d.diesel.spendTtm)}. Every number above came from it.
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
                   <Link href="/app?sample=1" className={btnPrimary}>Analyze a sample company</Link>
@@ -192,7 +246,7 @@ export default async function Landing() {
         <div className={cx(wrap, "grid gap-8 text-[13px] md:grid-cols-[1fr_1.4fr]")}>
           <div>
             <Logo size={18} />
-            <p className="mt-4 max-w-[38ch] leading-[1.6] text-faint">
+            <p className="mt-4 max-w-[40ch] leading-[1.6] text-faint">
               A simulation built for the UBC 2026 Hackathon. Not an offer of insurance or derivatives. No real premiums, orders or money: devnet test dollars only.
             </p>
           </div>

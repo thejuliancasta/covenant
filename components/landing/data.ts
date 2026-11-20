@@ -51,9 +51,9 @@ async function build(): Promise<LandingData> {
 
   const verdictOf = new Map(a.others.map((o) => [o.category, o]));
   const categoryRows: CategoryRow[] = fin.categories.slice(0, 7).map((c) => {
-    if (c.category === "fleet_fuel") return { label: c.label, share: c.shareOfRevenue, ttm: c.ttm, market: true, verdict: `Moves with the ${d.regionLabel.replace(/ \(.*\)/, "")} diesel index` };
+    if (c.category === "fleet_fuel") return { label: c.label, share: c.shareOfRevenue, ttm: c.ttm, market: true, verdict: "Follows the official Midwest diesel price" };
     const o = verdictOf.get(c.category);
-    const verdict = o?.verdict === "no instrument" ? "Nothing trades on this cost" : o?.verdict === "not priced" ? `${o.benchmark}, below the 5% screen` : (o?.reason ?? "");
+    const verdict = o?.verdict === "no instrument" ? "Nothing exists to protect this cost" : o?.verdict === "not priced" ? "Too small to matter: under 5% of revenue" : "Too small to matter";
     return { label: c.label, share: c.shareOfRevenue, ttm: c.ttm, market: false, verdict };
   });
 

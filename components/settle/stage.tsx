@@ -114,10 +114,10 @@ function PlateBody({ p, perStep }: { p: PlateModel; perStep: number | null }) {
   return (
     <div className="relative flex h-full min-w-0 flex-col justify-center gap-1.5 px-1">
       <div className="flex min-w-0 items-baseline justify-between gap-2 leading-4">
-        <span className={cx("num shrink-0 text-[12px] font-medium", p.lane === "wallet" ? "text-ink" : "text-ink2")}>Step {p.index}</span>
+        <span className={cx("num shrink-0 text-[12px] font-medium", p.lane === "wallet" ? "text-ink" : "text-ink2")}>Chunk {p.index}</span>
         <span className="min-w-0 truncate text-[12px]">
           {p.lane === "wallet" ? (perStep !== null ? <DecodeText text={`+${perStep.toFixed(2)}`} play className="font-medium text-jade" /> : <span className="text-jade">paid</span>)
-            : p.lane === "underwriter" ? (p.reclaimed ? <span className="text-muted">returned</span> : <span className="text-faint">to fund</span>)
+            : p.lane === "underwriter" ? (p.reclaimed ? <span className="text-muted">back to backer</span> : <span className="text-faint">not set aside yet</span>)
             : p.sealed ? <CipherGlyphs length={5} seed={`plate-${p.index}`} className="text-[12px] sm:text-[13px]" label={`Step ${p.index} amount, encrypted`} /> : null}
         </span>
       </div>
@@ -144,22 +144,22 @@ export function SettlementStage({ m, company, explorer, running, underwriterBala
       {/* Oracle report line */}
       <div ref={reportScope} className="flex min-h-[44px] flex-wrap items-baseline gap-x-4 gap-y-1.5">
         {m.mean !== null ? (<>
-          <span className="text-[13px] text-muted">Oracle report</span>
+          <span className="text-[13px] text-muted">Official price posted on the blockchain</span>
           <span className="num text-[20px] font-[550] tracking-[-0.03em] text-heat">${m.mean.toFixed(3)}<span className="ml-1 text-[13px] font-normal tracking-normal text-muted">a gallon</span></span>
           {m.sha && <HashChip hash={m.sha} />}
           {m.reportTx && <TxChip sig={m.reportTx} explorer={explorer} />}
-          {m.reportReused && <span className="text-[12px] text-faint">already on chain, reused</span>}
+          {m.reportReused && <span className="text-[12px] text-faint">already posted, reused</span>}
         </>) : (
-          <span className="text-[13px] leading-[1.5] text-muted">{running ? "Waiting for the oracle to post the monthly mean on chain…" : <>Expected index from the replay: <span className="num text-ink2">${m.expectedMean.toFixed(3)}</span> a gallon. Not attested until the oracle posts it.</>}</span>
+          <span className="text-[13px] leading-[1.5] text-muted">{running ? "Waiting for the official price to be posted on the blockchain…" : <>Expected official price from the replay: <span className="num text-ink2">${m.expectedMean.toFixed(3)}</span> a gallon. Not posted yet.</>}</span>
         )}
       </div>
 
       {/* Lane headers */}
       <div className="mt-5 grid grid-cols-[44px_repeat(3,minmax(0,1fr))] gap-x-2 text-[12px] sm:grid-cols-[60px_repeat(3,minmax(0,1fr))] sm:gap-x-4">
-        <span className="self-end text-faint">Pays at</span>
-        <div className="min-w-0"><p className="truncate font-medium text-ink2">Underwriter</p><p className="num truncate text-faint">{underwriterBalance !== undefined ? tusd(underwriterBalance, 0) : "private balance"}</p></div>
-        <div className="min-w-0"><p className="truncate font-medium text-ink2">Step vaults</p><p className="truncate text-faint">{m.funded ? "funded, encrypted" : m.opened ? "open, terms public" : m.fromServer ? "terms from the oracle" : "expected terms"}</p></div>
-        <div className="min-w-0 text-right"><p className="truncate font-medium text-ink2">{company}</p><p className="num truncate text-faint">{paid ? `${paid} of ${n} released` : "wallet"}</p></div>
+        <span className="self-end text-faint">Pays at price</span>
+        <div className="min-w-0"><p className="truncate font-medium text-ink2">The backer</p><p className="num truncate text-faint">{underwriterBalance !== undefined ? tusd(underwriterBalance, 0) : "private balance"}</p></div>
+        <div className="min-w-0"><p className="truncate font-medium text-ink2">Set aside in advance</p><p className="truncate text-faint">{m.funded ? "locked, amounts hidden" : m.opened ? "policy open, terms public" : "expected"}</p></div>
+        <div className="min-w-0 text-right"><p className="truncate font-medium text-ink2">{company}</p><p className="num truncate text-faint">{paid ? `${paid} of ${n} paid` : "wallet"}</p></div>
       </div>
 
       <LayoutGroup>
@@ -202,7 +202,7 @@ export function SettlementStage({ m, company, explorer, running, underwriterBala
                   {p.reclaimed && p.tx && <ReturnMark tx={p.tx} explorer={explorer} />}
                   {!m.opened && !m.funded && (
                     <span className="flex w-full flex-col gap-1.5 px-1">
-                      <span className="text-[11.5px] text-faint">Step {p.index}</span>
+                      <span className="text-[11.5px] text-faint">Chunk {p.index}</span>
                       <span className="h-[5px] rounded-[3px] border border-dashed border-line/14" />
                     </span>
                   )}
@@ -236,7 +236,7 @@ function PayoutMark({ step, tx, explorer, shake }: { step: number; tx: string; e
   return (
     <motion.span ref={scope} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={UI_SPRING}
       className={cx("inline-flex items-center gap-1.5 whitespace-nowrap text-[11.5px] transition-colors duration-300", flash ? "text-rust" : "text-ink2")}>
-      <span className="font-medium">{flash ? "paid, repeat refused" : "paid"}</span>
+      <span className="font-medium">{flash ? "paid, second try refused" : "paid"}</span>
       {!flash && <TxLink sig={tx} explorer={explorer} className="hidden text-[10.5px] !text-inherit xl:inline-flex" />}
       <a href={txUrl(explorer, tx)} target="_blank" rel="noreferrer" aria-label={`Release transaction for step ${step}`} className="relative inline-flex before:absolute before:-inset-3 before:content-[''] xl:hidden"><ArrowOut /></a>
       <span className="sr-only">Step {step} released</span>
@@ -248,7 +248,7 @@ function ReturnMark({ tx, explorer }: { tx: string; explorer: string }) {
   return (
     <motion.a href={txUrl(explorer, tx)} target="_blank" rel="noreferrer" title={`Reclaim transaction ${tx}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={UI_SPRING}
       className="relative inline-flex items-center gap-1.5 whitespace-nowrap text-[11.5px] text-muted transition-colors duration-150 before:absolute before:-inset-y-3 before:inset-x-0 before:content-[''] hover:text-ink">
-      <span className="font-medium">returned</span><ArrowOut />
+      <span className="font-medium">back to backer</span><ArrowOut />
     </motion.a>
   );
 }
@@ -266,6 +266,19 @@ function StatusMark({ status }: { status: StepStatus }) {
   return <span role="img" aria-label="error" className="mt-[1px] flex h-4 w-4 shrink-0 items-center justify-center text-[13px] font-bold text-rust">!</span>;
 }
 
+/** Plain names for the server's steps; the server's own detail line stays underneath. */
+const PLAIN: Record<string, string> = {
+  oracle: "Read the official diesel price for the month",
+  setup: "Check the test wallets and private balances",
+  open: "Open the policy on Solana (terms are public)",
+  fund: "The backer sets money aside in advance, privately",
+  report: "Official price posted on the blockchain",
+  stranger: "Someone else tries to post a fake price",
+  release: "Paid to the business, privately",
+  duplicate: "The business tries to collect twice",
+  reclaim: "Unused money goes back to the backer",
+};
+
 function LogRow({ s, explorer }: { s: StepEvent; explorer: string }) {
   const scope = useShake(s.status === "rejected" || s.status === "error" ? 1 : 0);
   return (
@@ -274,14 +287,14 @@ function LogRow({ s, explorer }: { s: StepEvent; explorer: string }) {
         <StatusMark status={s.status} />
         <div className="min-w-0 flex-1">
           <p className={cx("flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[14px] font-medium transition-colors duration-200", s.status === "running" ? "text-ink" : s.status === "done" ? "text-ink2" : "text-ink")}>
-            {s.label}
-            {s.status === "rejected" && <span className="text-[12.5px] font-medium text-rust">blocked, as designed</span>}
+            {PLAIN[s.id] ?? s.label}
+            {s.status === "rejected" && <span className="text-[12.5px] font-medium text-rust">refused, as designed</span>}
           </p>
-          {s.detail && <p className="mt-1 break-words text-[12.5px] leading-[1.55] text-muted">{s.detail}</p>}
+          {s.detail && <p className="mt-1 break-words text-[12px] leading-[1.55] text-faint">{s.detail}</p>}
           {(s.private || s.tx) && (
             <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
               {s.tx && <TxChip sig={s.tx} explorer={explorer} />}
-              {s.private && <span className="inline-flex items-center gap-1.5 text-[12px] text-cipher"><LockIcon />Private, amounts encrypted</span>}
+              {s.private && <span className="inline-flex items-center gap-1.5 text-[12px] text-cipher"><LockIcon />Private: amounts hidden</span>}
             </div>
           )}
         </div>

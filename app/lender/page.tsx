@@ -100,7 +100,7 @@ export default function LenderPage() {
 
             : (<>
               <PageHead eyebrow={`Lender view · policy ${state.share.policyId}`}
-                title={state.kind === "ok" ? <>Diesel cover for {period}: <span className="num">{tusd(state.view.totalPaid, 0)}</span> paid.</> : state.kind === "error" ? <>The diesel cover for {period} could not be checked.</> : <>Checking the diesel cover for {period}.</>}
+                title={state.kind === "ok" ? <>Diesel protection for {period}: <span className="num">{tusd(state.view.totalPaid, 0)}</span> paid.</> : state.kind === "error" ? <>The diesel cover for {period} could not be checked.</> : <>Checking the diesel cover for {period}.</>}
                 lede={<>A fleet shared read-only viewing keys for {state.share.steps.length} protection steps on the {region} diesel index. Amounts are encrypted on Solana devnet. These keys decrypt them; they cannot spend them.</>} />
 
               {state.kind === "loading" && <Pending share={state.share} />}
@@ -151,7 +151,7 @@ const PLATE_GRID = "sm:grid-cols-[84px_minmax(0,1fr)_minmax(0,1.5fr)_96px_minmax
 function PlateHead() {
   return (
     <div aria-hidden className={cx("hidden gap-4 px-4 pb-2 text-[12px] text-faint sm:grid", PLATE_GRID)}>
-      <span>Step</span><span className="text-right">Pays at or above</span><span className="text-right">Funded</span><span>Status</span><span>Accounts</span>
+      <span>Chunk</span><span className="text-right">Pays when price ≥</span><span className="text-right">Set aside in advance</span><span>Status</span><span>Accounts</span>
     </div>
   );
 }
@@ -190,9 +190,9 @@ function Pending({ share }: { share: LenderShare }) {
       <ul className="space-y-2">
         {share.steps.map((s) => (
           <li key={s.index} className={cx("grid gap-2 py-3.5 sm:gap-4 sm:px-4", PLATE_GRID)}>
-            <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Step {s.index}</span></Cell>
-            <Cell label="Pays at or above" className="sm:text-right"><span className="text-[13px] text-faint">reading…</span></Cell>
-            <Cell label="Funded" className="sm:text-right"><CipherGlyphs length={8} seed={`${share.policyId}-${s.index}`} className="text-[15px]" label="Encrypted, not yet decrypted" /></Cell>
+            <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Chunk {s.index}</span></Cell>
+            <Cell label="Pays when price ≥" className="sm:text-right"><span className="text-[13px] text-faint">reading…</span></Cell>
+            <Cell label="Set aside in advance" className="sm:text-right"><CipherGlyphs length={8} seed={`${share.policyId}-${s.index}`} className="text-[15px]" label="Encrypted, not yet decrypted" /></Cell>
             <Cell label="Status"><span className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-cipher"><LockIcon />encrypted</span></Cell>
             <Cell label="Accounts"><Accounts acct={s} /></Cell>
           </li>
@@ -220,9 +220,9 @@ function Verified({ share, view }: { share: LenderShare; view: LenderView }) {
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}>
         <Card>
           <div className="grid grid-cols-2 gap-x-5 gap-y-6 md:grid-cols-4">
-            <Stat label="Funded across all steps" value={tusd(funded, 0)} sub="decrypted with the shared keys" />
+            <Stat label="Set aside in advance" value={tusd(funded, 0)} sub="read with the shared keys" />
             <Stat label="Paid to the fleet" value={<span className="text-jade">{tusd(paid, 0)}</span>} sub={`${view.steps.filter((s) => s.paid).length} of ${view.steps.length} steps released`} />
-            <Stat label="Steps funded or paid" value={`${backed} of ${view.steps.length}`} sub={backed < view.steps.length ? `${view.steps.length - backed} with no balance and no payout` : "every step holds funds or has paid"} />
+            <Stat label="Chunks set aside or paid" value={`${backed} of ${view.steps.length}`} sub={backed < view.steps.length ? `${view.steps.length - backed} with no balance and no payout` : "every step holds funds or has paid"} />
             <Stat label="Checked" value={<span className="text-[22px] sm:text-[24px]">{Number.isNaN(checked.getTime()) ? view.checkedAt : checked.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>} sub={`on Solana devnet · ${REGION_LABEL[view.region] ?? view.region}, ${monthLabel(periodYm(view.period), true)}`} />
           </div>
         </Card>
@@ -240,9 +240,9 @@ function Verified({ share, view }: { share: LenderShare; view: LenderView }) {
             return (
               <motion.li key={s.index} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, delay: i * STAGGER, ease: [0.2, 0.8, 0.2, 1] }}
                 className={cx("grid gap-2 py-3.5 sm:gap-4 sm:px-4", PLATE_GRID)}>
-                <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Step {s.index}</span></Cell>
-                <Cell label="Pays at or above" className="sm:text-right"><span className="num text-[13.5px] text-ink2">{ppg(s.triggerPrice)}</span></Cell>
-                <Cell label="Funded" className="sm:text-right">
+                <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Chunk {s.index}</span></Cell>
+                <Cell label="Pays when price ≥" className="sm:text-right"><span className="num text-[13.5px] text-ink2">{ppg(s.triggerPrice)}</span></Cell>
+                <Cell label="Set aside in advance" className="sm:text-right">
                   <span className="inline-flex items-center gap-2 sm:justify-end">
                     <DelayedDecode text={tusd(s.funded)} delay={i * STAGGER * 1000} seed={`${share.policyId}-${s.index}`} className="text-[13.5px] font-medium text-ink" />
                     <Encrypted label="decrypted" className="sm:hidden lg:inline-flex" />

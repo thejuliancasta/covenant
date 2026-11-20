@@ -10,11 +10,11 @@ import { Logo } from "@/components/brand/logo";
 import { Connect, Analyzing, type StageView } from "@/components/onboarding";
 import { Overview, Protection } from "@/components/results";
 import { Simulator, Payout } from "@/components/simulate";
-import { Judge } from "@/components/judge";
+import { Backdrop } from "@/components/fx/backdrop";
 
 /*
  * The product shell at /app. Linear-style: a slim sidebar (logo, steps with a sliding
- * ember mark, Judge mode, the simulation notice) beside one framed main panel. On narrow
+ * ember mark, the simulation notice) beside one framed main panel. On narrow
  * screens the sidebar becomes a compact sticky top bar with horizontal steps.
  */
 
@@ -27,11 +27,11 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const SAMPLE_LABEL = "Sample company (synthetic)";
 
 /** Step list. A short ember mark slides to the active step; steps that need a result say so. */
-function StepNav({ step, judge, enabled, go, id, vertical }: { step: Step; judge: boolean; enabled: (s: Step) => boolean; go: (s: Step) => void; id: string; vertical?: boolean }) {
+function StepNav({ step, enabled, go, id, vertical }: { step: Step; enabled: (s: Step) => boolean; go: (s: Step) => void; id: string; vertical?: boolean }) {
   return (
     <LayoutGroup id={id}>
       {NAV.map((n, i) => {
-        const on = enabled(n.id), active = !judge && (step === n.id || (n.id === "connect" && step === "analyzing"));
+        const on = enabled(n.id), active = (step === n.id || (n.id === "connect" && step === "analyzing"));
         return (
           <button
             key={n.id} disabled={!on} onClick={() => go(n.id)} aria-current={active ? "step" : undefined}
@@ -55,34 +55,17 @@ function StepNav({ step, judge, enabled, go, id, vertical }: { step: Step; judge
   );
 }
 
-function JudgeToggle({ on, disabled, onClick, wide }: { on: boolean; disabled: boolean; onClick: () => void; wide?: boolean }) {
-  return (
-    <button
-      disabled={disabled} onClick={onClick} aria-pressed={on} title={disabled ? "Run an analysis first" : "Technical view for judges"}
-      className={cx(
-        "flex h-9 shrink-0 items-center gap-2.5 rounded-[6px] px-3 text-[13px] font-[510] transition-[color,background-color] duration-150 ease-out",
-        wide && "w-full",
-        disabled ? "cursor-not-allowed text-faint/60" : on ? "text-ink" : "text-muted hover:bg-line/[0.04] hover:text-ink2",
-      )}
-    >
-      <motion.span aria-hidden className={cx("h-1.5 w-1.5 rounded-full", on ? "bg-jade" : disabled ? "bg-faint/40" : "bg-muted")} initial={false} animate={{ scale: on ? 1.35 : 1 }} transition={SPRING_UI} />
-      Judge mode<span className={cx("ml-auto text-[12px] font-normal", on ? "text-jade" : "text-faint")}>{on ? "On" : "Off"}</span>
-    </button>
-  );
-}
-
 export default function Flow({ initial = "connect" }: { initial?: Step }) {
   const [step, setStep] = useState<Step>(initial === "welcome" ? "connect" : initial);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [stages, setStages] = useState<Record<string, StageView>>({});
   const [error, setError] = useState<string | null>(null);
   const [source, setSource] = useState("");
-  const [judge, setJudge] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const imported = useRef(false);
   const mobileNav = useRef<HTMLElement>(null);
 
-  const go = useCallback((s: Step) => { setStep(s === "welcome" ? "connect" : s); setJudge(false); window.scrollTo({ top: 0 }); }, []);
+  const go = useCallback((s: Step) => { setStep(s === "welcome" ? "connect" : s); window.scrollTo({ top: 0 }); }, []);
 
   const run = useCallback(async (csv: string, region: string, label: string) => {
     setError(null); setStages({}); setAnalysis(null); setSource(label); go("analyzing");
@@ -149,8 +132,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
     if (nav && cur) nav.scrollTo({ left: cur.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft - (nav.clientWidth - cur.offsetWidth) / 2, behavior: "smooth" });
   }, [step, hasResult]);
   const enabled = (s: Step) => s === "connect" || hasResult;
-  const view = judge && analysis ? "judge" : step;
-  const toggleJudge = () => { setJudge((j) => !j); window.scrollTo({ top: 0 }); };
+  const view = step;
 
   return (
     <MotionConfig reducedMotion="user">
@@ -161,11 +143,10 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
             <Logo size={20} />
           </Link>
           <nav className="mt-6 grid gap-0.5" aria-label="Steps">
-            <StepNav id="side" vertical step={step} judge={judge} enabled={enabled} go={go} />
+            <StepNav id="side" vertical step={step} enabled={enabled} go={go} />
           </nav>
           {source && <p className="mt-6 px-3 text-[12px] leading-[1.5] text-faint">{source}</p>}
           <div className="mt-auto grid gap-3">
-            <JudgeToggle wide on={judge} disabled={!hasResult} onClick={toggleJudge} />
             <p className="px-3 text-[12px] leading-[1.5] text-faint">Simulation, devnet test dollars</p>
           </div>
         </aside>
@@ -174,21 +155,20 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
         <header className="sticky top-0 z-30 bg-bg/80 backdrop-blur-md lg:hidden">
           <div className="flex h-14 items-center justify-between gap-3 px-4">
             <Link href="/" className="flex h-10 items-center" aria-label="CostShield home"><Logo size={20} /></Link>
-            <JudgeToggle on={judge} disabled={!hasResult} onClick={toggleJudge} />
           </div>
           <nav ref={mobileNav} className="flex gap-0.5 overflow-x-auto px-2 pb-1 [scrollbar-width:none]" aria-label="Steps">
-            <StepNav id="top" step={step} judge={judge} enabled={enabled} go={go} />
+            <StepNav id="top" step={step} enabled={enabled} go={go} />
           </nav>
         </header>
 
         {/* Main panel */}
         <div className="min-w-0 lg:py-2 lg:pr-2">
-          <div className="min-h-[calc(100vh-16px)] lg:rounded-[12px] lg:border lg:border-line/[0.08] lg:bg-raised lg:shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
-            <main className="mx-auto max-w-[1080px] px-4 pb-20 pt-8 sm:px-8 sm:pt-12 lg:px-12">
+          <div className="relative min-h-[calc(100vh-16px)] overflow-hidden lg:rounded-[12px] lg:border lg:border-line/[0.08] lg:bg-raised lg:shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
+            <Backdrop variant="app" />
+            <main className="relative z-10 mx-auto max-w-[1080px] px-4 pb-20 pt-8 sm:px-8 sm:pt-12 lg:px-12">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={view} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}>
-                  {judge && analysis ? <Judge a={analysis} source={source} />
-                    : step === "analyzing" ? <Analyzing stages={stages} error={error} source={source} onBack={() => go("connect")} result={analysis} />
+                  {step === "analyzing" ? <Analyzing stages={stages} error={error} source={source} onBack={() => go("connect")} result={analysis} />
                     : analysis && step === "overview" ? <Overview a={analysis} onNext={() => go("protection")} />
                     : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} />
                     : analysis && step === "simulate" ? <Simulator a={analysis} onNext={() => go("payout")} />
@@ -197,7 +177,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
                 </motion.div>
               </AnimatePresence>
             </main>
-            <footer className="mx-auto max-w-[1080px] px-4 pb-8 text-[12px] leading-[1.6] text-faint sm:px-8 lg:px-12">
+            <footer className="relative z-10 mx-auto max-w-[1080px] px-4 pb-8 text-[12px] leading-[1.6] text-faint sm:px-8 lg:px-12">
               <p>Simulation. Not an offer of insurance or derivatives. No real premiums, orders or payouts. Devnet test dollars only.</p>
               <p className="mt-1">CostShield is a hackathon prototype built for UBC 2026. Price data: U.S. Energy Information Administration. Market data: Gemini Prediction Markets public API. Settlement: Solana devnet with Helius Privacy Rings.</p>
             </footer>

@@ -17,17 +17,17 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
   const fleetRef = useRef<HTMLDivElement>(null);
   const seen = useInView(fleetRef, { once: true, amount: 0.25 });
   const txs: { label: string; sig: string; priv?: boolean }[] = [
-    { label: "Open policy and step accounts", sig: r.txs.open },
-    ...r.txs.fund.map((sig, i) => ({ label: r.txs.fund.length > 1 ? `Fund steps, part ${i + 1}` : "Fund steps", sig, priv: true })),
-    { label: r.txs.reportAlreadyOnChain ? "Oracle report (reused)" : "Oracle report", sig: r.txs.report },
-    ...r.txs.releases.map((sig, i) => ({ label: `Release ${i + 1}`, sig, priv: true })),
-    ...(r.txs.reclaim ? [{ label: "Reclaim untriggered steps", sig: r.txs.reclaim, priv: true }] : []),
+    { label: "Open the policy", sig: r.txs.open },
+    ...r.txs.fund.map((sig, i) => ({ label: r.txs.fund.length > 1 ? `Set money aside, part ${i + 1}` : "Set money aside", sig, priv: true })),
+    { label: r.txs.reportAlreadyOnChain ? "Post the official price (reused)" : "Post the official price", sig: r.txs.report },
+    ...r.txs.releases.map((sig, i) => ({ label: `Payment ${i + 1}`, sig, priv: true })),
+    ...(r.txs.reclaim ? [{ label: "Unused money back to the backer", sig: r.txs.reclaim, priv: true }] : []),
   ];
   return (
     <section aria-label="Two views of the same settlement" className="space-y-4">
       <div className="max-w-2xl">
-        <h2 className="text-[22px] font-[550] leading-[1.1] tracking-[-0.022em] text-ink sm:text-[26px]">Two views of the same settlement</h2>
-        <p className="mt-2 text-[14px] leading-[1.5] text-muted">What {company} reads with its own keys, beside what anyone reading Solana devnet can see.</p>
+        <h2 className="text-[22px] font-[550] leading-[1.1] tracking-[-0.022em] text-ink sm:text-[26px]">Two views of the same payment</h2>
+        <p className="mt-2 text-[14px] leading-[1.5] text-muted">What {company} reads with its own keys, beside what everyone else sees on the blockchain.</p>
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <div className="min-w-0 space-y-6">
@@ -37,15 +37,15 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
                 <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">What {company} sees</h3>
                 <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink2"><LockIcon className="text-cipher" />Decrypted with its own keys</span>
               </div>
-              <p className="mt-1 text-[13px] text-muted">Every amount, decrypted with its own keys</p>
+              <p className="mt-1 text-[13px] text-muted">Every amount, readable with its own keys</p>
               <div className="mt-3">
                 {r.steps.map((s, i) => (
-                  <Row key={s.index} label={`Step ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "released to the fleet" : s.triggered ? "triggered" : "not triggered"}>
+                  <Row key={s.index} label={`Chunk ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "paid to the business" : s.triggered ? "due" : "price not reached, back to the backer"}>
                     <DecodeText text={tusd(s.amount)} play={seen} seed={`f${s.index}`} delayMs={i * 90} />
                   </Row>
                 ))}
                 <Row label={<span className="font-medium text-ink">Payout received</span>}><DecodeText text={tusd(r.fleetView.received)} play={seen} delayMs={r.steps.length * 90} className="font-[550] text-jade" /></Row>
-                <Row label="Private balance before → after"><DecodeText text={`${tusd(r.fleetView.balanceBefore)} → ${tusd(r.fleetView.balanceAfter)}`} play={seen} delayMs={(r.steps.length + 1) * 90} stepMs={26} /></Row>
+                <Row label="Its private balance, before → after"><DecodeText text={`${tusd(r.fleetView.balanceBefore)} → ${tusd(r.fleetView.balanceAfter)}`} play={seen} delayMs={(r.steps.length + 1) * 90} stepMs={26} /></Row>
               </div>
             </div>
           </Card>
@@ -53,14 +53,14 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
         </div>
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">What the public chain shows</h3>
+            <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">What everyone else sees on the blockchain</h3>
             <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-cipher"><LockIcon />Amounts encrypted</span>
           </div>
-          <p className="mt-1 text-[13px] text-muted">Terms and events, no amounts</p>
+          <p className="mt-1 text-[13px] text-muted">The terms and what happened, never the amounts</p>
           <div className="mt-3">
-            {r.steps.map((s) => <Row key={s.index} label={`Step ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "marked paid" : "open"}><CipherGlyphs length={8} seed={`${r.policyId}-${s.index}`} label="Encrypted" /></Row>)}
+            {r.steps.map((s) => <Row key={s.index} label={`Chunk ${s.index}, pays at ${ppg(s.triggerPrice)}`} hint={s.paid ? "marked paid" : "not paid"}><CipherGlyphs length={8} seed={`${r.policyId}-${s.index}`} label="Encrypted" /></Row>)}
             <Row label="Payout received"><CipherGlyphs length={8} seed={`${r.policyId}-paid`} label="Encrypted" live /></Row>
-            <Row label="Fleet balance"><CipherGlyphs length={10} seed={`${r.policyId}-bal`} label="Encrypted" /></Row>
+            <Row label="The business balance"><CipherGlyphs length={10} seed={`${r.policyId}-bal`} label="Encrypted" /></Row>
           </div>
           <div className="mt-5 grid gap-5 text-[13px] sm:grid-cols-2">
             <div>
@@ -68,7 +68,7 @@ export function TwoViews({ r, company }: { r: SettlementResult; company: string 
               <ul className="mt-2 space-y-1.5">{r.publicView.visible.map((v) => <li key={v} className="flex gap-2 leading-[1.5] text-muted"><svg viewBox="0 0 14 14" width="12" height="12" aria-hidden className="mt-1 shrink-0 text-jade"><path d="M2.5 7.4 5.6 10.3 11.5 3.8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="min-w-0 break-words">{v}</span></li>)}</ul>
             </div>
             <div>
-              <h4 className="text-[13px] font-medium text-ink2">Encrypted</h4>
+              <h4 className="text-[13px] font-medium text-ink2">Hidden (encrypted)</h4>
               <ul className="mt-2 space-y-1.5">{r.publicView.hidden.map((v) => <li key={v} className="flex items-start gap-2 leading-[1.5] text-muted"><LockIcon className="mt-1.5 shrink-0 text-cipher" /><span>{v}</span></li>)}</ul>
             </div>
           </div>
@@ -95,7 +95,7 @@ export function LenderShareCard({ r, company }: { r: SettlementResult; company: 
   return (
     <Card>
       <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Prove the cover to your lender, not to the world</h3>
-      <p className="mt-2 max-w-[60ch] text-[13px] leading-[1.55] text-muted">Your lender or factoring company can read this policy&apos;s coverage and payouts with this link but cannot spend: it carries read-only viewing keys for the {r.lenderShare.steps.length} step vaults, and the keys travel in the part of the URL after #, which browsers do not send when loading a page.</p>
+      <p className="mt-2 max-w-[60ch] text-[13px] leading-[1.55] text-muted">Your lender or factoring company can read this policy&apos;s coverage and payouts with this link but cannot spend: it carries read-only keys for the {r.lenderShare.steps.length} chunks of money set aside, and the keys travel in the part of the URL after #, which browsers do not send when loading a page.</p>
       <div className="mt-4 flex min-w-0 flex-col gap-2 sm:flex-row">
         <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-control border border-line/8 bg-bg/40 pl-3 pr-1 transition-[border-color] duration-150 focus-within:border-jade/50">
           <LockIcon className="shrink-0 text-cipher" />

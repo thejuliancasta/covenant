@@ -4,7 +4,7 @@ import { LogoMark } from "@/components/brand/logo";
 import type { LandingData, MonthRow } from "./data";
 import { cx, monYear, pct1, usd0 } from "./kit";
 
-const NAV = ["Overview", "Your risks", "Protection", "Simulate", "Payout", "Judge mode"];
+const NAV = ["Overview", "Your risks", "Protection", "Simulate", "Payout"];
 
 function Ev({ e }: { e: "C" | "V" | "A" }) {
   const t = { C: "Calculated from data", V: "Verified public data", A: "Assumption" }[e];
@@ -55,7 +55,7 @@ function Window({ d }: { d: LandingData }) {
           <p className="mb-1 mt-6 px-2.5 text-[12px] text-faint">Sources</p>
           <ul className="space-y-0.5 text-[13px] text-muted">
             <li className="flex h-8 items-center justify-between px-2.5"><span>Ledger</span><span className="num text-faint">{d.lines.toLocaleString("en-US")}</span></li>
-            <li className="flex h-8 items-center px-2.5">EIA diesel prices</li>
+            <li className="flex h-8 items-center px-2.5">Official diesel prices</li>
             <li className="flex h-8 items-center px-2.5">Gemini markets</li>
           </ul>
         </aside>
@@ -71,7 +71,7 @@ function Window({ d }: { d: LandingData }) {
               { k: "Revenue, last 12 months", v: usd0(d.revenueTtm), s: "From the ledger", e: "C" as const },
               { k: "Operating profit", v: usd0(d.profitTtm), s: `${(d.marginTtm * 100).toFixed(1)}% margin`, e: "C" as const },
               { k: "Fleet fuel", v: usd0(d.diesel.spendTtm), s: <><span className="text-heat">{pct1(d.diesel.share)}</span> of revenue</>, e: "C" as const },
-              { k: "1-in-20 diesel year", v: "+" + usd0(d.diesel.shockNet), s: <><span className="text-heat">{d.diesel.shockTimesProfit.toFixed(1)}×</span> operating profit</>, e: "C" as const },
+              { k: "A bad diesel year", v: "+" + usd0(d.diesel.shockNet), s: <><span className="text-heat">{d.diesel.shockTimesProfit.toFixed(1)}×</span> operating profit</>, e: "C" as const },
             ].map((s) => (
               <div key={s.k} className="bg-[rgb(13_14_15)] px-4 py-3.5">
                 <dt className="flex items-center text-[12px] text-muted">{s.k}<Ev e={s.e} /></dt>
@@ -101,16 +101,16 @@ function Window({ d }: { d: LandingData }) {
             </section>
             <section className="rounded-[10px] border border-line/6 bg-[rgb(13_14_15)] p-4">
               <div className="flex items-baseline justify-between gap-4">
-                <h4 className="text-[13px] font-[550] text-ink2">Price paid against the {d.diesel.regionLabel.replace(/ \(.*\)/, "")} index</h4>
-                <span className="num shrink-0 text-[12px] text-faint">R² {d.diesel.r2.toFixed(2)}</span>
+                <h4 className="text-[13px] font-[550] text-ink2">Their pump price vs. the official Midwest price</h4>
+                <span className="shrink-0 text-[12px] text-faint">Moves together</span>
               </div>
               <PaidVsIndex rows={d.monthly} className="mt-3" />
               <div className="num mt-2 flex justify-between text-[11px] text-faint"><span>{monYear(first)}</span><span>{monYear(last)}</span></div>
             </section>
           </div>
           <div className="mt-4 grid gap-4 text-[13px] lg:grid-cols-2">
-            <p className="rounded-[10px] border border-line/6 px-4 py-3 text-muted"><span className="font-[550] text-jade">Protectable.</span> Diesel, with a 12-month cap at {"$"}{d.policy.strike.toFixed(3)} a gallon.</p>
-            <p className="rounded-[10px] border border-line/6 px-4 py-3 text-muted"><span className="font-[550] text-ink2">Not protectable.</span> Payroll, leases, repairs and insurance.</p>
+            <p className="rounded-[10px] border border-line/6 px-4 py-3 text-muted"><span className="font-[550] text-jade">Can be protected.</span> Diesel, with protection starting at {"$"}{d.policy.strike.toFixed(2)} a gallon.</p>
+            <p className="rounded-[10px] border border-line/6 px-4 py-3 text-muted"><span className="font-[550] text-ink2">Can&apos;t be protected.</span> Payroll, leases, repairs and insurance.</p>
           </div>
         </div>
       </div>

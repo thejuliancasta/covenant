@@ -50,10 +50,17 @@ export function Tag({ tone = "neutral", children, className }: { tone?: Tone; ch
 }
 
 const EV_TONE: Record<string, string> = { V: "text-jade", C: "text-ink2", E: "text-heat", A: "text-muted" };
+/** Plain-word meaning of each evidence letter. */
+const EV_PLAIN: Record<string, string> = {
+  V: "Verified: official public data, such as U.S. government prices or a live market",
+  C: "Calculated: worked out from your records and public data",
+  E: "Estimate: our best reading, and it could be off",
+  A: "Assumption: a number we chose, shown so you can judge it",
+};
 
 /** Evidence mark: a small raised letter (verified, calculated, estimate, assumption). Hover or focus names it. */
 export function Ev({ e }: { e: Evidence | string }) {
-  const label = EVIDENCE_LABEL[e as Evidence] ?? e;
+  const label = EV_PLAIN[e] ?? EVIDENCE_LABEL[e as Evidence] ?? e;
   return (
     <abbr
       tabIndex={0} title={label} aria-label={label}
