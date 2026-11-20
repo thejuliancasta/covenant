@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { background: #F6F4EF; }
+body { color: #15181B; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.num { font-variant-numeric: tabular-nums; }
+::selection { background: #BFDCD1; }
+:focus-visible { outline: 2px solid #0B5D4B; outline-offset: 2px; border-radius: 6px; }
+input[type="range"] { accent-color: #0B5D4B; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

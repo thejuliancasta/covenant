@@ -1,0 +1,12 @@
+{
+  "network": "solana-devnet",
+  "programId": "DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114",
+  "ringsProgramId": "ring1GaLCuJnkUMVkX2JeZLTTX17wKsV4fZmPVzXANW",
+  "mint": "FQKedE1cBThwLvc1FJ1xr5b3DPYGVwRNVKrQVSHmCfv8",
+  "assetId": "427",
+  "underwriter": "D4VUvtQh3ad8j1FF48ZNNAc9fN1oZC8F241pcuQMEUua",
+  "oracle": "2RECf7GfWRSw8U73tyWJ1ZhTJ5U21FRHPjEaXxTa7EsH",
+  "fleet": "2gfZPF6tSUkUbEApUNzZNFxh1fqcMhMoCybKR1VSVY8N",
+  "deployTx": "535eqFpmsfF5iJV9gTHm9MJJwPThenfqjv5pQzRvHzq1p5pV1awntFM53EeC1KfrrD1y7uKfEig8FQs3iyZzzqi1",
+  "updatedAt": "2026-11-20T09:14:40.905Z"
+}
