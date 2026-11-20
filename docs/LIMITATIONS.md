@@ -2,7 +2,7 @@
 
 ## What works
 
-- CSV import, rule-based classification, exposure statistics, pool classification, Black-76 pricing, cohort backtest, scenario arithmetic and policy replay. 40 unit tests: 31 for the engine, 9 for the ledger import and sign-in mapping.
+- CSV import, rule-based classification, exposure statistics, pool classification, Black-76 pricing, cohort backtest, scenario arithmetic and policy replay. 42 unit tests: 31 for the engine, 9 for the ledger import and sign-in mapping, 2 for hypothetical backer economics.
 - Live Gemini Prediction Markets data: discovery, suitability screens, implied distribution and ladder replication.
 - Ledger sign-in code for QuickBooks Online, Xero, Zoho Books and FreshBooks (`lib/ledger/`, `/api/connect/*`). It is unit-tested against mocked provider responses: QuickBooks end to end (token, company and transaction list), the other three for line mapping only. It has not been verified against a live provider account. The demo has no provider keys, so the Books screen shows one line saying sign-in is built but switched off. CSV upload is the working path.
 - A settlement program on Solana devnet with Helius Privacy Rings, and a server flow that opens a policy as a ladder of steps, funds the steps privately, posts the oracle report, releases triggered steps to the fleet, and shows the refused attempts. A lender page decrypts the steps with read-only viewing keys.

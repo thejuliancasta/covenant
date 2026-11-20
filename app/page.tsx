@@ -77,7 +77,7 @@ export default async function Landing() {
     { k: "What it covers", day: "One event: a cold morning, a rained-out Saturday, a lost game.", us: "The cost that can close you. For a fleet, diesel, month after month, for a full year." },
     { k: "How the loss is found", day: "You guess it, in a sentence.", us: `Measured from your books: ${d.lines.toLocaleString("en-US")} transactions, the gallons on every receipt, less what your fuel surcharges already pass on.` },
     { k: "How big it can be", day: "Capped by how deep a prediction market's order book is, often a few hundred dollars.", us: `Sized to the business. A bad diesel year costs this fleet ${usd0(d.diesel.shockNet)}, ${d.diesel.shockTimesProfit.toFixed(0)} times its profit.` },
-    { k: "Who pays you", day: "Whoever is selling on the order book that day.", us: "A backer whose money is locked on Solana before your cover starts, and can't be pulled back while you're covered." },
+    { k: "Who pays you", day: "Whoever is selling on the order book that day.", us: "In the devnet replay, a test backer funds the month's private payout steps before settlement. A real backer has not joined." },
     { k: "Who sees it", day: "Payouts and exposures are public on chain.", us: "Amounts are encrypted with Helius Privacy Rings. Your lender can check your cover with a read-only key." },
     { k: "Proof it works", day: "The next event.", us: `Replayed on every 12-month period since ${d.backtest.from.slice(0, 4)}: it would have paid in ${d.backtest.badPaid} of the ${d.backtest.bad} bad ones.` },
   ];
@@ -87,8 +87,8 @@ export default async function Landing() {
       n: "Upload a CSV export from any accounting system. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built but switched off in this demo." },
     { k: "U.S. Energy Information Administration", h: "Draws the line",
       b: `Protection pays on the government's official weekly diesel price for your region, averaged over the month. Not on anyone's say-so, and not on a claim you have to file.` },
-    { k: "Solana", h: "Makes the payout certain",
-      b: `Before your protection starts, the backer locks the most it could ever pay into vaults that only Covenant's Solana program can open. Each month the official price is posted on chain once. If it is over the line, you sign once and the program releases your money. The backer can't block it or take it back.`,
+    { k: "Solana", h: "Enforces the payout rule",
+      b: `In the devnet replay, a test backer funds the maximum payout for one month in private vaults before settlement. The program checks the posted price against each step's line and releases triggered steps. A real year-long policy would need the full term funded or hedged before sale.`,
       n: `Money the protection never needed goes back to the backer, but only after every month of the term has come in under the line.` },
     { k: "Helius Privacy Rings", h: "Keeps the amounts yours",
       b: `The money in each vault and every payout are encrypted balances. The program enforces the rules without seeing the amounts, and the public can see that you were paid, not how much. So a competitor or a customer can't work out your gallons or your margins.`,
@@ -101,7 +101,7 @@ export default async function Landing() {
   const security = [
     { t: "We only read", b: "Covenant reads your transactions and never changes, categorizes or posts anything back to your accounting system." },
     { t: "Your file isn't stored", b: "An uploaded export is processed in memory and discarded when the analysis ends." },
-    { t: "Funded before you're covered", b: "The most the protection could ever pay is locked on Solana before the cover starts. In this simulation, in test dollars." },
+    { t: "The replay month is funded", b: "The devnet run funded all eight private payout steps for one month with test dollars. A full year is modelled, not funded." },
     { t: "Amounts hidden from the public", b: "Payouts and balances are encrypted with Helius Privacy Rings. Only you, and whoever you give a viewing key to, can read them." },
     { t: "One official price a month", b: "Each month's price is posted on chain once and can't be changed afterwards, with a fingerprint of the government file it came from." },
     { t: "Rules anyone can check", b: "Who can post a price, when a step pays and when money goes back to the backer are written into the Solana program, the same for everyone." },
@@ -198,7 +198,7 @@ export default async function Landing() {
             </Reveal>
             <Reveal i={2}>
               <p className={cx(body, "mt-6 max-w-[720px]")}>
-                Prediction markets still matter here, for what they do best. Covenant reads Gemini&apos;s live oil markets to see how big a move traders expect, and that sets the price of your protection. The risk itself sits with a backer whose money is locked for the whole year.
+                Prediction markets still matter here, for what they do best. Covenant reads Gemini&apos;s live oil markets to see how big a move traders expect, and that sets a model price. The devnet replay funds one month; no backer has funded the full year.
               </p>
             </Reveal>
           </div>

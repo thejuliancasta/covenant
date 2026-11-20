@@ -4,6 +4,7 @@
 
 - Show the full-year maximum liability and the backer's gross result for the replay in Judge mode. These are hypothetical and separate from the one-month devnet settlement. Do not describe the existing program as a funded 12-month backer pool or claim a realized LP return.
 - Read the lender's step vaults sequentially, retry only temporary transport failures, and provide a read-only local recheck of the latest policy. This addresses an indexer `fetch failed` after a settlement whose token transfers had already completed.
+- Correct landing-page, payout-screen and README claims that implied a full 12-month cover was collateralized. Only one replay month is funded on devnet; Judge mode now shows the hypothetical capital a full year would require.
 
 Newest first. One or two lines each: what was decided, why, and where the detail lives. Add a line whenever the team settles something. If a decision is reversed, add a new line; do not edit the old one.
 

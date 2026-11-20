@@ -4,6 +4,8 @@ Judge mode includes a hypothetical full-year backer-economics view: maximum liab
 
 The lender view reads vault histories sequentially and retries temporary RPC or indexer transport errors. It still rejects an invalid policy/share immediately. The `solana:verify-latest` command can recheck the latest local policy without sending a new transaction.
 
+Owner-facing copy must distinguish the funded one-month devnet replay from the modelled 12-month cap. It must not imply that a real underwriter has committed a year's collateral or that the program itself can read encrypted funding balances.
+
 ## PRD
 
 **Target user.** The owner of a for-hire trucking fleet with roughly 3 to 20 trucks. Fuel is about a fifth to a quarter of cost, margins are under 1%, and part of the freight is hauled with no fuel surcharge. The owner has never traded a derivative and keeps books in QuickBooks.
