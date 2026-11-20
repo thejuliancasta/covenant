@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { DEFAULT_EXPLORER, addressUrl, txUrl, type ChainStatus, type LenderShare } from "@/lib/chain/types";
 import { cx } from "./ui";
+import { LogoMark } from "./brand/logo";
 
 /** Short form for Solana signatures and addresses (base58, 32 to 88 characters). */
 export const shortSig = (s: string) => (s.length > 16 ? `${s.slice(0, 6)}…${s.slice(-6)}` : s);
@@ -33,18 +34,32 @@ export function useChainStatus() {
 }
 
 export function TxLink({ sig, explorer, className }: { sig: string; explorer?: string; className?: string }) {
-  return <a href={txUrl(explorer ?? DEFAULT_EXPLORER, sig)} target="_blank" rel="noreferrer" className={cx("font-mono text-[11px] text-shield underline-offset-2 hover:underline", className)}>{shortSig(sig)} ↗</a>;
+  return (
+    <a href={txUrl(explorer ?? DEFAULT_EXPLORER, sig)} target="_blank" rel="noreferrer" title={`Open transaction ${sig} on Solana Explorer (devnet)`}
+      className={cx("relative inline-flex items-center gap-1 whitespace-nowrap rounded-[6px] font-mono text-[11.5px] text-ink2 underline-offset-2 transition-colors duration-150 before:absolute before:-inset-y-3 before:inset-x-0 before:content-[''] hover:text-jade", className)}>
+      {shortSig(sig)}<Arrow />
+    </a>
+  );
 }
 
 export function AddrLink({ addr, explorer, className }: { addr: string; explorer?: string; className?: string }) {
-  return <a href={addressUrl(explorer ?? DEFAULT_EXPLORER, addr)} target="_blank" rel="noreferrer" title={addr} className={cx("font-mono text-[12px] text-shield underline-offset-2 hover:underline", className)}>{shortSig(addr)} ↗</a>;
+  return (
+    <a href={addressUrl(explorer ?? DEFAULT_EXPLORER, addr)} target="_blank" rel="noreferrer" title={addr}
+      className={cx("relative inline-flex items-center gap-1 whitespace-nowrap rounded-[6px] font-mono text-[12px] text-ink2 transition-colors duration-150 before:absolute before:-inset-y-3 before:inset-x-0 before:content-[''] hover:text-jade", className)}>
+      {shortSig(addr)}<Arrow />
+    </a>
+  );
 }
 
-/** Marks a value that is encrypted on chain. */
+function Arrow() {
+  return <svg viewBox="0 0 10 10" width="9" height="9" aria-hidden className="opacity-70"><path d="M3 1.5h5.5V7M8.3 1.7 1.6 8.4" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+
+/** Marks a value that is encrypted on chain. Plain text with a lock, never a pill. */
 export function Encrypted({ label = "encrypted", className }: { label?: string; className?: string }) {
   return (
-    <span className={cx("inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-slate-line bg-slate-soft px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-slate", className)}>
-      <LockIcon />{label}
+    <span className={cx("inline-flex items-center gap-1.5 whitespace-nowrap text-[12px] font-medium text-cipher", className)}>
+      <LockIcon />{label.charAt(0).toUpperCase() + label.slice(1)}
     </span>
   );
 }
@@ -53,8 +68,9 @@ export function LockIcon({ className }: { className?: string }) {
   return <svg width="9" height="10" viewBox="0 0 9 10" aria-hidden className={className}><rect x="0.5" y="4.25" width="8" height="5.25" rx="1.2" fill="currentColor" /><path d="M2.3 4.4V3a2.2 2.2 0 0 1 4.4 0v1.4" stroke="currentColor" strokeWidth="1.1" fill="none" /></svg>;
 }
 
+/** Kept for compatibility: renders the CostShield mark (components/brand/logo.tsx). */
 export function ShieldMark() {
-  return <svg width="22" height="24" viewBox="0 0 22 24" aria-hidden><path d="M11 1 2 4.5v6.8c0 5.3 3.6 9.6 9 11.7 5.4-2.1 9-6.4 9-11.7V4.5L11 1Z" fill="#0B5D4B" /><path d="M6.5 13.5 9.6 10l2.6 2.2L15.8 8" stroke="#fff" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+  return <LogoMark size={22} />;
 }
 
 /* Lender share links: /lender#<base64url(JSON.stringify(LenderShare))>. The fragment is not sent with the page request. */

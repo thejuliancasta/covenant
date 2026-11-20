@@ -1,10 +1,16 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { MotionConfig, motion } from "motion/react";
 import { DEFAULT_EXPLORER, type LenderShare, type LenderView } from "@/lib/chain/types";
 import { monthLabel, ppg } from "@/lib/format";
-import { Button, Card, Note, PageHead, Row, Stat, Table, Tag } from "@/components/ui";
-import { AddrLink, Encrypted, LockIcon, REGION_LABEL, ShieldMark, decodeShare, periodYm, tusd } from "@/components/chain";
+import { Button, Card, CardTitle, Note, PageHead, Row, Stat, Tag, cx } from "@/components/ui";
+import { AddrLink, Encrypted, LockIcon, REGION_LABEL, decodeShare, periodYm, tusd } from "@/components/chain";
+import { CipherGlyphs, DecodeText } from "@/components/settle/cipher";
+import { useCountUp } from "@/components/settle/rolling";
+import { DrawCheck } from "@/components/settle/tx";
+import { Logo } from "@/components/brand/logo";
+import { STAGGER } from "@/components/settle/motion";
 
 type State =
   | { kind: "reading" }
@@ -53,117 +59,210 @@ export default function LenderPage() {
   const period = share ? monthLabel(periodYm(share.period), true) : "";
 
   return (
-    <div className="min-h-screen bg-paper">
-      <div className="border-b border-amber-line bg-amber-soft px-4 py-1.5 text-center text-[12px] text-amber">
-        Simulation. Not an offer of insurance or derivatives. No real premiums, orders or payouts. Devnet test dollars only.
-      </div>
-      <header className="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2" aria-label="CostShield home">
-            <ShieldMark />
-            <span className="font-display text-[22px] leading-none tracking-tight">CostShield</span>
-          </Link>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-muted"><LockIcon className="text-slate" />Lender view · read-only</span>
-        </div>
-      </header>
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen bg-bg">
+        <p className="flex items-center justify-center gap-2 bg-sunken px-4 py-2 text-center text-[12px] leading-4 text-muted">
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="hidden shrink-0 text-heat sm:block"><path d="M5 1.2 9 8.6H1L5 1.2Z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /><path d="M5 4.2v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+          Simulation. Not an offer of insurance or derivatives. No real premiums, orders or payouts. Devnet test dollars only.
+        </p>
+        <header className="sticky top-0 z-30 bg-bg/80 backdrop-blur-md backdrop-saturate-150">
+          <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-[var(--page-gutter)]">
+            <Link href="/" className="-ml-2 flex min-h-10 items-center gap-2.5 rounded-control px-2 transition-transform duration-150 ease-out active:scale-[0.98]" aria-label="CostShield home">
+              <Logo />
+            </Link>
+            <span className="inline-flex items-center gap-2 whitespace-nowrap text-[13px] font-medium text-cipher">
+              <LockIcon />Lender view, read-only
+            </span>
+          </div>
+        </header>
 
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 sm:pt-12">
-        {state.kind === "reading" ? <p className="text-[13px] text-muted">Reading the shared link…</p>
+        <main className="mx-auto max-w-[1200px] px-[var(--page-gutter)] pb-24 pt-8 sm:pt-12">
+          {state.kind === "reading" ? <p className="text-[13px] text-muted">Reading the shared link…</p>
 
-          : state.kind === "none" ? (<>
-            <PageHead eyebrow="Lender view" title="No coverage share found." lede="This page shows a fleet's diesel cover and payouts to its lender or factoring company. Open the link the fleet shared with you: it ends in # followed by a long code that carries read-only viewing keys." />
-            <Card className="max-w-3xl">
-              <p className="text-[13px] leading-relaxed text-muted">A fleet creates the link on CostShield&apos;s payout screen after a settlement, under &quot;Share with your lender&quot;. The viewing keys let you read each protection step&apos;s funded amount and whether it paid. They cannot move money.</p>
-              <div className="mt-4"><Link href="/" className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-black">Go to CostShield</Link></div>
-            </Card>
-          </>)
-
-          : state.kind === "bad" ? (<>
-            <PageHead eyebrow="Lender view" title="This link cannot be read." lede="Ask the fleet to copy the link again from the payout screen. Links are long, and chat apps sometimes cut them off." />
-            <div className="max-w-3xl"><Note tone="warn" title="The shared code is damaged">{state.message}</Note></div>
-          </>)
-
-          : (<>
-            <PageHead eyebrow={`Lender view · policy ${state.share.policyId}`}
-              title={state.kind === "ok" ? <>Diesel cover for {period}: {tusd(state.view.totalPaid, 0)} paid.</> : state.kind === "error" ? <>The diesel cover for {period} could not be checked.</> : <>Checking the diesel cover for {period}.</>}
-              lede={<>A fleet shared read-only viewing keys for {state.share.steps.length} protection steps on the {region} diesel index. Amounts are encrypted on Solana devnet. These keys decrypt them; they cannot spend them.</>} />
-
-            {state.kind === "loading" && (
+            : state.kind === "none" ? (<>
+              <PageHead eyebrow="Lender view" title="No coverage share found." lede="This page shows a fleet's diesel cover and payouts to its lender or factoring company. Open the link the fleet shared with you: it ends in # followed by a long code that carries read-only viewing keys." />
               <Card className="max-w-3xl">
-                <p className="flex items-center gap-3 text-[13px] text-muted"><span className="h-5 w-5 shrink-0 animate-pulse rounded-full bg-ink" />Decrypting {state.share.steps.length} step balances on Solana devnet…</p>
+                <p className="max-w-[70ch] text-[13.5px] leading-[1.6] text-muted">A fleet creates the link on CostShield&apos;s payout screen after a settlement, under &quot;Share with your lender&quot;. The viewing keys let you read each protection step&apos;s funded amount and whether it paid. They cannot move money.</p>
+                <div className="mt-5">
+                  <Link href="/" className="group/btn inline-flex min-h-10 items-center justify-center gap-2 rounded-control bg-jade px-[18px] py-2.5 text-sm font-medium text-jade-ink transition-[background-color,transform] duration-150 ease-out hover:bg-jade/90 active:scale-[0.98]">
+                    Go to CostShield
+                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="-mr-0.5 transition-transform duration-150 ease-out group-hover/btn:translate-x-0.5"><path d="M3 8h9.2M8.6 4.2 12.4 8l-3.8 3.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </Link>
+                </div>
               </Card>
-            )}
+            </>)
 
-            {state.kind === "error" && (
-              <div className="max-w-3xl space-y-3">
-                <Note tone="warn" title="The coverage could not be checked">{state.message} Nothing on this page has been verified.</Note>
-                <Button variant="secondary" onClick={() => check(state.share)}>Try again</Button>
-              </div>
-            )}
+            : state.kind === "bad" ? (<>
+              <PageHead eyebrow="Lender view" title="This link cannot be read." lede="Ask the fleet to copy the link again from the payout screen. Links are long, and chat apps sometimes cut them off." />
+              <div className="max-w-3xl"><Note tone="warn" title="The shared code is damaged">{state.message}</Note></div>
+            </>)
 
-            {state.kind === "ok" && <Verified share={state.share} view={state.view} />}
+            : (<>
+              <PageHead eyebrow={`Lender view · policy ${state.share.policyId}`}
+                title={state.kind === "ok" ? <>Diesel cover for {period}: <span className="num">{tusd(state.view.totalPaid, 0)}</span> paid.</> : state.kind === "error" ? <>The diesel cover for {period} could not be checked.</> : <>Checking the diesel cover for {period}.</>}
+                lede={<>A fleet shared read-only viewing keys for {state.share.steps.length} protection steps on the {region} diesel index. Amounts are encrypted on Solana devnet. These keys decrypt them; they cannot spend them.</>} />
 
-            <Card className="mt-6">
-              <h2 className="text-[15px] font-medium">What this link can and cannot do</h2>
-              <div className="mt-3 grid gap-x-10 gap-y-1.5 text-[13px] md:grid-cols-2">
-                <ul className="space-y-1.5">
-                  <li className="flex gap-2"><span className="text-shield" aria-hidden>✓</span>Decrypt each step&apos;s private balance: how much was funded and whether it paid.</li>
-                  <li className="flex gap-2"><span className="text-shield" aria-hidden>✓</span>Check the public step accounts on Solana Explorer: trigger prices and paid status.</li>
-                </ul>
-                <ul className="space-y-1.5">
-                  <li className="flex gap-2"><span className="text-rust" aria-hidden>✕</span>Spend or move any funds. A viewing key is not a spending key.</li>
-                  <li className="flex gap-2"><span className="text-rust" aria-hidden>✕</span>See the fleet&apos;s other balances or transfers.</li>
-                </ul>
-              </div>
-              <p className="mt-4 text-xs text-faint">The keys travel in the part of the link after #, which browsers do not send when loading this page. To decrypt, this page sends them to the CostShield server, which reads the balances on Solana devnet. Anyone with the link can read these amounts. The program cannot check encrypted funding amounts itself; this decryption is that check.</p>
-            </Card>
-          </>)}
-      </main>
+              {state.kind === "loading" && <Pending share={state.share} />}
 
-      <footer className="border-t border-line px-4 py-6 text-center text-xs text-faint">
-        CostShield is a hackathon prototype built for UBC 2026. Price data: U.S. Energy Information Administration. Settlement: Solana devnet with Helius Privacy Rings.
-      </footer>
+              {state.kind === "error" && (
+                <div className="max-w-3xl space-y-3">
+                  <Note tone="warn" title="The coverage could not be checked">{state.message} Nothing on this page has been verified.</Note>
+                  <Button variant="secondary" onClick={() => check(state.share)}>Try again</Button>
+                </div>
+              )}
+
+              {state.kind === "ok" && <Verified share={state.share} view={state.view} />}
+
+              <Card className="mt-6">
+                <CardTitle>What this link can and cannot do</CardTitle>
+                <div className="mt-4 grid gap-x-10 gap-y-2.5 text-[13.5px] leading-[1.55] md:grid-cols-2">
+                  <ul className="space-y-2.5">
+                    <li className="flex gap-2.5 text-ink2"><Mark ok />Decrypt each step&apos;s private balance: how much was funded and whether it paid.</li>
+                    <li className="flex gap-2.5 text-ink2"><Mark ok />Check the public step accounts on Solana Explorer: trigger prices and paid status.</li>
+                  </ul>
+                  <ul className="space-y-2.5">
+                    <li className="flex gap-2.5 text-ink2"><Mark />Spend or move any funds. A viewing key is not a spending key.</li>
+                    <li className="flex gap-2.5 text-ink2"><Mark />See the fleet&apos;s other balances or transfers.</li>
+                  </ul>
+                </div>
+                <p className="mt-5 max-w-[90ch] text-[12px] leading-[1.6] text-faint">The keys travel in the part of the link after #, which browsers do not send when loading this page. To decrypt, this page sends them to the CostShield server, which reads the balances on Solana devnet. Anyone with the link can read these amounts. The program cannot check encrypted funding amounts itself; this decryption is that check.</p>
+              </Card>
+            </>)}
+        </main>
+
+        <footer className="mx-auto max-w-[1200px] px-[var(--page-gutter)] pb-10 text-center text-[12px] leading-[1.6] text-faint">
+          <p className="mx-auto max-w-[80ch]">CostShield is a hackathon prototype built for UBC 2026. Price data: U.S. Energy Information Administration. Settlement: Solana devnet with Helius Privacy Rings.</p>
+        </footer>
+      </div>
+    </MotionConfig>
+  );
+}
+
+function Mark({ ok }: { ok?: boolean }) {
+  return ok
+    ? <svg width="16" height="16" viewBox="0 0 16 16" aria-label="Can" role="img" className="mt-[2px] shrink-0 text-jade"><path d="m3.5 8.3 2.9 2.8 6-6.4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+    : <svg width="16" height="16" viewBox="0 0 16 16" aria-label="Cannot" role="img" className="mt-[2px] shrink-0 text-rust"><path d="m4.5 4.5 7 7m0-7-7 7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>;
+}
+
+/** One protection step as a plate. On narrow screens each cell carries its own label. */
+const PLATE_GRID = "sm:grid-cols-[84px_minmax(0,1fr)_minmax(0,1.5fr)_96px_minmax(0,1.7fr)] sm:items-center";
+
+function PlateHead() {
+  return (
+    <div aria-hidden className={cx("hidden gap-4 px-4 pb-2 text-[12px] text-faint sm:grid", PLATE_GRID)}>
+      <span>Step</span><span className="text-right">Pays at or above</span><span className="text-right">Funded</span><span>Status</span><span>Accounts</span>
     </div>
   );
+}
+
+function Cell({ label, children, className, bare }: { label: string; children: ReactNode; className?: string; bare?: boolean }) {
+  return (
+    <div className={cx("flex min-w-0 items-center justify-between gap-3 sm:block", className)}>
+      <span className={cx("text-[12px] text-faint", bare ? "sr-only" : "sm:sr-only")}>{label}</span>
+      <div className="min-w-0">{children}</div>
+    </div>
+  );
+}
+
+function Accounts({ acct }: { acct?: { account: string; vault: string } }) {
+  if (!acct) return <span className="text-faint">not in the link</span>;
+  return (
+    <span className="inline-flex flex-wrap justify-end gap-x-3 gap-y-1 text-[12px] text-muted sm:justify-start">
+      <span className="inline-flex items-center gap-1.5">terms <AddrLink addr={acct.account} explorer={DEFAULT_EXPLORER} className="text-[11.5px]" /></span>
+      <span className="inline-flex items-center gap-1.5">vault <AddrLink addr={acct.vault} explorer={DEFAULT_EXPLORER} className="text-[11.5px]" /></span>
+    </span>
+  );
+}
+
+/** Real pending state: the request is out; amounts are still cipher. No progress is invented. */
+function Pending({ share }: { share: LenderShare }) {
+  return (
+    <Card>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <CardTitle>Protection steps</CardTitle>
+        <p className="flex items-center gap-2.5 text-[13px] text-muted" role="status">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="shrink-0 animate-spin text-cipher [animation-duration:1.1s]"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeOpacity=".22" strokeWidth="1.6" /><path d="M14 8a6 6 0 0 0-6-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+          Decrypting {share.steps.length} step balances on Solana devnet…
+        </p>
+      </div>
+      <div className="mt-4"><PlateHead /></div>
+      <ul className="space-y-2">
+        {share.steps.map((s) => (
+          <li key={s.index} className={cx("grid gap-2 py-3.5 sm:gap-4 sm:px-4", PLATE_GRID)}>
+            <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Step {s.index}</span></Cell>
+            <Cell label="Pays at or above" className="sm:text-right"><span className="text-[13px] text-faint">reading…</span></Cell>
+            <Cell label="Funded" className="sm:text-right"><CipherGlyphs length={8} seed={`${share.policyId}-${s.index}`} className="text-[15px]" label="Encrypted, not yet decrypted" /></Cell>
+            <Cell label="Status"><span className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-cipher"><LockIcon />encrypted</span></Cell>
+            <Cell label="Accounts"><Accounts acct={s} /></Cell>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+function DelayedDecode({ text, delay, seed, className }: { text: string; delay: number; seed: string; className?: string }) {
+  const [play, setPlay] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setPlay(true), delay); return () => clearTimeout(t); }, [delay]);
+  return <DecodeText text={text} play={play} seed={seed} className={className} />;
 }
 
 function Verified({ share, view }: { share: LenderShare; view: LenderView }) {
   const accounts = new Map(share.steps.map((s) => [s.index, s]));
   const backed = view.steps.filter((s) => s.funded > 0 || s.paid).length;
   const checked = new Date(view.checkedAt);
+  const funded = useCountUp(view.totalFunded, true);
+  const paid = useCountUp(view.totalPaid, true);
+  const decodeEnd = view.steps.length * STAGGER * 1000;
   return (
-    <div className="space-y-6 animate-rise">
-      <Card className="border-shield-line">
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-          <Stat label="Funded across all steps" value={tusd(view.totalFunded, 0)} sub="decrypted with the shared keys" />
-          <Stat label="Paid to the fleet" value={<span className="text-shield">{tusd(view.totalPaid, 0)}</span>} sub={`${view.steps.filter((s) => s.paid).length} of ${view.steps.length} steps released`} />
-          <Stat label="Steps funded or paid" value={`${backed} of ${view.steps.length}`} sub={backed < view.steps.length ? `${view.steps.length - backed} with no balance and no payout` : "every step holds funds or has paid"} />
-          <Stat label="Checked" value={<span className="text-[22px] sm:text-[24px]">{Number.isNaN(checked.getTime()) ? view.checkedAt : checked.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>} sub={`on Solana devnet · ${REGION_LABEL[view.region] ?? view.region}, ${monthLabel(periodYm(view.period), true)}`} />
-        </div>
-      </Card>
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}>
+        <Card>
+          <div className="grid grid-cols-2 gap-x-5 gap-y-6 md:grid-cols-4">
+            <Stat label="Funded across all steps" value={tusd(funded, 0)} sub="decrypted with the shared keys" />
+            <Stat label="Paid to the fleet" value={<span className="text-jade">{tusd(paid, 0)}</span>} sub={`${view.steps.filter((s) => s.paid).length} of ${view.steps.length} steps released`} />
+            <Stat label="Steps funded or paid" value={`${backed} of ${view.steps.length}`} sub={backed < view.steps.length ? `${view.steps.length - backed} with no balance and no payout` : "every step holds funds or has paid"} />
+            <Stat label="Checked" value={<span className="text-[22px] sm:text-[24px]">{Number.isNaN(checked.getTime()) ? view.checkedAt : checked.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>} sub={`on Solana devnet · ${REGION_LABEL[view.region] ?? view.region}, ${monthLabel(periodYm(view.period), true)}`} />
+          </div>
+        </Card>
+      </motion.div>
 
       <Card>
-        <div className="flex flex-wrap items-baseline justify-between gap-2"><h2 className="text-[15px] font-medium">Protection steps</h2><span className="text-xs text-faint">public on chain: trigger and status · private: amount</span></div>
-        <div className="mt-3">
-          <Table align={["l", "r", "r", "l", "l"]} head={["Step", "Pays at or above", "Funded", "Status", "Accounts"]} rows={view.steps.map((s) => {
-            const acct = accounts.get(s.index);
-            return [
-              `Step ${s.index}`, ppg(s.triggerPrice),
-              <span key="f" className="inline-flex items-center justify-end gap-2">{tusd(s.funded)}<Encrypted label="decrypted" /></span>,
-              s.paid ? <Tag key="p" tone="good">paid</Tag> : <Tag key="p">open</Tag>,
-              acct ? <span key="a" className="inline-flex flex-wrap gap-x-3"><span>terms <AddrLink addr={acct.account} explorer={DEFAULT_EXPLORER} className="text-[11px]" /></span><span>vault <AddrLink addr={acct.vault} explorer={DEFAULT_EXPLORER} className="text-[11px]" /></span></span> : <span key="a" className="text-faint">not in the link</span>,
-            ];
-          })} />
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <CardTitle>Protection steps</CardTitle>
+          <span className="text-[12px] text-faint">public on chain: trigger and status · private: amount</span>
         </div>
-        <div className="mt-2">
+        <div className="mt-4"><PlateHead /></div>
+        <ul className="space-y-2">
+          {view.steps.map((s, i) => {
+            const acct = accounts.get(s.index);
+            return (
+              <motion.li key={s.index} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, delay: i * STAGGER, ease: [0.2, 0.8, 0.2, 1] }}
+                className={cx("grid gap-2 py-3.5 sm:gap-4 sm:px-4", PLATE_GRID)}>
+                <Cell label="Step" bare><span className="num text-[13.5px] font-medium text-ink">Step {s.index}</span></Cell>
+                <Cell label="Pays at or above" className="sm:text-right"><span className="num text-[13.5px] text-ink2">{ppg(s.triggerPrice)}</span></Cell>
+                <Cell label="Funded" className="sm:text-right">
+                  <span className="inline-flex items-center gap-2 sm:justify-end">
+                    <DelayedDecode text={tusd(s.funded)} delay={i * STAGGER * 1000} seed={`${share.policyId}-${s.index}`} className="text-[13.5px] font-medium text-ink" />
+                    <Encrypted label="decrypted" className="sm:hidden lg:inline-flex" />
+                  </span>
+                </Cell>
+                <Cell label="Status">{s.paid ? <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-jade"><DrawCheck size={12} />paid</span> : <span className="text-[13px] text-muted">open</span>}</Cell>
+                <Cell label="Accounts"><Accounts acct={acct} /></Cell>
+              </motion.li>
+            );
+          })}
+        </ul>
+        <p className="mt-3 hidden items-center gap-1.5 text-[12px] text-faint sm:flex lg:hidden"><LockIcon className="text-cipher" />Funded amounts are encrypted on chain and were decrypted with the shared keys.</p>
+        <div className="mt-4">
           <Row label="Total funded">{tusd(view.totalFunded)}</Row>
-          <Row label="Total paid">{tusd(view.totalPaid)}</Row>
-          <Row label="Policy" hint="Solana devnet, tUSD test dollars (1 tUSD = $1)">{view.policyId}</Row>
+          <Row label="Total paid"><span className="text-jade">{tusd(view.totalPaid)}</span></Row>
+          <Row label="Policy" hint="Solana devnet, tUSD test dollars (1 tUSD = $1)"><span className="font-mono text-[12.5px]">{view.policyId}</span></Row>
         </div>
       </Card>
 
-      {view.note && <Note tone="info" title="Note from the server">{view.note}</Note>}
-      <p className="text-xs text-faint">Balances read from Solana devnet at {view.checkedAt}.</p>
+      {view.note && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2, delay: decodeEnd / 1000 }}><Note tone="info" title="Note from the server">{view.note}</Note></motion.div>}
+      <p className="text-[12px] text-faint">Balances read from Solana devnet at <span className="num">{view.checkedAt}</span>.</p>
     </div>
   );
 }

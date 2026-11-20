@@ -2,10 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-html { background: #F6F4EF; }
-body { color: #15181B; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+/* Dark theme tokens (RGB channels). Roles: docs/UI_DIRECTION.md. */
+:root {
+  color-scheme: dark;
+  --bg: 11 15 20;          /* #0b0f14 page */
+  --sunken: 7 10 14;       /* #070a0e wells behind charts */
+  --raised: 16 22 29;      /* #10161d cards */
+  --panel: 21 28 37;       /* #151c25 inner panels */
+  --well: 27 35 46;        /* #1b232e inputs, tracks */
+  --ink: 237 241 245;      /* #edf1f5 primary text */
+  --ink2: 211 218 228;     /* #d3dae4 secondary text, headings */
+  --muted: 154 167 183;    /* #9aa7b7 body */
+  --faint: 120 133 149;    /* #788595 metadata */
+  --line: 226 234 242;     /* borders: use at /10 to /14 */
+  /* Accent: ember (token name kept as `jade` so existing classes keep working; `accent` aliases it). */
+  --jade: 240 138 75;      /* #f08a4b action, focus, protection in force */
+  --jade-deep: 122 52 18;  /* #7a3412 deep ember fills */
+  --jade-ink: 26 13 6;     /* text on ember */
+  --heat: 246 186 132;     /* #f6ba84 market-driven cost, price above a trigger (lighter ember) */
+  --heat-deep: 110 62 26;
+  --cipher: 138 169 214;   /* #8aa9d6 encrypted, private */
+  --cipher-deep: 40 56 84;
+  --rust: 229 72 77;       /* #e5484d refusal, loss */
+  --rust-deep: 92 24 27;
+  --page-gutter: clamp(16px, 4vw, 48px);
+}
+
+html { background: rgb(var(--bg)); }
+body {
+  color: rgb(var(--ink));
+  background: rgb(var(--bg));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
 .num { font-variant-numeric: tabular-nums; }
-::selection { background: #BFDCD1; }
-:focus-visible { outline: 2px solid #0B5D4B; outline-offset: 2px; border-radius: 6px; }
-input[type="range"] { accent-color: #0B5D4B; }
-@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+::selection { background: rgb(var(--jade) / 0.32); color: rgb(var(--ink)); }
+:focus-visible { outline: 2px solid rgb(var(--jade)); outline-offset: 2px; border-radius: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
+}
