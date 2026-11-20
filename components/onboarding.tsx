@@ -81,7 +81,7 @@ function ProviderTile({ p, onConnect }: { p: LedgerProvider; onConnect: () => vo
     <li className={cx("group flex min-w-0 flex-col rounded-[10px] border border-line/[0.08] bg-panel/60 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.03)]", p.configured && surfaceHover)}>
       <div className="flex items-center justify-between gap-3">
         <LinkGlyph ready={p.configured} />
-        <Tag tone={p.configured ? "good" : "neutral"}>{p.configured ? "Ready" : "Not configured"}</Tag>
+        <Tag tone={p.configured ? "good" : "neutral"}>{p.configured ? "Ready" : "Not set up yet"}</Tag>
       </div>
       <p className={cx("mt-3 text-[15px] font-medium leading-6", p.configured ? "text-ink" : "text-ink2")}>{p.name}</p>
       <p className="mt-1 flex-1 text-[12.5px] leading-[1.5] text-muted">
@@ -192,8 +192,8 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
   return (
     <div className="mx-auto max-w-5xl">
       <motion.header initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.2, 0.8, 0.2, 1] }} className="mb-8">
-        <h1 className={cx("text-[28px] leading-[1.1] sm:text-[34px] sm:leading-[1.08]", display)}>Connect your accounting records</h1>
-        <p className="mt-3 max-w-2xl text-[15px] leading-[1.6] text-muted sm:text-base">We need 12 to 24 months of expense transactions. Sign in, or upload an export.</p>
+        <h1 className={cx("text-[28px] leading-[1.1] sm:text-[34px] sm:leading-[1.08]", display)}>Connect your books</h1>
+        <p className="mt-3 max-w-2xl text-[15px] leading-[1.6] text-muted sm:text-base">We only read your books and never change them. Uploaded files aren't stored.</p>
       </motion.header>
 
       <Card className="mb-4">
@@ -229,19 +229,19 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
 
       <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <Card className="flex flex-col">
-          <div className="flex items-center justify-between gap-3"><CardTitle>Sign in to the books</CardTitle><Tag tone="info">Read only</Tag></div>
+          <div className="flex items-center justify-between gap-3"><CardTitle>Connect your accounting software</CardTitle><Tag tone="info">We only read</Tag></div>
           <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">The owner logs in at their own software and approves access. We pull 24 months of lines and analyze them in this session. The login is not stored.</p>
           {ledgers === null
             ? <p className="mt-5 text-[13px] text-muted">Checking which connections are configured…</p>
             : <motion.ul initial="hidden" animate="show" transition={{ staggerChildren: 0.06 }} className="mt-4 grid gap-3 sm:grid-cols-2">
                 {ledgers.map((p) => <motion.div key={p.id} variants={rise} className="flex"><ProviderTile p={p} onConnect={() => connect(p.id)} /></motion.div>)}
               </motion.ul>}
-          <p className="mt-4 text-[12px] leading-[1.55] text-faint">Each app needs a redirect URL of <code className="font-mono text-[11.5px] text-ink2">/api/connect/quickbooks/callback</code>, and the same path with xero, zoho, or freshbooks. QuickBooks Desktop has no cloud sign-in, so use a CSV. Wave does not return historical ledger lines.</p>
+          
         </Card>
 
         <div className="grid content-start gap-4">
           <Card className="flex flex-col">
-            <div className="flex items-center justify-between gap-3"><CardTitle>Upload an export</CardTitle><Tag tone="good">Works now</Tag></div>
+            <div className="flex items-center justify-between gap-3"><CardTitle>Upload a CSV export</CardTitle></div>
             <div {...dragProps} onClick={() => input.current?.click()}
               className={cx("group mt-3 cursor-pointer rounded-[10px] border border-dashed px-4 pb-5 pt-5 text-center transition-[border-color,background-color] duration-150 ease-out", drag ? "border-jade/60 bg-jade/[0.04]" : "border-line/[0.12] bg-bg/40 hover:border-line/[0.2]")}>
               <SheetGlyph drag={drag} />
@@ -265,9 +265,9 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
             <Button onClick={() => input.current?.click()} className="mt-4 w-full">Choose file</Button>
           </Card>
           <Card className="flex flex-col">
-            <div className="flex items-center justify-between gap-3"><CardTitle>Sample company</CardTitle><Tag tone="info">Synthetic</Tag></div>
+            <div className="flex items-center justify-between gap-3"><CardTitle>Try a sample fleet</CardTitle><Tag tone="info">Synthetic data</Tag></div>
             <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">John&apos;s Trucking LLC: 10 trucks in the Midwest, 3,315 transactions over 24 months. The ledger is generated, but its fuel prices follow the real EIA Midwest diesel index. It goes through the same importer as an upload.</p>
-            <Button variant="secondary" onClick={sample} disabled={busy} className="mt-4 self-start">{busy ? "Loading…" : "Use sample company"}</Button>
+            <Button variant="secondary" onClick={sample} disabled={busy} className="mt-4 self-start">{busy ? "Loading…" : <>Try the sample fleet<Arrow /></>}</Button>
           </Card>
         </div>
       </div>
@@ -324,6 +324,17 @@ function StatusMark({ v }: { v?: StageView }) {
   );
 }
 
+/** Product wording for each pipeline stage; the server's own wording stays in the docs. */
+const STEP_LABEL: Record<string, string> = {
+  classify: "Sorting costs", financials: "Measuring where the money goes", exposure: "Matching prices you don't control",
+  pool: "Comparing with similar businesses", markets: "Checking live markets", price: "Pricing protection",
+};
+const PLAIN_DETAIL = new Set(["ingest", "classify", "financials"]);
+function stepLabel(id: string, v: StageView | undefined, read: number) {
+  if (id === "ingest") return Number.isFinite(read) ? `Reading ${read.toLocaleString("en-US")} transactions` : "Reading transactions";
+  return STEP_LABEL[id] ?? id;
+}
+
 export function Analyzing({ stages, error, source, onBack, result }: { stages: Record<string, StageView>; error: string | null; source: string; onBack: () => void; result?: Analysis | null }) {
   const done = STAGES.filter((s) => stages[s.id]?.status === "done").length;
   const lanes = useLanes(result);
@@ -331,7 +342,7 @@ export function Analyzing({ stages, error, source, onBack, result }: { stages: R
   return (
     <div className="mx-auto max-w-3xl">
       <motion.header initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.2, 0.8, 0.2, 1] }} className="mb-6">
-        <h1 className={cx("text-[28px] leading-[1.1] sm:text-[34px] sm:leading-[1.08]", display)}>{error ? "We could not finish the analysis" : done === STAGES.length ? "Analysis complete" : "Analyzing your records"}</h1>
+        <h1 className={cx("text-[28px] leading-[1.1] sm:text-[34px] sm:leading-[1.08]", display)}>{error ? "We could not read this file" : done === STAGES.length ? "Your books are read" : "Reading your books"}</h1>
         <p className="mt-3 text-[14px] leading-5 text-muted">{source}</p>
         <div className="mt-5 flex gap-1" role="progressbar" aria-label="Pipeline stages finished" aria-valuemin={0} aria-valuemax={STAGES.length} aria-valuenow={done}>
           {STAGES.map((s) => {
@@ -354,9 +365,9 @@ export function Analyzing({ stages, error, source, onBack, result }: { stages: R
               <li key={s.id} className="grid grid-cols-[20px_1fr_auto] items-start gap-3 py-2.5">
                 <StatusMark v={v} />
                 <div className="min-w-0">
-                  <p className={cx("text-[14px] font-medium leading-5 transition-colors duration-200", v ? "text-ink" : "text-faint")}>{s.label}</p>
+                  <p className={cx("text-[14px] font-medium leading-5 transition-colors duration-200", v ? "text-ink" : "text-faint")}>{stepLabel(s.id, v, read)}</p>
                   <AnimatePresence initial={false}>
-                    {v?.detail && (
+                    {v?.detail && (v.status === "error" || PLAIN_DETAIL.has(s.id)) && (
                       <motion.p key={v.status} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={SPRING_UI}
                         className={cx("num mt-1 text-[13px] leading-[1.5]", v.status === "error" ? "text-rust" : "text-muted")}>
                         {v.status === "error" ? v.detail : <TickText text={v.detail} />}
@@ -404,7 +415,7 @@ export function Analyzing({ stages, error, source, onBack, result }: { stages: R
         </motion.section>
       )}
 
-      <p className="mt-3 text-[12px] leading-[1.55] text-faint">Each line is a real stage of the server pipeline, with its measured run time and its actual result. The display pauses briefly between stages so the results can be read.</p>
+      <p className="mt-3 text-[12px] leading-[1.55] text-faint">Each step is real work on your file, shown with how long it took.</p>
       {error && (
         <div className="mt-5 space-y-3">
           <Note tone="warn" title="What went wrong">{error}</Note>

@@ -131,7 +131,7 @@ export function PrivatePayout({ d }: { d: LandingData }) {
     { k: "Set aside per chunk", pub: <DecodeText text={usd2(s.stepAmount)} play={false} seed="pub-step" />, own: <DecodeText key={replay} text={usd2(s.stepAmount)} play={play} seed="own-step" className="text-ink2" /> },
   ];
   return (
-    <Frame title={`Settlement, ${monYear(s.month, true)}`} meta="Solana devnet">
+    <Frame title={`Settlement, ${monYear(s.month, true)}`} meta="Settled on Solana">
       <div ref={ref} className="grid sm:grid-cols-2">
         <div className="border-b border-line/6 p-4 sm:border-b-0 sm:border-r sm:p-5">
           <p className="text-[13px] font-[550] text-muted">What the public chain shows</p>
@@ -158,7 +158,7 @@ export function PrivatePayout({ d }: { d: LandingData }) {
         </div>
       </div>
       <div className="num border-t border-line/6 bg-panel/40 px-4 py-3 text-[12px] text-muted">
-        No wallet needed: this demo pays from test wallets on Solana devnet. The amount is encrypted for everyone except the business.
+        The amount is encrypted for everyone except the business and whoever it chooses to show.
       </div>
     </Frame>
   );

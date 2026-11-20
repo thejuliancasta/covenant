@@ -64,7 +64,7 @@ export default function LenderPage() {
       <div className="min-h-screen bg-bg">
         <p className="flex items-center justify-center gap-2 bg-sunken px-4 py-2 text-center text-[12px] leading-4 text-muted">
           <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden className="hidden shrink-0 text-heat sm:block"><path d="M5 1.2 9 8.6H1L5 1.2Z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /><path d="M5 4.2v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-          Simulation. Not an offer of insurance or derivatives. No real premiums, orders or payouts. Devnet test dollars only.
+          Test mode: paid in test dollars on Solana devnet. Not an offer of insurance.
         </p>
         <header className="sticky top-0 z-30 bg-bg/80 backdrop-blur-md backdrop-saturate-150">
           <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-[var(--page-gutter)]">
@@ -72,7 +72,7 @@ export default function LenderPage() {
               <Logo />
             </Link>
             <span className="inline-flex items-center gap-2 whitespace-nowrap text-[13px] font-medium text-cipher">
-              <LockIcon />Lender view, read-only
+              <LockIcon />Payout proof, read-only
             </span>
           </div>
         </header>
@@ -81,7 +81,7 @@ export default function LenderPage() {
           {state.kind === "reading" ? <p className="text-[13px] text-muted">Reading the shared link…</p>
 
             : state.kind === "none" ? (<>
-              <PageHead eyebrow="Lender view" title="No coverage share found." lede="This page shows a fleet's diesel cover and payouts to its lender or factoring company. Open the link the fleet shared with you: it ends in # followed by a long code that carries read-only viewing keys." />
+              <PageHead eyebrow="Payout proof" title="No payout proof found." lede="This page shows a fleet's diesel cover and payouts to its lender or factoring company. Open the link the fleet shared with you: it ends in # followed by a long code that carries read-only viewing keys." />
               <Card className="max-w-3xl">
                 <p className="max-w-[70ch] text-[13.5px] leading-[1.6] text-muted">A fleet creates the link on CostShield&apos;s payout screen after a settlement, under &quot;Share with your lender&quot;. The viewing keys let you read each protection step&apos;s funded amount and whether it paid. They cannot move money.</p>
                 <div className="mt-5">
@@ -94,14 +94,14 @@ export default function LenderPage() {
             </>)
 
             : state.kind === "bad" ? (<>
-              <PageHead eyebrow="Lender view" title="This link cannot be read." lede="Ask the fleet to copy the link again from the payout screen. Links are long, and chat apps sometimes cut them off." />
+              <PageHead eyebrow="Payout proof" title="This link cannot be read." lede="Ask the fleet to copy the link again from the payout screen. Links are long, and chat apps sometimes cut them off." />
               <div className="max-w-3xl"><Note tone="warn" title="The shared code is damaged">{state.message}</Note></div>
             </>)
 
             : (<>
-              <PageHead eyebrow={`Lender view · policy ${state.share.policyId}`}
-                title={state.kind === "ok" ? <>Diesel protection for {period}: <span className="num">{tusd(state.view.totalPaid, 0)}</span> paid.</> : state.kind === "error" ? <>The diesel cover for {period} could not be checked.</> : <>Checking the diesel cover for {period}.</>}
-                lede={<>A fleet shared read-only viewing keys for {state.share.steps.length} protection steps on the {region} diesel index. Amounts are encrypted on Solana devnet. These keys decrypt them; they cannot spend them.</>} />
+              <PageHead eyebrow={`Read-only, policy ${state.share.policyId}`}
+                title={state.kind === "ok" ? <>Payout proof: <span className="num">{tusd(state.view.totalPaid, 0)}</span> paid for {period}</> : state.kind === "error" ? <>This payout proof could not be checked.</> : <>Payout proof for {period}</>}
+                lede={<>A business shared read-only keys for {state.share.steps.length} chunks of money set aside against the official {region} diesel price. Amounts are encrypted on Solana devnet. These keys read them; they cannot move money.</>} />
 
               {state.kind === "loading" && <Pending share={state.share} />}
 
@@ -132,7 +132,7 @@ export default function LenderPage() {
         </main>
 
         <footer className="mx-auto max-w-[1200px] px-[var(--page-gutter)] pb-10 text-center text-[12px] leading-[1.6] text-faint">
-          <p className="mx-auto max-w-[80ch]">CostShield is a hackathon prototype built for UBC 2026. Price data: U.S. Energy Information Administration. Settlement: Solana devnet with Helius Privacy Rings.</p>
+          <p className="mx-auto max-w-[80ch]">Price data: U.S. Energy Information Administration. Settlement: Solana devnet with Helius Privacy Rings.</p>
         </footer>
       </div>
     </MotionConfig>

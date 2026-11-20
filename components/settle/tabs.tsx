@@ -43,7 +43,7 @@ export function Tabs<T extends string>({ tabs, value, onChange, label, base }: {
                 onClick={() => onChange(t)}
                 className={cx("relative flex min-h-10 shrink-0 items-center whitespace-nowrap rounded-control px-3 text-[13.5px] font-medium transition-[color,transform] duration-150 ease-out active:scale-[0.98]",
                   on ? "text-ink" : "text-muted hover:text-ink")}>
-                {on && <motion.span layoutId="judge-tab" transition={UI_SPRING} aria-hidden className="absolute bottom-1 left-1/2 -ml-2 h-[2px] w-4 rounded-full bg-jade" />}
+                {on && <motion.span layoutId="tab-mark" transition={UI_SPRING} aria-hidden className="absolute bottom-1 left-1/2 -ml-2 h-[2px] w-4 rounded-full bg-jade" />}
                 <span className="relative">{t}</span>
               </button>
             );

@@ -14,23 +14,23 @@ import { Backdrop } from "@/components/fx/backdrop";
 
 /*
  * The product shell at /app. Linear-style: a slim sidebar (logo, steps with a sliding
- * ember mark, the simulation notice) beside one framed main panel. On narrow
+ * ember mark, the test-mode note) beside one framed main panel. On narrow
  * screens the sidebar becomes a compact sticky top bar with horizontal steps.
  */
 
 type Step = "welcome" | "connect" | "analyzing" | "overview" | "protection" | "simulate" | "payout";
 const NAV: { id: Step; label: string }[] = [
-  { id: "connect", label: "Connect" }, { id: "overview", label: "Your risks" }, { id: "protection", label: "Protection" },
-  { id: "simulate", label: "Simulate" }, { id: "payout", label: "Payout" },
+  { id: "connect", label: "Books" }, { id: "overview", label: "Risks" }, { id: "protection", label: "Protection" },
+  { id: "simulate", label: "What if" }, { id: "payout", label: "Payouts" },
 ];
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const SAMPLE_LABEL = "Sample company (synthetic)";
+const SAMPLE_LABEL = "Sample fleet (synthetic data)";
 
 /** Step list. A short ember mark slides to the active step; steps that need a result say so. */
 function StepNav({ step, enabled, go, id, vertical }: { step: Step; enabled: (s: Step) => boolean; go: (s: Step) => void; id: string; vertical?: boolean }) {
   return (
     <LayoutGroup id={id}>
-      {NAV.map((n, i) => {
+      {NAV.map((n) => {
         const on = enabled(n.id), active = (step === n.id || (n.id === "connect" && step === "analyzing"));
         return (
           <button
@@ -46,7 +46,6 @@ function StepNav({ step, enabled, go, id, vertical }: { step: Step; enabled: (s:
               <motion.span layoutId="mark" transition={SPRING_UI} aria-hidden
                 className={cx("absolute rounded-full bg-jade", vertical ? "left-0 top-1/2 h-3.5 w-[2px] -translate-y-1/2" : "bottom-0.5 left-1/2 h-[2px] w-3.5 -translate-x-1/2")} />
             )}
-            <span className={cx("num w-3 text-[12px] tabular-nums", active ? "text-jade" : "text-faint")}>{i + 1}</span>
             <span>{n.label}</span>
           </button>
         );
@@ -145,9 +144,9 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
           <nav className="mt-6 grid gap-0.5" aria-label="Steps">
             <StepNav id="side" vertical step={step} enabled={enabled} go={go} />
           </nav>
-          {source && <p className="mt-6 px-3 text-[12px] leading-[1.5] text-faint">{source}</p>}
+          {(analysis?.company || source) && <p className="mt-6 truncate px-3 text-[12px] leading-[1.5] text-muted">{analysis?.company ?? source}</p>}
           <div className="mt-auto grid gap-3">
-            <p className="px-3 text-[12px] leading-[1.5] text-faint">Simulation, devnet test dollars</p>
+            <p title="Payouts use test dollars on Solana devnet" className="flex cursor-default items-center gap-2 px-3 text-[12px] leading-[1.5] text-muted"><span aria-hidden className="h-1.5 w-1.5 rounded-full bg-jade" />Test mode</p>
           </div>
         </aside>
 
@@ -178,8 +177,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
               </AnimatePresence>
             </main>
             <footer className="relative z-10 mx-auto max-w-[1080px] px-4 pb-8 text-[12px] leading-[1.6] text-faint sm:px-8 lg:px-12">
-              <p>Simulation. Not an offer of insurance or derivatives. No real premiums, orders or payouts. Devnet test dollars only.</p>
-              <p className="mt-1">CostShield is a hackathon prototype built for UBC 2026. Price data: U.S. Energy Information Administration. Market data: Gemini Prediction Markets public API. Settlement: Solana devnet with Helius Privacy Rings.</p>
+              <p>Test mode: test dollars on Solana devnet. Not an offer of insurance.</p>
             </footer>
           </div>
         </div>

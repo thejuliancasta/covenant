@@ -1,51 +1,98 @@
 /*
- * Backdrop: one quiet, brand-derived background shared by the landing page and the app.
- * The five bars of the Stepped C logo, drawn as hairlines (the top and bottom edge of
- * each bar), anchored to the top-right and fading out to the left, plus a very soft
- * light from the top. Static, at most about 5% opacity, invisible to screen readers.
- * Mount it inside a `relative` container; it fills that container's top area.
+ * Backdrop: the quiet, brand-derived background shared by the landing page and the app.
+ * Composed from components/graphics:
+ *   SteppedC    the logo as a large outlined drawing with construction lines, cropped by an edge
+ *   PriceTrace  real weekly diesel prices crossing a dashed strike, drawn once
+ *   TickField   a sparse grid of tiny crosses
+ *   MarginRuler a measured scale down the left margin
+ * Static, hairline only, ink lines at or under ~6% and ember under ~12%. Every piece fades
+ * toward the content column. No glows, gradients of light, noise or animation.
+ *
+ * Mount it as the first child of a `relative` container; it fills that container.
+ * - "landing": spans the full page height (the landing root is `relative isolate`), so it sits
+ *   at z-index -1 behind in-flow content and places detail at a few vertical anchors.
+ * - "app": one corner motif plus texture, at z-0 under the `relative z-10` content.
  */
-
-// Logo bars on its 48-unit grid: [left edge, top, height]. The C opens to the right.
-const BARS: [number, number, number][] = [[17, 6, 5.6], [11, 13.1, 5.6], [8, 20.2, 7.6], [11, 29.3, 5.6], [17, 36.4, 5.6]];
+import { SteppedC } from "@/components/graphics/stepped-c";
+import { PriceTrace } from "@/components/graphics/price-trace";
+import { MarginRuler, TickField } from "@/components/graphics/texture";
 
 export function Backdrop({ variant = "app" }: { variant?: "landing" | "app" }) {
-  const landing = variant === "landing";
-  const H = landing ? 620 : 440;
-  const alpha = landing ? 0.055 : 0.04;
-  const scaleY = H / 48, x0 = 8;
-  const xs = (x: number) => 380 + (x - x0) * 26; // logo x -> viewBox x (1000 wide); the stepped edge sits right of center
-  const lines = BARS.flatMap(([x, y, h], k) => [
-    { x: xs(x), y: y * scaleY, ember: k === 0 },
-    { x: xs(x), y: (y + h) * scaleY, ember: k === 0 },
-  ]);
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-0 overflow-hidden" style={{ height: H }}>
-      <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 70% 55% at 50% 0%, rgb(255 255 255 / ${landing ? 0.04 : 0.03}), transparent 70%)` }} />
-      <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 1000 ${H}`} preserveAspectRatio="none">
-        <defs>
-          <linearGradient id={`bd-fade-${variant}`} gradientUnits="userSpaceOnUse" x1="120" y1="0" x2="1000" y2="0">
-            <stop offset="0" stopColor="rgb(var(--ink))" stopOpacity="0" />
-            <stop offset="0.55" stopColor="rgb(var(--ink))" stopOpacity={alpha} />
-            <stop offset="1" stopColor="rgb(var(--ink))" stopOpacity={alpha * 0.6} />
-          </linearGradient>
-          <linearGradient id={`bd-ember-${variant}`} gradientUnits="userSpaceOnUse" x1="120" y1="0" x2="1000" y2="0">
-            <stop offset="0" stopColor="rgb(var(--jade))" stopOpacity="0" />
-            <stop offset="0.55" stopColor="rgb(var(--jade))" stopOpacity={alpha * 1.1} />
-            <stop offset="1" stopColor="rgb(var(--jade))" stopOpacity={alpha * 0.6} />
-          </linearGradient>
-          <linearGradient id={`bd-down-${variant}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0.55" stopColor="white" />
-            <stop offset="1" stopColor="black" />
-          </linearGradient>
-          <mask id={`bd-mask-${variant}`}><rect width="1000" height={H} fill={`url(#bd-down-${variant})`} /></mask>
-        </defs>
-        <g mask={`url(#bd-mask-${variant})`}>
-          {lines.map((l, i) => (
-            <line key={i} x1={l.x - 260} x2={1000} y1={l.y} y2={l.y} stroke={`url(#bd-${l.ember ? "ember" : "fade"}-${variant})`} strokeWidth="1" vectorEffect="non-scaling-stroke" />
-          ))}
-        </g>
-      </svg>
+    <div aria-hidden className={`pointer-events-none absolute inset-0 select-none overflow-hidden ${variant === "landing" ? "-z-10" : "z-0"}`}>
+      {variant === "landing" ? <Landing /> : <App />}
     </div>
+  );
+}
+
+function Landing() {
+  return (
+    <>
+      {/* Hero: the mark, top right, cropped by the edge, with a few crosses in the corner. */}
+      <div className="absolute inset-x-0 top-0 h-[760px] opacity-60 sm:opacity-100">
+        <TickField id="bd-l-ticks-top" alpha={0.04} fadeX={[[0, 0], [0.58, 0], [1, 1]]} fadeY={[[0, 1], [0.45, 0.6], [0.85, 0]]} className="absolute inset-0" />
+        <SteppedC
+          id="bd-l-mark"
+          scale={15}
+          edgeAt={34}
+          top={-15}
+          alpha={0.055}
+          ember={0.11}
+          fadeX={[[0, 0], [0.4, 0], [0.8, 1], [1, 1]]}
+          fadeY={[[0, 1], [0.6, 1], [1, 0]]}
+          className="absolute inset-0"
+        />
+      </div>
+
+      {/* Left margin: a measured ruler down the whole page. */}
+      <MarginRuler id="bd-l-ruler" alpha={0.05} fadeY={[[0, 0], [0.04, 1], [0.96, 1], [1, 0]]} className="absolute left-0 top-0 h-full" />
+
+      {/* About a third down: the diesel price, once, crossing the strike. */}
+      <div className="absolute inset-x-0 top-[31%] h-[240px]">
+        <PriceTrace id="bd-l-price" height={240} className="absolute inset-0" />
+      </div>
+
+      {/* Further down: crosses in the right margin. */}
+      <div className="absolute inset-x-0 top-[57%] h-[640px]">
+        <TickField id="bd-l-ticks-mid" alpha={0.04} fadeX={[[0, 0], [0.72, 0], [1, 1]]} fadeY={[[0, 0], [0.3, 1], [0.7, 1], [1, 0]]} className="absolute inset-0" />
+      </div>
+
+      {/* Near the close: a smaller echo of the mark, right edge. */}
+      <div className="absolute inset-x-0 bottom-[160px] hidden h-[560px] sm:block">
+        <SteppedC
+          id="bd-l-mark-end"
+          scale={10}
+          edgeAt={30}
+          top={40}
+          alpha={0.04}
+          ember={0.08}
+          fadeX={[[0, 0], [0.55, 0], [0.88, 1], [1, 1]]}
+          fadeY={[[0, 0], [0.25, 1], [0.75, 1], [1, 0]]}
+          className="absolute inset-0"
+        />
+      </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <div className="absolute inset-x-0 top-0 h-[560px] opacity-60 sm:opacity-100">
+        <TickField id="bd-a-ticks" alpha={0.035} fadeX={[[0, 0], [0.62, 0], [1, 1]]} fadeY={[[0, 1], [0.7, 0]]} className="absolute inset-0" />
+        <SteppedC
+          id="bd-a-mark"
+          scale={10}
+          edgeAt={31}
+          top={-20}
+          alpha={0.045}
+          ember={0.09}
+          fadeX={[[0, 0], [0.45, 0], [0.86, 1], [1, 1]]}
+          fadeY={[[0, 1], [0.5, 1], [1, 0]]}
+          className="absolute inset-0"
+        />
+      </div>
+      <MarginRuler id="bd-a-ruler" alpha={0.04} fadeY={[[0, 0], [0.1, 1], [0.5, 1], [1, 0]]} className="absolute left-0 top-0 hidden h-[720px] sm:block" />
+    </>
   );
 }

@@ -185,7 +185,7 @@ export function Payout({ a }: { a: Analysis }) {
     <MotionConfig reducedMotion="user">
       <div className="space-y-6">
         <PageHead eyebrow="Real prices, your gallons, a real Solana payment in test dollars"
-          title={result ? <>Replay {month}: CostShield paid {company} {usd(result.payoutUsd)} in test dollars on Solana, privately.</> : <>Replay 2026: protection would have paid {company} {usd(p.totalPayout)}.</>}
+          title={result ? <>CostShield paid {company} {usd(result.payoutUsd)}, privately.</> : <>See a real price spike paid out: {month}</>}
           lede={<>Suppose {company} had bought protection in {monthLabel(p.inceptionMonth, true)}, when the official Midwest diesel price (U.S. government data) was {ppg(p.inceptionIndex)}. We replay the real prices against the gallons in its books, then pay out {month} for real on Solana&apos;s test network.</>} />
 
         <div className="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -221,7 +221,7 @@ export function Payout({ a }: { a: Analysis }) {
             <div className="max-w-2xl">
               <h2 className="text-[24px] font-[550] leading-[1.1] tracking-[-0.025em] text-ink sm:text-[30px]">Pay out {month} for real on Solana</h2>
               <p className="mt-3 text-[14px] leading-[1.55] text-muted">The backer sets the money aside in advance. The official price is posted on the blockchain with a fingerprint of the government data file. A Solana program checks the price, and only {company} can collect. Amounts stay encrypted. Money is test dollars: 1 test dollar = $1, nothing scaled.</p>
-              <p className="mt-2 text-[13px] text-ink2">No wallet needed: this demo pays from test wallets on Solana devnet.</p>
+              <p className="mt-2 text-[13px] text-ink2">Test mode: paid in test dollars on Solana devnet. No wallet needed.</p>
             </div>
             <SettleButton onClick={settle} disabled={!canRun} running={running} again={!!result} />
           </div>
@@ -239,7 +239,7 @@ export function Payout({ a }: { a: Analysis }) {
                   <div className="min-w-0"><p className="text-xs text-muted">Backer private balance</p><p className="num font-medium text-ink2">{st.underwriterPrivateBalance !== undefined ? tusd(st.underwriterPrivateBalance, 0) : "—"}</p></div>
                   <div className="min-w-0"><p className="text-xs text-muted">Policies opened</p><p className="num font-medium text-ink2">{st.policies ?? "—"}</p></div>
                 </div>
-                <p className="mt-3 flex items-center gap-1.5 text-xs text-faint"><LockIcon className="text-cipher" />Private balances are encrypted on chain. This demo server decrypts them with each party&apos;s own key.</p>
+                <p className="mt-3 flex items-center gap-1.5 text-xs text-faint"><LockIcon className="text-cipher" />Private balances are encrypted on chain. In test mode the server decrypts them with each party&apos;s own key.</p>
               </div>
             )}
 
@@ -270,7 +270,7 @@ export function Payout({ a }: { a: Analysis }) {
 
           {result && <SettledCard r={result} company={company} />}
 
-          <div className="mt-6"><Note tone="info" title="What is real and what is not">Real: the Solana program on the test network (devnet), the private transfers (Helius Privacy Rings), the transactions and the U.S. government prices. Test money: test dollars are worth nothing. Simulated: the policy (nobody sold it), the price poster (one key that recomputes the official monthly average, not a decentralised feed) and the business wallet (this demo server holds every party&apos;s keys). Helius&apos;s prover sees amounts inside secure hardware. Gemini markets do not pay out here.</Note></div>
+          <div className="mt-6"><Note tone="info" title="What is real and what is not">Real: the Solana program on the test network (devnet), the private transfers (Helius Privacy Rings), the transactions and the U.S. government prices. Test money: test dollars are worth nothing. Not real yet: the policy (nobody sold it), the price poster (one key that recomputes the official monthly average, not a decentralised feed) and the business wallet (in test mode the server holds every party&apos;s keys). Helius&apos;s prover sees amounts inside secure hardware. Gemini markets do not pay out here.</Note></div>
         </section>
 
         {result && <TwoViews r={result} company={company} />}

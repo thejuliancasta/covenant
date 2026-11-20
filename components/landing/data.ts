@@ -20,7 +20,7 @@ export interface LandingData {
   categoryRows: CategoryRow[];
   monthly: MonthRow[];
   backtest: { n: number; from: string; to: string; paidShare: number; bad: number; badPaid: number; badPaidShare: number; varianceReduction: number };
-  policy: { inceptionMonth: string; inceptionIndex: number; strike: number; rows: CoverRow[]; totalPayout: number; totalExtraCost: number; paidMonths: number; premiumPerGallon: number; sigma: number };
+  policy: { inceptionMonth: string; inceptionIndex: number; strike: number; rows: CoverRow[]; totalPayout: number; totalExtraCost: number; paidMonths: number; premiumPerGallon: number; premiumPerMonth: number; sigma: number };
   wholesaleR2: number;
   pool: { id: string; status: string; confidence: number };
   settlement: { month: string; indexMean: number; gallons: number; stepAmount: number; steps: StepRow[]; paidSteps: number; payout: number; funded: number };
@@ -86,7 +86,7 @@ async function build(): Promise<LandingData> {
       inceptionMonth: p.inceptionMonth, inceptionIndex: p.inceptionIndex, strike: p.strike,
       rows: p.replay.map((r) => ({ month: r.month, index: r.index, payout: r.payout, triggered: r.triggered })),
       totalPayout: p.totalPayout, totalExtraCost: p.totalExtraCost, paidMonths: p.replay.filter((r) => r.payout > 0).length,
-      premiumPerGallon: p.priceAtInception.premiumPerGallon, sigma: p.priceAtInception.sigma,
+      premiumPerGallon: p.priceAtInception.premiumPerGallon, premiumPerMonth: p.priceAtInception.premiumPerMonth, sigma: p.priceAtInception.sigma,
     },
     wholesaleR2: a.wholesale.r2Annual,
     pool: { id: a.pool!.poolId, status: a.pool!.status, confidence: a.pool!.confidence },

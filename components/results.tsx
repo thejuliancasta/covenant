@@ -146,7 +146,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
           <p className="mt-3 text-[12px] leading-[1.6] text-faint">Labels: <Ev e="V" /> verified public data, <Ev e="C" /> calculated from data, <Ev e="E" /> estimate, <Ev e="A" /> assumption.</p>
         </Card>
       </Reveal>
-      <div className="flex justify-end pt-2"><Button onClick={onNext} size="lg">See protection options<Arrow /></Button></div>
+      <div className="flex justify-end pt-2"><Button onClick={onNext} size="lg">Protect diesel<Arrow /></Button></div>
     </div>
   );
 }
@@ -287,7 +287,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
           <div className="mt-4"><Note tone="warn" title="Why you cannot buy this yet">{a.eligibility.reasons.join(" ")}</Note></div>
         </Card>
       </Reveal>
-      <div className="flex justify-end pt-2"><Button onClick={onNext} size="lg">Simulate a price shock<Arrow /></Button></div>
+      <div className="flex justify-end pt-2"><Button onClick={onNext} size="lg">See it pay out<Arrow /></Button></div>
     </div>
   );
 }

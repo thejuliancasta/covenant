@@ -55,7 +55,7 @@ const EV_PLAIN: Record<string, string> = {
   V: "Verified: official public data, such as U.S. government prices or a live market",
   C: "Calculated: worked out from your records and public data",
   E: "Estimate: our best reading, and it could be off",
-  A: "Assumption: a number we chose, shown so you can judge it",
+  A: "Assumption: a number we chose, shown so you can weigh it",
 };
 
 /** Evidence mark: a small raised letter (verified, calculated, estimate, assumption). Hover or focus names it. */
