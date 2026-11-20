@@ -35,7 +35,7 @@ function Window({ d }: { d: LandingData }) {
   const maxShare = Math.max(...top.map((c) => c.share));
   const first = d.monthly[0].month, last = d.monthly[d.monthly.length - 1].month;
   return (
-    <div className="overflow-hidden rounded-[14px] border border-line/8 bg-[rgb(11_12_13)] text-left shadow-[inset_0_1px_0_rgb(var(--ink)/0.1),0_60px_140px_-48px_rgb(0_0_0/0.95)]">
+    <div className="overflow-hidden rounded-[14px] border border-line/8 bg-raised text-left shadow-[inset_0_1px_0_rgb(var(--ink)/0.1),0_60px_140px_-48px_rgb(var(--shadow)/0.95)]">
       {/* Title bar */}
       <div className="flex h-11 items-center gap-2.5 border-b border-line/6 px-4 text-[13px]">
         <LogoMark size={16} />
@@ -73,7 +73,7 @@ function Window({ d }: { d: LandingData }) {
               { k: "Fleet fuel", v: usd0(d.diesel.spendTtm), s: <><span className="text-heat">{pct1(d.diesel.share)}</span> of revenue</>, e: "C" as const },
               { k: "A bad diesel year", v: "+" + usd0(d.diesel.shockNet), s: <><span className="text-heat">{d.diesel.shockTimesProfit.toFixed(1)}×</span> operating profit</>, e: "C" as const },
             ].map((s) => (
-              <div key={s.k} className="bg-[rgb(13_14_15)] px-4 py-3.5">
+              <div key={s.k} className="bg-raised px-4 py-3.5">
                 <dt className="flex items-center text-[12px] text-muted">{s.k}<Ev e={s.e} /></dt>
                 <dd className="num mt-1.5 text-[20px] font-[560] tracking-[-0.02em] text-ink">{s.v}</dd>
                 <dd className="mt-0.5 text-[12px] text-faint">{s.s}</dd>
@@ -82,7 +82,7 @@ function Window({ d }: { d: LandingData }) {
           </dl>
           {/* Panels */}
           <div className="mt-4 grid gap-4 lg:grid-cols-[1.05fr_1fr]">
-            <section className="rounded-[10px] border border-line/6 bg-[rgb(13_14_15)] p-4">
+            <section className="rounded-[10px] border border-line/6 bg-raised p-4">
               <div className="flex items-baseline justify-between">
                 <h4 className="text-[13px] font-[550] text-ink2">Where the money goes</h4>
                 <span className="text-[12px] text-faint">Share of revenue</span>
@@ -99,7 +99,7 @@ function Window({ d }: { d: LandingData }) {
                 ))}
               </ul>
             </section>
-            <section className="rounded-[10px] border border-line/6 bg-[rgb(13_14_15)] p-4">
+            <section className="rounded-[10px] border border-line/6 bg-raised p-4">
               <div className="flex items-baseline justify-between gap-4">
                 <h4 className="text-[13px] font-[550] text-ink2">Their pump price vs. the official Midwest price</h4>
                 <span className="shrink-0 text-[12px] text-faint">Moves together</span>

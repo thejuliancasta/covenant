@@ -5,10 +5,12 @@ Newest first. One or two lines each: what was decided, why, and where the detail
 ## Open questions
 
 - **QuickNode Streams bounty: enter or not?** Not integrated today.
-- **Colour theme and final UI direction.** A proposal with four themes is on the `design/ui-ux-proposal` branch. Not merged, not decided. (Merged on Nov 20, see below. Light mode and friendlier colours are still open.)
+- **Colour theme and final UI direction.** A proposal with four themes is on the `design/ui-ux-proposal` branch. Not merged, not decided. (Merged on Nov 20, see below.)
 
 ## 2026-11-20
 
+- **Light mode is the default, dark mode is a button** (`components/theme.tsx`, tokens in `app/globals.css`). The accent changes from ember orange to dark green in both themes, with amber kept for risk. Reason: owners should read this as a safe business tool, not a crypto product. Built on the `friendly-ui` branch.
+- **Simple view first, Detailed on a switch** for Risks and Protection. Simple never hides a "not available", "rejected" or "signal only" label. Judge mode stays the technical view. Choosing the view automatically by business size is not built: no threshold has been agreed.
 - **Aabis's redesign is merged** (`design/ui-ux-proposal`): landing page at `/`, the app at `/app`, dark token-based theme. This reverses "Cut before submission: merging `design/ui-ux-proposal`" below. Julian asked for it. The earlier UI stays viewable on the `classic-ui` branch.
 - **`motion` accepted as a dependency.** The redesign's animations use it. It is the one exception to "no new dependencies before submission".
 - **Judge mode stays.** The redesign removed it; Julian wants it back. It opens from a button in the app's sidebar once an analysis exists.

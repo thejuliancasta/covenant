@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/brand/logo";
+import { ThemeToggle } from "@/components/theme";
 import { cx, wrap } from "./kit";
 
 const LINKS = [
@@ -35,9 +36,10 @@ export function Nav() {
           ))}
         </ul>
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           <Link
             href="/app"
-            className="inline-flex h-8 items-center rounded-control border border-line/10 bg-well px-3 text-[13px] font-[550] text-ink shadow-[inset_0_1px_0_rgb(var(--ink)/0.08)] transition-[background-color,border-color] duration-150 hover:border-line/16 hover:bg-[rgb(36_37_41)]"
+            className="inline-flex h-8 items-center rounded-control border border-line/10 bg-well px-3 text-[13px] font-[550] text-ink shadow-[inset_0_1px_0_rgb(var(--ink)/0.08)] transition-[background-color,border-color] duration-150 hover:border-line/16 hover:bg-panel"
           >Open app</Link>
         </div>
       </nav>

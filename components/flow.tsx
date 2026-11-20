@@ -11,6 +11,7 @@ import { Connect, Analyzing, type StageView } from "@/components/onboarding";
 import { Overview, Protection } from "@/components/results";
 import { Simulator, Payout } from "@/components/simulate";
 import { Judge } from "@/components/judge";
+import { ThemeToggle } from "@/components/theme";
 import { Backdrop } from "@/components/fx/backdrop";
 
 /*
@@ -63,6 +64,8 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
   const [source, setSource] = useState("");
   const [connectError, setConnectError] = useState<string | null>(null);
   const [judge, setJudge] = useState(false);
+  const [detail, setDetailState] = useState(false); // Simple view first; Detailed adds the working
+  const setDetail = useCallback((d: boolean) => { setDetailState(d); window.scrollTo({ top: 0 }); }, []);
   const imported = useRef(false);
   const mobileNav = useRef<HTMLElement>(null);
 
@@ -156,7 +159,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
           <nav className="mt-6 grid gap-0.5" aria-label="Steps">
             <StepNav id="side" vertical step={navStep} enabled={enabled} go={go} />
           </nav>
-          <div className="mt-4 px-3">{judgeButton("h-8 w-full px-3 text-left")}</div>
+          <div className="mt-4 flex flex-col gap-2 px-3">{judgeButton("h-8 w-full px-3 text-left")}<ThemeToggle className="w-full" /></div>
           {(analysis?.company || source) && <p className="mt-6 truncate px-3 text-[12px] leading-[1.5] text-muted">{analysis?.company ?? source}</p>}
           <div className="mt-auto grid gap-3">
             <p title="Payouts use test dollars on Solana devnet" className="flex cursor-default items-center gap-2 px-3 text-[12px] leading-[1.5] text-muted"><span aria-hidden className="h-1.5 w-1.5 rounded-full bg-jade" />Test mode</p>
@@ -167,7 +170,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
         <header className="sticky top-0 z-30 bg-bg/80 backdrop-blur-md lg:hidden">
           <div className="flex h-14 items-center justify-between gap-3 px-4">
             <Link href="/" className="flex h-10 items-center" aria-label="CostShield home"><Logo size={20} /></Link>
-            {judgeButton("h-8 px-3")}
+            <span className="flex items-center gap-2"><ThemeToggle />{judgeButton("h-8 px-3")}</span>
           </div>
           <nav ref={mobileNav} className="flex gap-0.5 overflow-x-auto px-2 pb-1 [scrollbar-width:none]" aria-label="Steps">
             <StepNav id="top" step={navStep} enabled={enabled} go={go} />
@@ -183,8 +186,8 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
                 <motion.div key={view} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}>
                   {judge && analysis ? <Judge a={analysis} source={source} />
                     : step === "analyzing" ? <Analyzing stages={stages} error={error} source={source} onBack={() => go("connect")} result={analysis} />
-                    : analysis && step === "overview" ? <Overview a={analysis} onNext={() => go("protection")} />
-                    : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} />
+                    : analysis && step === "overview" ? <Overview a={analysis} onNext={() => go("protection")} detail={detail} onDetail={setDetail} />
+                    : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} detail={detail} onDetail={setDetail} />
                     : analysis && step === "simulate" ? <Simulator a={analysis} onNext={() => go("payout")} />
                     : analysis && step === "payout" ? <Payout a={analysis} />
                     : <Connect onRun={run} connectError={connectError} />}

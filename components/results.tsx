@@ -26,7 +26,35 @@ function Line({ children, className }: { children: React.ReactNode; className?: 
   return <li className={cx("py-2 text-[14px] leading-5", className)}>{children}</li>;
 }
 
-export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
+type DetailProps = { detail: boolean; onDetail: (detail: boolean) => void };
+
+/** Simple or Detailed. Simple keeps the findings and every "not available" label; Detailed adds the working behind them. */
+function DetailSwitch({ detail, onDetail }: DetailProps) {
+  return (
+    <div className="flex items-center justify-end gap-2.5 text-[12.5px] text-muted">
+      <span>View</span>
+      <div role="group" aria-label="Level of detail" className="inline-flex rounded-[8px] border border-line/[0.1] bg-panel p-0.5">
+        {[false, true].map((v) => (
+          <button key={String(v)} type="button" aria-pressed={detail === v} onClick={() => onDetail(v)}
+            className={cx("h-7 rounded-[6px] px-3 text-[12.5px] font-[510] transition-colors duration-150 ease-out", detail === v ? "bg-jade text-jade-ink" : "text-ink2 hover:text-ink")}>
+            {v ? "Detailed" : "Simple"}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StepFooter({ detail, onDetail, onNext, next }: DetailProps & { onNext: () => void; next: string }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+      <Button variant="secondary" onClick={() => onDetail(!detail)}>{detail ? "Show the simple view" : "Show the detailed analysis"}</Button>
+      <Button onClick={onNext} size="lg">{next}<Arrow /></Button>
+    </div>
+  );
+}
+
+export function Overview({ a, onNext, detail, onDetail }: { a: Analysis; onNext: () => void } & DetailProps) {
   const f = a.financials, d = a.diesel, pool = a.pool;
   const noInstrument = a.others.filter((o) => o.verdict === "no instrument");
   const small = a.others.filter((o) => o.verdict !== "no instrument");
@@ -39,13 +67,14 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
         lede={<>We analyzed {int(a.lineCount)} transactions over {f.months.length} months. {d?.material
           ? <>Fuel is {pct(d.shareOfRevenue)} of your revenue and its price is set by a market you do not control. Most of your other costs either do not follow a market or are too small to matter.</>
           : <>None of your market-driven costs is large enough against profit to justify paying for protection. Repricing or setting cash aside is the better tool.</>}</>} />
+      <DetailSwitch detail={detail} onDetail={onDetail} />
 
       <Card>
         <div className="grid grid-cols-2 gap-x-6 gap-y-7 md:grid-cols-4">
           <Stat label="Operating expenses, last 12 months" value={<CountUp value={f.expensesTtm} format={usdK} />} sub={`${usdK(f.expensesTtm / 12)} a month`} ev="C" />
           <Stat label="Revenue, last 12 months" value={<CountUp value={f.revenueTtm} format={usdK} />} ev="C" />
           <Stat label="Operating profit" value={<CountUp value={f.operatingProfitTtm} format={(v) => usd(v)} />} sub={`${pct(f.marginTtm, 1)} margin`} ev="C" />
-          <Stat label="Largest cost" value={<CountUp value={top.shareOfExpenses * 100} format={(v) => `${v.toFixed(0)}%`} />} sub={`${top.label}, concentration index ${f.hhi.toFixed(2)}`} ev="C" />
+          <Stat label="Largest cost" value={<CountUp value={top.shareOfExpenses * 100} format={(v) => `${v.toFixed(0)}%`} />} sub={detail ? `${top.label}, concentration index ${f.hhi.toFixed(2)}` : top.label} ev="C" />
         </div>
       </Card>
 
@@ -56,12 +85,12 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
             <span className="text-[12px] text-faint">Share of spending, and how much it jumps month to month</span>
           </div>
           <div className="mt-5"><ExposureColumns categories={f.categories.slice(0, 9)} market={MARKET} topTtm={top.ttm} /></div>
-          <p className="mt-4 text-[12px] leading-[1.55] text-faint">Swing is the standard deviation of monthly spend divided by its average. {pct(f.classifiedShare)} of spend was classified by rule; anything unmatched is shown as unclassified rather than guessed.</p>
+          {detail && <p className="mt-4 text-[12px] leading-[1.55] text-faint">Swing is the standard deviation of monthly spend divided by its average. {pct(f.classifiedShare)} of spend was classified by rule; anything unmatched is shown as unclassified rather than guessed.</p>}
         </Card>
       </Reveal>
 
       {d && (
-        <Reveal className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
+        <Reveal className={detail ? "grid gap-4 lg:grid-cols-[0.92fr_1.08fr]" : undefined}>
           <Card>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className={cx("text-[20px] leading-[1.15]", display)}>Diesel prices</h2>
@@ -88,7 +117,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
             <p className="mt-4 text-[12px] leading-[1.55] text-faint">Shock sizes are calculated from {d.shocks[0].basis}.<Ev e="C" /> &quot;Cost to you&quot; applies to the {pct(d.unsurchargedShare)} of gallons not covered by a surcharge.<Ev e="E" /></p>
           </Card>
 
-          <Card>
+          {detail && <Card>
             <CardTitle>Your price per gallon follows the official {d.regionLabel} diesel price</CardTitle>
             <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">
               {d.fit.method === "ledger-regression"
@@ -99,12 +128,12 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
               <LineChart height={280} x={d.monthly.map((m) => monthLabel(m.month))} yFmt={(v) => `$${v.toFixed(2)}`}
                 lines={[{ label: `EIA ${d.regionLabel} retail diesel`, color: tok("faint"), values: d.monthly.map((m) => m.index), dashed: true }, { label: "Price you paid (fuel-card lines with gallons)", color: tok("heat"), values: d.monthly.map((m) => m.pricePaid), width: 2.4 }]} />
             </div>
-          </Card>
+          </Card>}
         </Reveal>
       )}
 
-      <Reveal className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
-        {d && pool ? (
+      <Reveal className={detail ? "grid gap-4 lg:grid-cols-[1.08fr_0.92fr]" : undefined}>
+        {!detail ? null : d && pool ? (
           <Card>
             <div className="flex items-center justify-between gap-3"><CardTitle>Risk pool</CardTitle><Tag tone={pool.status === "member" ? "good" : "warn"}>{pool.status}</Tag></div>
             <p className="mt-2 break-all font-mono text-[12.5px] text-ink2">{pool.poolId}</p>
@@ -116,7 +145,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
             <div className="mt-5"><Note tone="info" title="A pool is not a policy"><span>A pool groups businesses whose payouts move on the same index, so one hedge can cover all of them. Protection also needs a liquid hedge and a licensed company to owe the payout. See the next step.</span></Note></div>
           </Card>
         ) : <div className="hidden lg:block" />}
-        <div className="grid content-start gap-4">
+        <div className={cx("grid content-start gap-4", !detail && "md:grid-cols-2")}>
           <Card>
             <CardTitle>Costs nobody can protect</CardTitle>
             <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">{pct(noInstrument.reduce((s, o) => s + o.spendTtm, 0) / f.expensesTtm)} of your spending. No index or traded instrument tracks these costs, so nobody can honestly sell you protection on them.</p>
@@ -134,7 +163,7 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
         </div>
       </Reveal>
 
-      <Reveal>
+      {detail ? <Reveal>
         <Card>
           <CardTitle>How much to trust this</CardTitle>
           <div className="mt-3 grid gap-x-10 md:grid-cols-2">
@@ -145,13 +174,13 @@ export function Overview({ a, onNext }: { a: Analysis; onNext: () => void }) {
           </div>
           <p className="mt-3 text-[12px] leading-[1.6] text-faint">Labels: <Ev e="V" /> verified public data, <Ev e="C" /> calculated from data, <Ev e="E" /> estimate, <Ev e="A" /> assumption.</p>
         </Card>
-      </Reveal>
-      <div className="flex justify-end pt-2"><Button onClick={onNext} size="lg">Protect diesel<Arrow /></Button></div>
+      </Reveal> : <p className="text-[12px] leading-[1.6] text-faint">The small letters next to numbers say where each one comes from: <Ev e="V" /> verified public data, <Ev e="C" /> calculated from data, <Ev e="E" /> estimate, <Ev e="A" /> assumption.</p>}
+      <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next="Protect diesel" />
     </div>
   );
 }
 
-export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
+export function Protection({ a, onNext, detail, onDetail }: { a: Analysis; onNext: () => void } & DetailProps) {
   const d = a.diesel, p = a.policy, bt = a.backtest, m = a.markets;
   if (!d || !p || !bt) return <Card><p className="text-sm text-muted">No protection candidate: this ledger has no material, hedgeable exposure.</p></Card>;
   const crude = m.crude;
@@ -166,8 +195,9 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
   ];
   return (
     <div className="space-y-4">
-      <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, CostShield pays you the difference.`}
+      <PageHead title={`When diesel goes above $${p.strike.toFixed(2)} a gallon, CostShield would pay you the difference.`}
         lede={`Over the last ${p.replay.length} months it would have paid you ${usd(p.totalPayout)}. It pays on the gallons you actually bought and could not pass on to customers, using the official Midwest diesel price (U.S. government data).`} />
+      <DetailSwitch detail={detail} onDetail={onDetail} />
 
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Diesel price vs. where protection starts</CardTitle><Tag tone="bad">Not available to buy</Tag></div>
@@ -203,20 +233,20 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
           <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
             <div>
               <CardTitle>What protection costs</CardTitle>
-              <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">A model price, not a quote. Hedge cost is a strip of 12 monthly call options on wholesale diesel (Black-76), divided by 0.70 to cover expenses and margin.<Ev e="A" /></p>
+              <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">A model price, not a quote.{detail && " Hedge cost is a strip of 12 monthly call options on wholesale diesel (Black-76), divided by 0.70 to cover expenses and margin."}<Ev e="A" /></p>
               <p className="mt-3 text-[13.5px] leading-[1.6] text-muted">Cover costs {(today.premium / then.premium).toFixed(1)} times more after the 2026 spike, and the strike would sit at {ppg(p.todayIndex + p.strikeOffset)}. Protection is cheapest before you need it.</p>
-              <p className="mt-3 text-[12px] leading-[1.55] text-faint">Volatility today: {m.volatility.source}<Ev e={m.volatility.evidence} /></p>
+              {detail && <p className="mt-3 text-[12px] leading-[1.55] text-faint">Volatility today: {m.volatility.source}<Ev e={m.volatility.evidence} /></p>}
             </div>
             <div className="grid content-start gap-3 sm:grid-cols-2">
               <div className={SUB}>
                 <p className="text-[13px] text-muted">If bound in {monthLabel(p.inceptionMonth)}</p>
                 <p className={cx("num mt-2 text-[28px] leading-none", display)}><CountUp value={then.premium} format={(v) => usd(v)} /></p>
-                <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(then.premiumPerGallon)} per covered gallon, wholesale {ppg(then.forward)}, {pct(then.sigma)} vol</p>
+                <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(then.premiumPerGallon)} per covered gallon{detail && <>, wholesale {ppg(then.forward)}, {pct(then.sigma)} vol</>}</p>
               </div>
               <div className={SUB}>
                 <p className="text-[13px] text-heat">If bound today</p>
                 <p className={cx("num mt-2 text-[28px] leading-none", display)}><CountUp value={today.premium} format={(v) => usd(v)} /></p>
-                <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(today.premiumPerGallon)} per covered gallon, wholesale {ppg(today.forward)}, {pct(today.sigma)} vol</p>
+                <p className="num mt-2.5 text-[12px] leading-[1.5] text-faint">{ppg(today.premiumPerGallon)} per covered gallon{detail && <>, wholesale {ppg(today.forward)}, {pct(today.sigma)} vol</>}</p>
               </div>
             </div>
           </div>
@@ -231,11 +261,11 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
             <Stat label="Average money back" value={<CountUp value={bt.burnPerGallonYear} format={ppg} />} sub="per covered gallon a year" ev="C" />
             <Stat label="Fuel cost swings removed" value={<CountUp value={bt.varianceReduction * 100} format={(v) => `${v.toFixed(0)}%`} />} sub={`${pct(bt.recoveryInBad)} of the increase recovered in bad years`} ev="C" />
           </div>
-          <div className={cx("mt-6", SUB)}>
+          {detail && <div className={cx("mt-6", SUB)}>
             <h3 className="text-[14px] font-medium text-ink">Money back per gallon, by the month protection started</h3>
             <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.6] text-muted">Each bar is one 12-month period on real {d.regionLabel} prices, with the strike {usd(p.strikeOffset, 2)} above the starting price. Most periods pay nothing. The ones that pay are the years that hurt.</p>
             <div className="mt-4"><Bars values={bt.cohorts.map((c) => c.payoutPerGallon)} labels={bt.cohorts.map((c) => c.inception.slice(0, 4))} readLabels={bt.cohorts.map((c) => monthLabel(c.inception.slice(0, 7), true))} fmt={(v) => `$${v.toFixed(2)}`} height={170} /></div>
-          </div>
+          </div>}
         </Card>
       </Reveal>
 
@@ -243,7 +273,17 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-2"><CardTitle>Can this risk actually be protected?</CardTitle><Tag tone={m.status === "live" ? "good" : "warn"}>{m.status === "live" ? `Gemini live, ${m.scanned} markets scanned` : "Gemini unavailable"}</Tag></div>
           <p className="mt-1.5 max-w-[80ch] text-[13.5px] leading-[1.6] text-muted">We test each instrument against your cost, not against a price forecast. A market that does not track what you pay is rejected even if it is the only one listed.</p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {!detail && (
+            <ul className="mt-4 grid gap-2">
+              {a.hedges.map((h) => (
+                <li key={h.name} className="flex items-center justify-between gap-4 text-[13.5px]">
+                  <span className="min-w-0 text-ink2">{h.name} <span className="text-faint">({h.venue})</span></span>
+                  <Tag tone={h.status.startsWith("viable") ? "good" : h.status === "signal only" ? "warn" : "bad"}>{h.status}</Tag>
+                </li>
+              ))}
+            </ul>
+          )}
+          {detail && <div className="mt-4 grid gap-3 md:grid-cols-2">
             {a.hedges.map((h) => {
               const viable = h.status.startsWith("viable");
               return (
@@ -256,8 +296,8 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
                 </div>
               );
             })}
-          </div>
-          {crude && (
+          </div>}
+          {detail && crude && (
             <div className={cx("mt-4 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]", SUB)}>
               <div>
                 <h3 className="text-[14px] font-medium text-ink">What the Gemini market is good for</h3>
@@ -275,7 +315,7 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
         <Card>
           <CardTitle>Who would pay you</CardTitle>
           <p className="mt-1.5 text-[13.5px] leading-[1.6] text-muted">CostShield would never owe or fund a payout itself. This is the chain a real product needs, and how much of it exists today.</p>
-          <ol className="mt-4 grid gap-3 md:grid-cols-3">
+          {detail && <ol className="mt-4 grid gap-3 md:grid-cols-3">
             {waterfall.map(([who, what, status], i) => (
               <motion.li key={who} initial={{ y: 10 }} whileInView={{ y: 0 }} viewport={{ once: true }} transition={{ duration: 0.3, delay: i * 0.06, ease: [0.2, 0.8, 0.2, 1] }}
                 className={cx("min-w-0", SUB)}>
@@ -283,11 +323,11 @@ export function Protection({ a, onNext }: { a: Analysis; onNext: () => void }) {
                 <p className="mt-3 text-[14px] font-medium text-ink">{who}</p><p className="mt-1 text-[12.5px] leading-[1.55] text-muted">{what}</p>
               </motion.li>
             ))}
-          </ol>
+          </ol>}
           <div className="mt-4"><Note tone="warn" title="Why you cannot buy this yet">{a.eligibility.reasons.join(" ")}</Note></div>
         </Card>
       </Reveal>
-      <div className="flex justify-end pt-2"><Button onClick={onNext} size="lg">See it pay out<Arrow /></Button></div>
+      <StepFooter detail={detail} onDetail={onDetail} onNext={onNext} next="See it pay out" />
     </div>
   );
 }

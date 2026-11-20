@@ -33,7 +33,7 @@
 
 ## UX specification
 
-Design intent: a business-banking product, not a trading terminal. Since the Nov 20 redesign: a dark theme driven by colour tokens in `app/globals.css`, Inter for text and Geist Mono for figures, one accent colour and one warning colour, and a simulation notice at the top of every page. The app has a sidebar with five steps (Books, Risks, Protection, What if, Payouts) and a Judge mode button. The earlier warm-paper single-page UI is on the `classic-ui` branch. Numbers use tabular figures. Evidence chips (V, C, E, A) sit next to numbers so an owner can ignore them and a judge can read them.
+Design intent: a business-banking product, not a trading terminal. Since the Nov 20 redesign: colour tokens in `app/globals.css`, Inter for text and Geist Mono for figures, dark green for action and protection, amber for risk, and a simulation notice at the top of every page. Light mode is the default; a button in the landing nav and the app sidebar switches to dark mode and the choice is kept in the browser. The app has a sidebar with five steps (Books, Risks, Protection, What if, Payouts) and a Judge mode button. Risks and Protection open in a Simple view with a switch to Detailed: Simple keeps the findings, the price, the hedge verdicts and every "not available" label; Detailed adds the index fit, the risk pool, the backtest chart, the full hedge test, the payment chain and the data-quality table. The earlier warm-paper single-page UI is on the `classic-ui` branch. Numbers use tabular figures. Evidence chips (V, C, E, A) sit next to numbers so an owner can ignore them and a judge can read them.
 
 | Screen | Purpose | Key interactions | Data it needs | Narrow screens |
 | --- | --- | --- | --- | --- |

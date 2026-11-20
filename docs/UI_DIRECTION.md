@@ -1,5 +1,7 @@
 # UI direction: dark, crafted, alive
 
+> Update, Nov 20: the theme now has a light default and an opt-in dark mode, and the accent is dark green instead of ember. The token names and roles below still apply; the colour values are in `app/globals.css`. See `docs/DECISIONS.md`.
+
 ## Revision 3 (05:00 CST): Linear-style. Overrides everything below, including Revision 2
 
 The user found Revision 2 messy and the background art stock-like. The target is the feel of linear.app: a real startup page, precise, restrained, unique in its details.

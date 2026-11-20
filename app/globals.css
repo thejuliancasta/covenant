@@ -2,10 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark theme tokens (RGB channels). Roles: docs/UI_DIRECTION.md. */
+/*
+ * Theme tokens (RGB channels). Roles: docs/UI_DIRECTION.md.
+ * Light is the default: warm paper, dark green for action and protection, amber for risk.
+ * Dark is opt-in from the theme button (components/theme.tsx sets data-theme on <html>).
+ * The accent token is still called `jade`; `accent` aliases it in tailwind.config.ts.
+ */
 :root {
+  color-scheme: light;
+  --bg: 246 245 240;       /* #f6f5f0 page, warm paper */
+  --sunken: 238 237 231;   /* #eeede7 wells */
+  --raised: 255 255 255;   /* #ffffff surfaces */
+  --panel: 250 249 246;    /* #faf9f6 inner panels */
+  --well: 240 239 233;     /* #f0efe9 inputs, tracks */
+  --ink: 20 28 26;         /* #141c1a primary text */
+  --ink2: 48 59 56;        /* #303b38 secondary text */
+  --muted: 88 99 95;       /* #58635f body */
+  --faint: 122 132 128;    /* #7a8480 metadata */
+  --line: 20 40 34;        /* borders */
+  --line-k: 1.7;           /* borders are drawn at 6 to 16 percent; paper needs them heavier */
+  --jade: 14 107 84;       /* #0e6b54 action, focus, protection in force */
+  --jade-deep: 212 234 225;
+  --jade-ink: 255 255 255; /* text on the accent */
+  --heat: 168 86 4;        /* #a85604 market-driven cost, price above a trigger */
+  --heat-deep: 250 232 205;
+  --cipher: 44 92 158;     /* #2c5c9e encrypted, private */
+  --cipher-deep: 219 230 246;
+  --rust: 184 40 44;       /* #b8282c refusal, loss */
+  --rust-deep: 250 221 221;
+  --shadow: 96 104 96;     /* drop shadows: soft on paper */
+  --page-gutter: clamp(16px, 4vw, 48px);
+}
+:root[data-theme="dark"] {
   color-scheme: dark;
-  /* Linear-style neutrals: near-black, barely cool. */
   --bg: 8 9 10;            /* #08090a page */
   --sunken: 5 6 7;         /* #050607 wells */
   --raised: 15 16 17;      /* #0f1011 surfaces */
@@ -16,19 +45,18 @@
   --muted: 138 143 152;    /* #8a8f98 body */
   --faint: 98 102 109;     /* #62666d metadata */
   --line: 255 255 255;     /* borders: use at /6 to /10 */
-  /* Accent: ember (token name kept as `jade` so existing classes keep working; `accent` aliases it). */
-  --jade: 240 138 75;      /* #f08a4b action, focus, protection in force */
-  --jade-deep: 122 52 18;  /* #7a3412 deep ember fills */
-  --jade-ink: 26 13 6;     /* text on ember */
-  --heat: 246 186 132;     /* #f6ba84 market-driven cost, price above a trigger (lighter ember) */
+  --line-k: 1;
+  --jade: 82 196 154;      /* #52c49a action, focus, protection in force */
+  --jade-deep: 14 66 50;
+  --jade-ink: 4 28 20;     /* text on the accent */
+  --heat: 246 186 132;     /* #f6ba84 market-driven cost, price above a trigger */
   --heat-deep: 110 62 26;
   --cipher: 138 169 214;   /* #8aa9d6 encrypted, private */
   --cipher-deep: 40 56 84;
   --rust: 229 72 77;       /* #e5484d refusal, loss */
   --rust-deep: 92 24 27;
-  --page-gutter: clamp(16px, 4vw, 48px);
+  --shadow: 0 0 0;
 }
-
 html { background: rgb(var(--bg)); }
 body {
   color: rgb(var(--ink));

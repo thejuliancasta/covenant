@@ -17,7 +17,7 @@ export const cx = (...xs: (string | false | null | undefined)[]) => xs.filter(Bo
 export const display = "font-[560] tracking-[-0.025em] text-ink";
 
 /** Surface classes, exported so other components can frame things the same way. */
-export const surface = "rounded-[12px] border border-line/[0.08] bg-raised shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]";
+export const surface = "rounded-[12px] border border-line/[0.08] bg-raised shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_1px_2px_rgb(var(--shadow)/0.1)]";
 /** Interactive surface: brightens its border and lifts 1 px on hover. */
 export const surfaceHover = "transition-[border-color,transform,background-color] duration-150 ease-out hover:-translate-y-px hover:border-line/[0.14]";
 

@@ -227,7 +227,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
       <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <Card className="flex flex-col">
           <div className="flex items-center justify-between gap-3"><CardTitle>Connect your accounting software</CardTitle><Tag tone="info">We only read</Tag></div>
-          <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">The owner logs in at their own software and approves access. We pull 24 months of lines and analyze them in this session. The login is not stored.</p>
+          <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">Log in to your accounting software and approve access. We read the last 24 months and analyze them in this session. The login is not stored.</p>
           {ledgers === null
             ? <p className="mt-5 text-[13px] text-muted">Checking which connections are configured…</p>
             : <motion.ul initial="hidden" animate="show" transition={{ staggerChildren: 0.06 }} className="mt-4 grid gap-3 sm:grid-cols-2">
