@@ -11,6 +11,7 @@ import {
   type Book, type GeminiEvent, type HedgeVerdict, type ImpliedDistribution, type MarketMapping, type Replication,
 } from "./gemini";
 import type { IngestReport } from "./types";
+import { connectionNote } from "@/lib/ledger/csv";
 import { sum } from "./stats";
 
 export const STAGES = [
@@ -234,7 +235,7 @@ export async function* runPipeline(csv: string, opts: PipelineOptions = {}): Asy
       ] },
       provenance: [
         { name: "Accounting ledger", source: report.format, url: "", fetchedAt: new Date().toISOString(), evidence: /synthetic|john's trucking/i.test(report.company ?? "") ? "A" : "V",
-          note: /john's trucking/i.test(report.company ?? "") ? "Synthetic sample company. Fuel prices paid are built on the real EIA Midwest index; budgets are assumptions." : "Uploaded by the user. Processed in memory and not stored." },
+          note: /john's trucking/i.test(report.company ?? "") ? "Synthetic sample company. Fuel prices paid are built on the real EIA Midwest index; budgets are assumptions." : (connectionNote(report) ?? "Uploaded by the user. Processed in memory and not stored.") },
         prov(REGIONS[region].series as keyof typeof SERIES, "Trigger index, shock table and backtest."),
         prov("diesel_us_weekly", "National backtest and wholesale relationship."),
         prov("ulsd_nyh_monthly", "Wholesale hedge proxy for Black-76 pricing."),

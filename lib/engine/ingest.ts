@@ -115,8 +115,9 @@ export function ingestCsv(text: string): { lines: LedgerLine[]; report: IngestRe
   if (!lines.length) throw new IngestError("No transactions could be read from the file.");
   const dates = lines.map((l) => l.date).sort();
   const preamble = rows.slice(0, headerRow).map((r) => r.join(" ").trim()).filter(Boolean);
+  const sourceLine = preamble.find((p) => /^source:/i.test(p));
   const report: IngestReport = {
-    format: preamble.some((p) => /transaction (detail|list)/i.test(p)) ? "QuickBooks Online report export (CSV)" : "Generic transaction CSV",
+    format: sourceLine ? sourceLine.replace(/^source:\s*/i, "") : preamble.some((p) => /transaction (detail|list)/i.test(p)) ? "QuickBooks Online report export (CSV)" : "Generic transaction CSV",
     headerRow: headerRow + 1,
     columns: Object.fromEntries(Object.keys(HEADER_ALIASES).map((k) => [k, cols[k] === undefined ? null : rows[headerRow][cols[k]].trim()])),
     rowsRead: rows.length - headerRow - 1,
