@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { Analysis } from "@/lib/engine/pipeline";
-import { backerEconomics } from "@/lib/engine/backer";
+import { backerEconomics, cohortStress } from "@/lib/engine/backer";
 import { int, pct, ppg, usd } from "@/lib/format";
 import { Card, Check, Ev, PageHead, Row, Table, Tag, cx } from "./ui";
 import { AddrLink, Encrypted, LockIcon, tusd, useChainStatus } from "./chain";
@@ -15,6 +15,9 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
   const backer = p ? backerEconomics({ months: p.coverMonths.length, maxCoveredGallonsPerMonth: p.maxCoveredGallonsPerMonth,
     maxPayoutPerGallon: 2, aggregateLimit: p.aggregateLimit, modelPremium: p.priceAtInception.premium,
     replayPayout: p.totalPayout }) : null;
+  const stress = backer && bt && p ? cohortStress({ payoutPerGallon: bt.cohorts.map((c) => c.payoutPerGallon),
+    annualGallons: p.maxCoveredGallonsPerMonth * p.coverMonths.length,
+    aggregateLimit: p.aggregateLimit, modelPremium: backer.modelPremium, reservedCapital: backer.maximumLiability }) : null;
   return (
     <div className="min-w-0 space-y-6">
       <PageHead eyebrow="Judge mode · technical view" title="How every number was produced" lede={`Source file: ${source}. Analysis generated ${a.generatedAt}. Business owners never need this screen.`} />
@@ -36,7 +39,7 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
         <Card>
           <h2 className="text-[15px] font-medium">What is real, what is simulated</h2>
           <Table head={["Component", "Status", "Detail"]} rows={[
-            ["CSV importer, classifier, statistics, pricing, backtest", <Tag key="1" tone="good">real</Tag>, "Deterministic TypeScript, 40 unit tests (31 engine, 9 ledger), runs server-side on every analysis."],
+            ["CSV importer, classifier, statistics, pricing, backtest", <Tag key="1" tone="good">real</Tag>, "Deterministic TypeScript, 43 unit tests (31 engine, 9 ledger, 3 backer), runs server-side on every analysis."],
             ["EIA price history", <Tag key="2" tone="good">real</Tag>, "Bundled snapshot of public series, fetched by scripts/fetch_eia.py."],
             ["Gemini market data", <Tag key="3" tone={m.status === "live" ? "good" : "warn"}>{m.status}</Tag>, "Public REST API, read at analysis time. No orders are placed."],
             ["Settlement program and private tUSD transfers", <Tag key="4" tone="good">real, devnet</Tag>, "Solana devnet program (Pinocchio, adapted from Equity Floor, our first idea for this hackathon, written during the event and set aside on Nov 20) with Helius Privacy Rings. Step amounts, payouts and balances are encrypted on chain. tUSD is a devnet test dollar. The earlier Arc vault in contracts/ is no longer the settlement path."],
@@ -124,8 +127,15 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
             <Row label="Payout in this historical replay">{usd(backer.replayPayout)}</Row>
             <Row label="Backer gross result in the replay" hint="Premium minus payout; excludes hedges, fees and capital cost">{usd(backer.grossResult)}</Row>
             <Row label="Gross result / maximum liability">{backer.returnOnReservedCapital === null ? "—" : pct(backer.returnOnReservedCapital, 1)}</Row>
+            {stress && <>
+              <Row label={`Mean payout across ${stress.cohorts} rolling cohorts`}>{usd(stress.meanPayout)}</Row>
+              <Row label="Mean payout / fixed model premium">{stress.lossRatio === null ? "—" : pct(stress.lossRatio, 1)}</Row>
+              <Row label="Mean gross result / reserved capital">{stress.meanReturnOnReservedCapital === null ? "—" : pct(stress.meanReturnOnReservedCapital, 1)}</Row>
+              <Row label="Cohorts whose payout exceeds premium">{stress.losingCohorts} of {stress.cohorts}</Row>
+              <Row label="Worst cohort payout">{usd(stress.worstPayout)}</Row>
+            </>}
           </div>
-          <p className="mt-3 text-xs leading-[1.55] text-faint">This is a stress illustration, not a realized return. No premium is collected, no backer pool exists, and the devnet run funds one month of steps. A real 12-month unhedged contract would need to reserve its entire maximum liability or buy a verified hedge before sale. The 131 rolling cohorts overlap and are not independent underwriting years.</p>
+          <p className="mt-3 text-xs leading-[1.55] text-faint">This is a stress illustration, not a realized return. Each historical cohort gets the same annual gallons, aggregate cap and model premium, so it does not recreate a quote at each inception date. No premium is collected, no backer pool exists, and the devnet run funds one month of steps. A real 12-month unhedged contract would need to reserve its entire maximum liability or buy a verified hedge before sale. The 131 rolling cohorts overlap and are not independent underwriting years.</p>
         </Card>}
       </>)}
 

@@ -9,7 +9,12 @@ async function main() {
   const { lenderView, validShare } = await import("../lib/chain/lender");
   const path = resolve(process.cwd(), ".solana-keys/policies.jsonl");
   const rows = readFileSync(path, "utf8").trim().split("\n");
-  const last = JSON.parse(rows[rows.length - 1]);
+  const requestedId = process.argv[2];
+  if (requestedId && !/^[0-9a-f]{16}$/.test(requestedId)) throw new Error("Expected a 16-character policy id");
+  const last = requestedId
+    ? rows.map((row) => JSON.parse(row)).findLast((row) => row.policyId === requestedId)
+    : JSON.parse(rows[rows.length - 1]);
+  if (!last) throw new Error(`Policy ${requestedId} was not recorded locally`);
   const share = { policyId: last.policyId, region: "PADD2", period: last.period, steps: last.steps };
   if (!validShare(share)) throw new Error("Last local policy record is invalid");
   const result = await lenderView(share);

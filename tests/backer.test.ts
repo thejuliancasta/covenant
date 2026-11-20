@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { backerEconomics } from "@/lib/engine/backer";
+import { backerEconomics, cohortStress } from "@/lib/engine/backer";
 
 describe("full-term backer exposure", () => {
   it("reserves the smaller of the aggregate cap and the sum of monthly maxima", () => {
@@ -19,4 +19,16 @@ describe("full-term backer exposure", () => {
       aggregateLimit: 0, modelPremium: 0, replayPayout: 0 });
     expect(empty.returnOnReservedCapital).toBeNull();
   });
+});
+
+it("caps each cohort payout and exposes loss ratios without treating overlapping cohorts as realized years", () => {
+  const x = cohortStress({ payoutPerGallon: [0, 0.5, 2], annualGallons: 1000,
+    aggregateLimit: 1500, modelPremium: 400, reservedCapital: 1500 });
+  expect(x.cohorts).toBe(3);
+  expect(x.meanPayout).toBeCloseTo(2000 / 3);
+  expect(x.lossRatio).toBeCloseTo(5 / 3);
+  expect(x.losingCohorts).toBe(2);
+  expect(x.worstPayout).toBe(1500);
+  expect(x.meanReturnOnReservedCapital).toBeCloseTo((400 - 2000 / 3) / 1500);
+  expect(() => cohortStress({ payoutPerGallon: [NaN], annualGallons: 1, aggregateLimit: 1, modelPremium: 1, reservedCapital: 1 })).toThrow();
 });

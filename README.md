@@ -84,6 +84,8 @@ These commands are for the team's machine. They need a Helius devnet API key in 
 npm run solana:setup   # idempotent: wallets, devnet SOL, tUSD mint and Rings registration, private deposits
 npm run solana:e2e     # one settlement end to end; prints Explorer links
 npm run solana:verify-latest # read-only lender verification of the last local policy
+npm run solana:verify-latest -- <policy-id> # verify a specific recovered policy
+npm run solana:recover -- <policy-id> # dry-run recovery; add --execute to resume open steps
 ```
 
 Secrets live in `.env.local` (Helius devnet API key) and `.solana-keys/` (wallet keypairs). Both are gitignored. Never commit them. Public addresses (program id, mint, role wallets) are written to `deployments/solana-devnet.json`, which is committed and read by the app.
@@ -215,7 +217,7 @@ Covenant places no orders and Gemini markets do not settle the program.
 - **Premium and who pays whom.** No premium is collected, on chain or off. The program has no premium instruction, the fleet pays nothing, and the underwriter funds the steps with its own test dollars. The premium on screen is a model price. Its 30% load is the only allowance for a carrier's costs and margin, and no fee for Covenant is modelled. In a real programme the fleet would pay the premium to a licensed carrier, and none has agreed to that.
 - **Maximum loss.** The underwriter's loss on a policy month is capped at the 8 funded steps: $2.00 per gallon times covered gallons. A month above `K + $2.00` pays no more. The on-chain demo policy funds one month's steps.
 - **Upgrade authority.** The program is upgradeable. One team wallet, the one that deployed it (`84ZgVXHPfpYML8E3o63aLqMo69Z4A6o4cxUY4r7xuWRE`), can replace its code. A production program would give that up or put it behind a multisig.
-- **Unfinished runs.** Nothing on chain expires. If a settlement run stops midway, the remaining steps stay open and funded. One devnet policy (`2c7cb8f46c1f57c2`) was in that state when read at 4:25 AM Central on Nov 20: 3 steps paid, 5 open. Releasing or reclaiming them needs each step's vault key, which the server that ran the settlement keeps on its own disk. There is no recovery tool.
+- **Interrupted runs.** Nothing on chain expires. If a settlement run stops midway, the remaining steps stay open and funded. `solana:recover` checks the saved viewing keys, onchain step accounts and oracle report before resuming; its default is a read-only plan. Policy `2c7cb8f46c1f57c2` was recovered on Nov 20: four remaining steps released to the fleet and one reclaimed to the underwriter. A read-only lender check then found 5,794.53 tUSD funded and 5,070.22 tUSD paid, matching 7 of 8 public paid flags. Recovery still depends on the original local keys.
 - **Money.** tUSD devnet test dollars at 1 tUSD = $1. No real funds.
 
 More in [docs/MODEL.md](docs/MODEL.md) and [docs/LIMITATIONS.md](docs/LIMITATIONS.md).

@@ -24,3 +24,34 @@ export function backerEconomics(input: {
     premiumToMaximumLiability: maximumLiability > 0 ? modelPremium / maximumLiability : null,
   };
 }
+
+/** Stress the same illustrative contract against each rolling historical cohort.
+ * Holds the quoted premium and covered annual gallons fixed; this is not a
+ * historical underwriting track record or a forecast.
+ */
+export function cohortStress(input: {
+  payoutPerGallon: number[];
+  annualGallons: number;
+  aggregateLimit: number;
+  modelPremium: number;
+  reservedCapital: number;
+}) {
+  const { payoutPerGallon, annualGallons, aggregateLimit, modelPremium, reservedCapital } = input;
+  if (!payoutPerGallon.length || !payoutPerGallon.every((x) => Number.isFinite(x) && x >= 0)
+    || ![annualGallons, aggregateLimit, modelPremium, reservedCapital].every((x) => Number.isFinite(x) && x >= 0)) {
+    throw new Error("Invalid cohort stress inputs");
+  }
+  const payouts = payoutPerGallon.map((x) => Math.min(aggregateLimit, x * annualGallons));
+  const meanPayout = payouts.reduce((a, b) => a + b, 0) / payouts.length;
+  const worstPayout = Math.max(...payouts);
+  const losingCohorts = payouts.filter((x) => x > modelPremium).length;
+  return {
+    cohorts: payouts.length,
+    meanPayout,
+    worstPayout,
+    lossRatio: modelPremium > 0 ? meanPayout / modelPremium : null,
+    meanGrossResult: modelPremium - meanPayout,
+    meanReturnOnReservedCapital: reservedCapital > 0 ? (modelPremium - meanPayout) / reservedCapital : null,
+    losingCohorts,
+  };
+}

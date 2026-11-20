@@ -2,7 +2,7 @@
 
 ## What works
 
-- CSV import, rule-based classification, exposure statistics, pool classification, Black-76 pricing, cohort backtest, scenario arithmetic and policy replay. 42 unit tests: 31 for the engine, 9 for the ledger import and sign-in mapping, 2 for hypothetical backer economics.
+- CSV import, rule-based classification, exposure statistics, pool classification, Black-76 pricing, cohort backtest, scenario arithmetic and policy replay. 43 unit tests: 31 for the engine, 9 for the ledger import and sign-in mapping, 3 for hypothetical backer economics.
 - Live Gemini Prediction Markets data: discovery, suitability screens, implied distribution and ladder replication.
 - Ledger sign-in code for QuickBooks Online, Xero, Zoho Books and FreshBooks (`lib/ledger/`, `/api/connect/*`). It is unit-tested against mocked provider responses: QuickBooks end to end (token, company and transaction list), the other three for line mapping only. It has not been verified against a live provider account. The demo has no provider keys, so the Books screen shows one line saying sign-in is built but switched off. CSV upload is the working path.
 - A settlement program on Solana devnet with Helius Privacy Rings, and a server flow that opens a policy as a ladder of steps, funds the steps privately, posts the oracle report, releases triggered steps to the fleet, and shows the refused attempts. A lender page decrypts the steps with read-only viewing keys.
@@ -10,7 +10,7 @@
 
 ## What is simulated
 
-- **Backer economics.** Judge mode shows the full-year maximum liability, model premium, replay payout and gross result. No backer pool, LP shares or onchain premium collection is built. The devnet policy funds only one month; it does not reserve a full year's maximum liability. The 131 rolling 12-month cohorts overlap and do not independently validate an underwriter return.
+- **Backer economics.** Judge mode shows the full-year maximum liability, model premium, replay payout and gross result, plus a stress calculation over the 131 rolling historical cohorts. The cohort calculation holds maximum annual gallons and the model premium fixed across history; it is not a historical quote or realized return. No backer pool, LP shares or onchain premium collection is built. The devnet policy funds only one month; it does not reserve a full year's maximum liability. The cohorts overlap and do not independently validate an underwriter return.
 - **Lender availability.** Its read-only check depends on Solana RPC and the Privacy Rings indexer. Sequential reads and retries reduce transient rate-limit failures, but the page cannot verify a vault while those services are unavailable.
 
 - **The sample company.** Synthetic. Fuel prices paid are built from the real EIA Midwest index plus seeded noise, so its R² to the index reflects the generator, not a real fleet.
@@ -33,7 +33,7 @@
 - **Explorer support.** Privacy Rings uses v1 transactions. Some explorers and RPC clients cannot render them yet.
 - **Write-once reports are global.** One report per index and month. A rerun of the demo reuses the report already on chain and says so.
 - **Upgradeable program.** One team wallet, the one that deployed the program (`84ZgVXHPfpYML8E3o63aLqMo69Z4A6o4cxUY4r7xuWRE`), holds the upgrade authority and can replace the code.
-- **Unfinished runs stay open.** Nothing on chain expires. A settlement run that stops midway leaves its remaining steps open and funded, and releasing or reclaiming them needs each step's vault key, which only the server that ran it keeps. One devnet policy (`2c7cb8f46c1f57c2`) had 3 steps paid and 5 open when read on Nov 20. There is no recovery tool.
+- **Interrupted runs need local recovery.** Nothing on chain expires. A settlement run that stops midway leaves its remaining steps open and funded. `npm run solana:recover -- <policy id>` reads the locally saved vault keys, checks each open step against its onchain report and decrypted balance, and prints a recovery plan without sending transactions. Adding `--execute` resumes release or reclaim for open funded steps. On Nov 20 this recovered policy `2c7cb8f46c1f57c2`: four remaining steps released to the fleet, one reclaimed to the underwriter, and the lender recheck found 7 of 8 paid and 5,070.22 tUSD paid. Recovery requires the original `.solana-keys/policies.jsonl` and both demo role signing keys. It cannot recover a lost viewing key, and it does not make the contract self-custodial.
 - **No settlement without the team's keys.** A server that lacks them, including the hosted demo, shows the replay and no settle button. For the sample fleet the payout screen says "This settlement ran on Solana devnet" and links the team's Nov 20 devnet transactions; it does not send a new payment. The amount it shows in 25-cent steps is worked out from the public price and the fleet's gallons, because the on-chain amounts are encrypted. Settlement has run only from a team machine; the README lists the devnet transactions.
 
 ## What was not built
