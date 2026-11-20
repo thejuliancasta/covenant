@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import type { Analysis } from "@/lib/engine/pipeline";
-import { DEFAULT_EXPLORER, type SettlementEvent, type SettlementResult } from "@/lib/chain/types";
+import { DEFAULT_EXPLORER, txUrl, type SettlementEvent, type SettlementResult } from "@/lib/chain/types";
 import { scenario } from "@/lib/engine/payout";
 import { priceCap } from "@/lib/engine/pricing";
 import { int, monthLabel, pct, ppg, readNdjson, usd } from "@/lib/format";
@@ -21,7 +21,9 @@ import { PriceVsTrigger } from "./fx/price-vs-trigger";
 
 export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
   const d = a.diesel!, p = a.policy!;
-  const [rise, setRise] = useState(0.6);
+  const sep = p.replay.find((r) => r.month === p.settlement.month);
+  const likeSettle = sep ? Math.round((sep.index - p.inceptionIndex) * 20) / 20 : 2.5; // opens on this scenario
+  const [rise, setRise] = useState(Math.min(3, likeSettle));
   const [gallons, setGallons] = useState(Math.round(d.gallonsTtm / 12 / 10) * 10);
   const [share, setShare] = useState(p.coveredShare);
   const [offset, setOffset] = useState(p.strikeOffset);
@@ -31,8 +33,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
 
   const price = useMemo(() => priceCap({ forward: p.priceToday.forward, strikeOffset: offset, sigma: vol, monthlyGallons: Array(12).fill(gallons * share), hedgeRatio: a.wholesale.slopeAnnual }), [p, offset, vol, gallons, share, a.wholesale.slopeAnnual]);
   const s = scenario({ gallonsPerMonth: gallons, coveredShare: share, priceRise: rise, strikeOffset: offset, premiumPerMonth: price.premiumPerMonth, basisStd });
-  const sep = p.replay.find((r) => r.month === p.settlement.month);
-  const presets: [string, number][] = [["60 cents", 0.6], ["A bad year (once in 20 years)", Math.round(d.avgPricePaidTtm * d.shocks[1].pct * 20) / 20], [`Like ${monthLabel(p.settlement.month, true)}`, sep ? Math.round((sep.index - p.inceptionIndex) * 20) / 20 : 2.5]];
+  const presets: [string, number][] = [["60 cents", 0.6], ["A bad year (once in 20 years)", Math.round(d.avgPricePaidTtm * d.shocks[1].pct * 20) / 20], [`Like ${monthLabel(p.settlement.month, true)}`, likeSettle]];
   const max = Math.max(s.extraCost, 1);
   const w = (v: number) => `${Math.max(0, Math.min(100, (v / max) * 100))}%`;
   const plates = plateBounds(offset, 3);
@@ -44,7 +45,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
   const line = (label: string, value: number, tone: string, note?: string) => (
     <li className="flex min-w-0 items-baseline gap-3">
       <span aria-hidden className="w-4 shrink-0 text-[15px] text-faint">→</span>
-      <span className="min-w-0 text-[17px] leading-[1.45] text-ink2 sm:text-[19px]">
+      <span className="min-w-0 text-[15px] leading-[1.45] text-ink2 sm:text-[16px]">
         {label} <span className={cx("num font-[550]", tone)}>{usd(value)}</span>{note && <span className="text-[14px] text-muted"> {note}</span>}
       </span>
     </li>
@@ -58,10 +59,10 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
 
         <Card>
           <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
-            <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="text-[19px] text-ink2 sm:text-[22px]">If diesel rises by</span>
-              <Rolling text={`$${rise.toFixed(2)}`} className="text-[40px] font-[550] tracking-[-0.03em] text-heat sm:text-[48px]" />
-              <span className="text-[19px] text-ink2 sm:text-[22px]">a gallon</span>
+            <p className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+              <span className="text-[17px] text-ink2 sm:text-[19px]">If diesel rises by</span>
+              <Rolling text={`$${rise.toFixed(2)}`} className="text-[26px] font-[550] tracking-[-0.02em] text-heat sm:text-[30px]" />
+              <span className="text-[17px] text-ink2 sm:text-[19px]">a gallon</span>
             </p>
             <div role="group" aria-label="Examples" className="flex flex-wrap gap-1">
               {presets.map(([l, v]) => <PresetChip key={l} on={Math.abs(rise - Math.min(3, v)) < 1e-9} onClick={() => setRise(Math.min(3, v))}>{l}</PresetChip>)}
@@ -71,10 +72,24 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
           <PriceRiseControl className="mt-6" value={rise} onChange={setRise} offset={offset} label="How much diesel rises, per gallon"
             valueText={`diesel up $${rise.toFixed(2)} a gallon; CostShield would pay you ${usd(s.payout)}`} />
 
-          <ol className="mt-7 space-y-2" aria-live="polite">
+          {/* The answer: what the month costs with protection, next to what it costs without. */}
+          <div className="mt-8" aria-live="polite">
+            <div className="flex flex-wrap items-end gap-x-4 gap-y-4 sm:gap-x-10">
+              <div>
+                <p className="text-[15px] leading-5 text-ink2">You&apos;re out</p>
+                <Rolling text={usd(s.unhedged)} className="mt-1 text-[44px] font-[560] tracking-[-0.035em] text-ink sm:text-[72px]" />
+              </div>
+              <div className="pb-1 sm:pb-2.5">
+                <p className="num text-[24px] font-[550] leading-none tracking-[-0.02em] text-heat sm:text-[32px]">{usd(s.exposedCost)}</p>
+                <p className="mt-1.5 text-[14px] leading-5 text-muted">without protection</p>
+              </div>
+            </div>
+            <p className="mt-3 text-[13px] leading-[1.5] text-muted">That month, before what protection costs: about <span className="num text-ink2">{usd(s.premium)}</span> a month if bought today<Ev e="A" />.</p>
+          </div>
+
+          <ol className="mt-6 space-y-2">
             {line("your fuel bill rises", s.extraCost, "text-ink", s.passedThrough > 0 ? `(your fuel surcharges pass ${usd(s.passedThrough)} of it to customers)` : undefined)}
             {line("CostShield would pay you back", s.payout, "text-jade", s.payout === 0 && rise > 0 ? `(the rise is still under the ${usd(offset, 2)} you cover yourself)` : undefined)}
-            {line("you're out only", s.unhedged, "text-ink", `instead of ${usd(s.exposedCost)}`)}
           </ol>
 
           <div className="mt-7 text-[13px]">
@@ -109,7 +124,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
               <Row label="Left for you to pay"><span className="text-heat">{usd(s.exposedCost)}</span></Row>
               <Row label="CostShield would pay you back" hint={`($${rise.toFixed(2)} − $${offset.toFixed(2)}, if above zero) × ${int(gallons * share)} protected gallons`}><span className="text-jade">−{usd(s.payout)}</span></Row>
               <Row label="You're out" hint={`${pct(s.offsetShare)} of the hit would be paid back`}>{usd(s.unhedged)}</Row>
-              <Row label="What protection costs this month" hint={`Estimated price: ${usd(price.premium)} a year, ${ppg(price.premiumPerGallon)} per protected gallon`}>{usd(s.premium)}<Ev e="A" /></Row>
+              <Row label="What protection costs this month, if bought today" hint={`Estimated price: ${usd(price.premium)} a year, ${ppg(price.premiumPerGallon)} per protected gallon`}>{usd(s.premium)}<Ev e="A" /></Row>
               <Row label={<span className="font-medium text-ink">Effect on profit this month</span>} hint={`Without protection: ${usd(s.netWithoutCover)}`}><span className="text-base">{usd(s.net)}</span></Row>
             </div>
             <div className="mt-4"><Note tone="info" title="Your pump price can differ from the official price">CostShield would pay on the official Midwest diesel price (U.S. government data), not your pump price. Yours differs by about ±{ppg(basisStd)} a gallon in a typical month<Ev e={d.fit.method === "ledger-regression" ? "C" : "A"} />, so the real effect on {int(gallons * share)} gallons could be about {usd(s.basisBand)} better or worse (95% range).</Note></div>
@@ -124,18 +139,42 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
 
 /* ------------------------------------------------------------------ payout and private settlement */
 
+/** Gallons as the maths uses them, so a written-out sum can be checked by hand. */
+const gal2 = (g: number) => g.toLocaleString("en-US", { maximumFractionDigits: 2 });
+
+/**
+ * The team's devnet settlement of the sample fleet's September 2026, run on Nov 20, 2026 at 3:12 AM Central.
+ * Copied from the README ("Deployed program"); keep the two in step. It is the sample fleet's month only:
+ * the screen claims "this settlement ran" for the sample fleet and that month, and for nothing else.
+ */
+const README_URL = "https://github.com/thejuliancasta/orange-cat#deployed-program";
+const EARLIER_RUN = {
+  month: "2026-09", when: "Nov 20, 2026 at 3:12 AM Central",
+  txs: [
+    ["eight chunks opened", "5EcVnVPwuLLKudQEhm5p4nErLGkFS29vx7Jo6thwrHDR1nJuWGPDS5xKrPHzF5EaQHLjgDg8hxK2ZDBenrF5Y7jL"],
+    ["official price posted", "3FYhzywtKP1hmRxN1Y1BmsBaaoW3YWiKugKndctb5A8NcbVKVcT7M1jAPKwoFvgHqkczNYVmhsCPSues4wca8a2Z"],
+    ["first chunk paid privately", "2wTYb5MjiCKCWLNA6FVrnufXAWsfmhyCBhAimbWnjFXFCQnXrEsm61zHstiz5z6ZvgiXycqujN2HRQKngPC7pC9S"],
+    ["unused chunk returned to the backer", "3zZyVtP2HHdRU5am7YRaddypcjYYebUfpF3KgHy26tUWT3V71iPPTi9rbar4L8gNwuABrnMaxiNyJEL3LKftHP7j"],
+  ] as [string, string][],
+};
+const LINK = "text-jade underline decoration-jade/40 underline-offset-2 hover:decoration-jade";
+
 /** Defaults from docs/SOLANA_PORT.md. The server's result is authoritative once a settlement has run. */
 const DEFAULT_STEP = 0.25, LADDER_TOP = 2;
 
-/** The linear cap rounded down to whole steps: step i pays when index >= strike + i x step. */
+/**
+ * The linear cap rounded down to whole steps: step i pays when index >= strike + i x step.
+ * Triggers round up to a tenth of a cent, as lib/chain/server.ts and the landing page do.
+ */
 function ladder(index: number, strike: number, step: number, gallons: number) {
   const count = Math.round(LADDER_TOP / step);
-  const triggers = Array.from({ length: count }, (_, i) => Math.round((strike + (i + 1) * step) * 1000) / 1000);
+  const triggers = Array.from({ length: count }, (_, i) => Math.ceil(Math.round((strike + (i + 1) * step) * 1e6) / 1000) / 1000);
   const hit = triggers.filter((t) => index >= t - 1e-9).length;
   return { count, triggers, hit, perStep: step * gallons, total: hit * step * gallons };
 }
 
-export function Payout({ a }: { a: Analysis }) {
+/** `sample` is true only for the bundled sample fleet, the one ledger the team settled on devnet. */
+export function Payout({ a, sample = false }: { a: Analysis; sample?: boolean }) {
   const d = a.diesel!, p = a.policy!;
   const company = a.company?.trim() || "Your business";
   const { status: st, failed, reload } = useChainStatus();
@@ -180,19 +219,46 @@ export function Payout({ a }: { a: Analysis }) {
   const net = p.totalPayout - p.priceAtInception.premium * (p.replay.length / 12);
   const month = monthLabel(p.settlement.month, true);
   const canRun = !!st?.configured && !running;
+  // The chart opens on the settlement month, not on the month that happened to pay most.
+  const settleIdx = p.replay.findIndex((r) => r.month === p.settlement.month);
+  const [chartMonth, setChartMonth] = useState<number | undefined>(settleIdx >= 0 ? settleIdx : undefined);
+  const off = !!st && !st.configured; // this server cannot settle (the hosted demo holds no keys)
+  const ranEarlier = sample && p.settlement.month === EARLIER_RUN.month; // the team's devnet run was this ledger and this month
+  const settled = !!result || ranEarlier;
+  const paidSteps = result ? result.steps.filter((s) => s.paid).length : plan.hit;
+  const allSteps = result ? result.steps.length : plan.count;
+  const cents = Math.round(stepSize * 100);
+  const earlierLinks = EARLIER_RUN.txs.map(([label, sig], i) => <span key={sig}>{i > 0 && ", "}<a href={txUrl(DEFAULT_EXPLORER, sig)} target="_blank" rel="noreferrer" className={LINK}>{label}</a></span>);
 
   return (
     <MotionConfig reducedMotion="user">
       <div className="space-y-6">
         <PageHead eyebrow={st?.configured ? "Real prices, your gallons, a real Solana payment in test dollars" : "Real prices and your gallons, replayed. Nobody sold this policy"}
           title={result ? <>CostShield paid {company} {usd(result.payoutUsd)} in test dollars, privately.</> : <>Replay a real price spike: {month}</>}
-          lede={<>Suppose {company} had bought protection in {monthLabel(p.inceptionMonth, true)}, when the official Midwest diesel price (U.S. government data) was {ppg(p.inceptionIndex)}. We replay the real prices against the gallons in its books. {st?.configured ? <>Then {month} is paid for real, in test dollars, on Solana&apos;s test network.</> : <>This server cannot send the test payment for {month}; the note below says why.</>}</>} />
+          lede={<>Suppose {company} had bought protection in {monthLabel(p.inceptionMonth, true)}, when the official Midwest diesel price (U.S. government data) was {ppg(p.inceptionIndex)}. We replay the real prices against the gallons in its books. {st?.configured ? <>Then {month} is paid for real, in test dollars, on Solana&apos;s test network.</> : ranEarlier ? <>The team settled {month} on Solana&apos;s test network, in test dollars; the transactions are linked below.</> : <>This demo server does not send test payments; the sample fleet&apos;s devnet settlement is linked below.</>}</>} />
 
         <div className="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <Card>
             <h2 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Diesel price each month, and where protection starts</h2>
             <div className="mt-3">
-              <PriceVsTrigger months={p.replay.map((r) => ({ label: monthLabel(r.month), price: r.index, payout: r.payout }))} trigger={p.strike} />
+              <PriceVsTrigger months={p.replay.map((r) => ({ label: monthLabel(r.month), price: r.index, payout: r.payout }))} trigger={p.strike} selected={chartMonth} onSelect={setChartMonth} />
+            </div>
+            {/* The settlement month counted two ways: the replay's formula, and what the program pays. */}
+            <div className="mt-5 border-t border-line/[0.08] pt-5">
+              <p className="text-[13px] leading-5 text-muted">{month}, counted two ways</p>
+              <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-4">
+                <div className="min-w-0">
+                  <p className="flex min-h-10 items-end text-[13px] leading-5 text-ink2 sm:min-h-0">Historical replay</p>
+                  <p className="num mt-1 text-[30px] font-[560] leading-none tracking-[-0.03em] text-ink sm:text-[36px]">{usd(linear)}</p>
+                  <p className="mt-2 text-[12px] leading-[1.45] text-faint">Every cent above the line, on {int(gallons)} protected gallons</p>
+                </div>
+                <div className="min-w-0">
+                  <p className="flex min-h-10 items-end text-[13px] leading-5 text-ink2 sm:min-h-0">{settled ? "Settled" : "Settles"} in {cents}-cent steps</p>
+                  <p className="num mt-1 text-[30px] font-[560] leading-none tracking-[-0.03em] text-jade sm:text-[36px]">{usd(stepped)}</p>
+                  <p className="mt-2 text-[12px] leading-[1.45] text-faint">{paidSteps} of {allSteps} steps × {usd(plan.perStep, 2)}{result ? ", from the settlement result" : ", worked out from the public price"}</p>
+                </div>
+              </div>
+              <p className="mt-4 max-w-[70ch] text-[13px] leading-[1.55] text-muted">The Solana program can&apos;t read encrypted amounts, so it pays one full step (a {cents}-cent chunk) for every {cents} cents the price climbed above the line{linear - stepped < 0.5 ? "" : index - strike > LADDER_TOP ? `; ${usd(linear - stepped)} isn't paid: the part past the last full step, and anything above ${ppg(strike + LADDER_TOP)}` : `; the last ${usd(linear - stepped)} didn't fill a step and isn't paid`}.</p>
             </div>
           </Card>
           <Card>
@@ -219,16 +285,24 @@ export function Payout({ a }: { a: Analysis }) {
         <section className="pt-10">
           <div className="flex flex-wrap items-start justify-between gap-5">
             <div className="max-w-2xl">
-              <h2 className="text-[24px] font-[550] leading-[1.1] tracking-[-0.025em] text-ink sm:text-[30px]">Settle {month} privately on Solana devnet</h2>
+              <h2 className="text-[24px] font-[550] leading-[1.1] tracking-[-0.025em] text-ink sm:text-[30px]">{!off ? <>Settle {month} privately on Solana devnet</> : ranEarlier ? <>{month}, settled privately on Solana devnet</> : <>How {month} would settle privately on Solana devnet</>}</h2>
               <p className="mt-3 text-[14px] leading-[1.55] text-muted">The backer sets the money aside in advance. The official price is posted on the blockchain with a fingerprint of the government data file. A Solana program checks the price, and only {company} can collect. Amounts stay encrypted. Money is test dollars: 1 test dollar = $1, nothing scaled.</p>
-              <p className="mt-2 text-[13px] text-ink2">Test mode: paid in test dollars on Solana devnet. No wallet needed.</p>
+              {!off && <p className="mt-2 text-[13px] text-ink2">Test mode: paid in test dollars on Solana devnet. No wallet needed.</p>}
             </div>
-            <SettleButton onClick={settle} disabled={!canRun} running={running} again={!!result} />
+            {st?.configured && <SettleButton onClick={settle} disabled={!canRun} running={running} again={!!result} />}
           </div>
 
           {!st && !failed ? <p className="mt-5 text-[13px] text-muted">Checking the settlement program on Solana devnet…</p>
             : !st ? <div className="mt-5"><Note tone="warn" title="Could not read the settlement status">{failed} The replay and the step plan below are unaffected. Nothing has been sent on chain.</Note></div>
-            : !st.configured ? <div className="mt-5"><Note tone="warn" title="Private settlement is not configured on this server">{st.reason ?? "The server did not say why."} The replay and the step plan below are unaffected. Nothing has been sent on chain, and no payout is shown until one settles.</Note></div>
+            : !st.configured ? <div className="mt-5">{ranEarlier
+                ? <Note tone="good" title="This settlement ran on Solana devnet">
+                    The team ran it on {EARLIER_RUN.when}, in test dollars. See it on Solana Explorer: {earlierLinks}. Explorer shows who signed and that a private transfer happened, not the amounts.
+                    <span className="mt-2 block">This demo server holds no keys, so it does not send the payment again: nothing here is a new payout. The full list of transactions is in the <a href={README_URL} target="_blank" rel="noreferrer" className={LINK}>README</a>, and Judge mode says what this server is missing.</span>
+                  </Note>
+                : <Note tone="warn" title="This demo server does not settle your month">
+                    It holds no keys, so nothing has been sent on chain for this ledger and no payout is shown. The replay and the step plan are unaffected.
+                    <span className="mt-2 block">The same settlement ran on Solana devnet for the sample fleet&apos;s {monthLabel(EARLIER_RUN.month, true)}, on {EARLIER_RUN.when}, in test dollars: {earlierLinks}. Explorer shows who signed and that a private transfer happened, not the amounts. The full list is in the <a href={README_URL} target="_blank" rel="noreferrer" className={LINK}>README</a>, and Judge mode says what this server is missing.</span>
+                  </Note>}</div>
             : (
               <div className="mt-8">
                 <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-[13px] md:grid-cols-3 lg:grid-cols-6">
@@ -250,7 +324,7 @@ export function Payout({ a }: { a: Analysis }) {
             </div>
             <div className="min-w-0">
               <h3 className="mb-3 text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">What happens on Solana, live</h3>
-              <EventLog steps={steps} explorer={explorer} empty={st?.configured ? "Each step appears here as Solana devnet confirms it, with its transaction." : "Nothing has been sent on chain."} />
+              <EventLog steps={steps} explorer={explorer} empty={st?.configured ? "Each step appears here as Solana devnet confirms it, with its transaction." : off ? "Nothing has been sent on chain from this server." : "Nothing has been sent on chain."} />
               {err && <ErrorBanner message={err} />}
             </div>
           </div></Card>
@@ -260,9 +334,9 @@ export function Payout({ a }: { a: Analysis }) {
               <h3 className="text-[15px] font-medium leading-6 tracking-[-0.01em] text-ink">Why the money comes in {Math.round(stepSize * 100)}-cent chunks</h3>
               <span className="text-xs text-faint">{result ? "from the settlement result" : `expected, at the default ${usd(stepSize, 2)} step`}</span>
             </div>
-            <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.55] text-muted">The Solana program can&apos;t read encrypted amounts, so it can&apos;t work out the exact amount owed. Instead the money is split into {plan.count} chunks up to {ppg(strike + LADDER_TOP)}. Each chunk holds {usd(stepSize, 2)} × {int(gallons)} gallons = {usd(plan.perStep, 2)}, set aside in advance, and pays when the official price reaches its level. The program only compares public prices; it never needs to see an amount.</p>
+            <p className="mt-1.5 max-w-[80ch] text-[13px] leading-[1.55] text-muted">The Solana program can&apos;t read encrypted amounts, so it can&apos;t work out the exact amount owed. Instead the money is split into {plan.count} chunks up to {ppg(strike + LADDER_TOP)}. Each chunk holds {usd(stepSize, 2)} × {gal2(gallons)} gallons = {usd(plan.perStep, 2)}, set aside in advance, and pays when the official price reaches its level. The program only compares public prices; it never needs to see an amount.</p>
             <div className="mt-4 grid gap-4 text-[13px] sm:grid-cols-3">
-              <div><p className="text-xs text-muted">Every cent above the line</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-ink">{usd(linear, 2)}</p><p className="mt-1.5 text-xs text-faint">({ppg(index)} − {ppg(strike)}) × {int(gallons)} gal</p></div>
+              <div><p className="text-xs text-muted">Every cent above the line</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-ink">{usd(linear, 2)}</p><p className="mt-1.5 text-xs text-faint">({ppg(index)} − {ppg(strike)}) × {gal2(gallons)} gal</p></div>
               <div><p className="text-xs text-muted">Paid in chunks</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-jade">{usd(stepped, 2)}</p><p className="mt-1.5 text-xs text-faint">{result ? result.steps.filter((s) => s.paid).length : plan.hit} of {result ? result.steps.length : plan.count} chunks × {usd(plan.perStep, 2)}</p></div>
               <div><p className="text-xs text-muted">Difference</p><p className="num mt-1 text-[24px] font-[550] leading-none tracking-[-0.03em] text-ink">{usd(Math.max(0, linear - stepped), 2)}</p><p className="mt-1.5 text-xs text-faint">Rounded down to the chunk{index - strike > LADDER_TOP ? `, and nothing above ${ppg(strike + LADDER_TOP)}` : ""}</p></div>
             </div>

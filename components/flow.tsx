@@ -7,7 +7,7 @@ import { readNdjson } from "@/lib/format";
 import { SimBanner, cx } from "@/components/ui";
 import { SPRING_UI } from "@/components/fx/motion";
 import { Logo } from "@/components/brand/logo";
-import { Connect, Analyzing, type StageView } from "@/components/onboarding";
+import { Connect, Analyzing, SAMPLE_LABEL, type StageView } from "@/components/onboarding";
 import { Overview, Protection } from "@/components/results";
 import { Simulator, Payout } from "@/components/simulate";
 import { Judge } from "@/components/judge";
@@ -26,7 +26,6 @@ const NAV: { id: Step; label: string }[] = [
   { id: "simulate", label: "What if" }, { id: "payout", label: "Payouts" },
 ];
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const SAMPLE_LABEL = "Sample fleet (synthetic data)";
 
 /** Step list. A short ember mark slides to the active step; steps that need a result say so. */
 function StepNav({ step, enabled, go, id, vertical }: { step: Step; enabled: (s: Step) => boolean; go: (s: Step) => void; id: string; vertical?: boolean }) {
@@ -189,7 +188,7 @@ export default function Flow({ initial = "connect" }: { initial?: Step }) {
                     : analysis && step === "overview" ? <Overview a={analysis} onNext={() => go("protection")} detail={detail} onDetail={setDetail} />
                     : analysis && step === "protection" ? <Protection a={analysis} onNext={() => go("simulate")} detail={detail} onDetail={setDetail} />
                     : analysis && step === "simulate" ? <Simulator a={analysis} onNext={() => go("payout")} />
-                    : analysis && step === "payout" ? <Payout a={analysis} />
+                    : analysis && step === "payout" ? <Payout a={analysis} sample={source === SAMPLE_LABEL} />
                     : <Connect onRun={run} connectError={connectError} />}
                 </motion.div>
               </AnimatePresence>

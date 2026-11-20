@@ -4,7 +4,7 @@
 
 - CSV import, rule-based classification, exposure statistics, pool classification, Black-76 pricing, cohort backtest, scenario arithmetic and policy replay. 40 unit tests: 31 for the engine, 9 for the ledger import and sign-in mapping.
 - Live Gemini Prediction Markets data: discovery, suitability screens, implied distribution and ladder replication.
-- Ledger sign-in code for QuickBooks Online, Xero, Zoho Books and FreshBooks (`lib/ledger/`, `/api/connect/*`). It is unit-tested against mocked provider responses: QuickBooks end to end (token, company and transaction list), the other three for line mapping only. It has not been verified against a live provider account. The demo has no provider keys, so each sign-in button shows "Needs keys". CSV upload is the working path.
+- Ledger sign-in code for QuickBooks Online, Xero, Zoho Books and FreshBooks (`lib/ledger/`, `/api/connect/*`). It is unit-tested against mocked provider responses: QuickBooks end to end (token, company and transaction list), the other three for line mapping only. It has not been verified against a live provider account. The demo has no provider keys, so the Books screen shows one line saying sign-in is built but switched off. CSV upload is the working path.
 - A settlement program on Solana devnet with Helius Privacy Rings, and a server flow that opens a policy as a ladder of steps, funds the steps privately, posts the oracle report, releases triggered steps to the fleet, and shows the refused attempts. A lender page decrypts the steps with read-only viewing keys.
 - Earlier work, archived and not the settlement path: a fully collateralised USDC vault written for Arc testnet with 15 Foundry tests (`contracts/`). It was not deployed.
 
@@ -31,7 +31,7 @@
 - **Write-once reports are global.** One report per index and month. A rerun of the demo reuses the report already on chain and says so.
 - **Upgradeable program.** One team wallet, the one that deployed the program (`84ZgVXHPfpYML8E3o63aLqMo69Z4A6o4cxUY4r7xuWRE`), holds the upgrade authority and can replace the code.
 - **Unfinished runs stay open.** Nothing on chain expires. A settlement run that stops midway leaves its remaining steps open and funded, and releasing or reclaiming them needs each step's vault key, which only the server that ran it keeps. One devnet policy (`2c7cb8f46c1f57c2`) had 3 steps paid and 5 open when read on Nov 20. There is no recovery tool.
-- **No settlement without the team's keys.** A server that lacks them, including the hosted demo, shows the replay and the not-configured note on the payout screen. Settlement has run only from a team machine; the README lists the devnet transactions.
+- **No settlement without the team's keys.** A server that lacks them, including the hosted demo, shows the replay and no settle button. For the sample fleet the payout screen says "This settlement ran on Solana devnet" and links the team's Nov 20 devnet transactions; it does not send a new payment. The amount it shows in 25-cent steps is worked out from the public price and the fleet's gallons, because the on-chain amounts are encrypted. Settlement has run only from a team machine; the README lists the devnet transactions.
 
 ## What was not built
 

@@ -9,6 +9,9 @@ Newest first. One or two lines each: what was decided, why, and where the detail
 
 ## 2026-11-20
 
+- **Payouts on a server without keys shows the earlier devnet run, not a disabled button.** For the sample fleet's September 2026 the screen says "This settlement ran on Solana devnet" and links the 3:12 AM transactions from the README. For any other ledger it says the server does not settle that month. The stepped amount reads "Settled in 25-cent steps" only for a live result or the sample fleet's run, and "Settles in 25-cent steps" otherwise; it is labelled as worked out from the public price, because on-chain amounts are encrypted. This replaces the not-configured note described below.
+- **Ledger sign-in copy changes from "Needs keys" to one line.** The Books screen leads with the sample fleet and CSV upload and says sign-in is built but switched off in this demo. Replaces the "Needs keys" wording in the sign-in decision below; the status (built, not verified live) is unchanged.
+- **The sample fleet is the primary call to action** on the landing page and the Books screen. The hero says "profit", not "earns".
 - **The light, green, Simple-first UI is what we submit.** Julian chose it over the dark redesign and the earlier UI; `friendly-ui` was fast-forwarded into `main`. The earlier UI stays on `classic-ui`, and the dark redesign as merged is commit `1bb1955`.
 - **Light mode is the default, dark mode is a button** (`components/theme.tsx`, tokens in `app/globals.css`). The accent changes from ember orange to dark green in both themes, with amber kept for risk. Reason: owners should read this as a safe business tool, not a crypto product. Built on the `friendly-ui` branch.
 - **Simple view first, Detailed on a switch** for Risks and Protection. Simple never hides a "not available", "rejected" or "signal only" label. Judge mode stays the technical view. Choosing the view automatically by business size is not built: no threshold has been agreed.

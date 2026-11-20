@@ -34,7 +34,7 @@ npm test               # 40 unit tests: 31 engine, 9 ledger
 npm run test:contracts # earlier work: 15 Foundry tests for the Arc vault (needs Foundry)
 ```
 
-The app works without any keys: analysis, Gemini evaluation, pricing, backtest and the replay all run. Only private settlement and the lender page need the Solana setup below. Without it, the payout screen says settlement is not configured and why.
+The app works without any keys: analysis, Gemini evaluation, pricing, backtest and the replay all run. Only private settlement and the lender page need the Solana setup below. Without it, the payout screen shows no settle button; for the sample fleet it links the devnet settlement the team ran on Nov 20 (the transactions under [Deployed program](#deployed-program)), and Judge mode says what the server is missing.
 
 Ledger sign-in (QuickBooks Online, Xero, Zoho Books, FreshBooks) is off unless the server has that provider's client id and secret; `.env.example` lists the variables and redirect URLs. The sign-in code has not been verified against a live provider. CSV upload and the sample company always work.
 

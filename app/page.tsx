@@ -45,8 +45,8 @@ function SectionHead({ id, title, lede }: { id: string; title: ReactNode; lede?:
 function Actions() {
   return (
     <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-      <Link href="/app" className={btnPrimary}>Analyze my business</Link>
-      <Link href="/app?sample=1" className={linkArrow}>Try a sample fleet<Arrow /></Link>
+      <Link href="/app?sample=1" className={btnPrimary}>Try the sample fleet</Link>
+      <Link href="/app" className={linkArrow}>Analyze my business<Arrow /></Link>
     </div>
   );
 }
@@ -73,7 +73,7 @@ export default async function Landing() {
   ];
 
   const integrations = [
-    { k: "Accounting", v: "QuickBooks Online, Xero, Zoho Books, FreshBooks, or a CSV export from anything else" },
+    { k: "Accounting", v: "CSV upload works today, from QuickBooks, Xero or anything else. Sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks is built but switched off in this demo." },
     { k: "Prices", v: "Official diesel prices from the U.S. Energy Information Administration" },
     { k: "Market signals", v: "Gemini prediction markets, read live" },
     { k: "Payouts", v: "Solana, with Helius Privacy Rings keeping amounts private" },
@@ -92,7 +92,7 @@ export default async function Landing() {
     { q: "Is this insurance?", a: "It is index-based protection: it pays when an official price crosses a line, not after a claim. It is not for sale. A real version would need a licensed insurer to owe the payouts, and none has agreed to. Today CostShield is a simulation that pays in test dollars." },
     { q: "What if my pump price is different?", a: "Your pump price can differ from the official one. Before you buy, CostShield shows how closely your price has followed it, from your own receipts." },
     { q: "Who pays me?", a: "In this simulation, a test backer wallet that sets the full amount aside before the cover starts. In a real version it would be a licensed partner, and none has signed up." },
-    { q: "What does it cost?", a: `The scan is free and nothing is for sale. The model price for the sample fleet is ${usd0(d.policy.premiumPerMonth)} a month. That is an estimate, not a quote.` },
+    { q: "What does it cost?", a: `The scan is free and nothing is for sale. The model price for the sample fleet is ${usd0(d.policy.premiumPerMonth)} a month if bought in ${monYear(d.policy.inceptionMonth, true)}. That is an estimate, not a quote.` },
     { q: "Is my data safe?", a: "We only read your books, and uploaded files aren't stored. Payout amounts are encrypted, so only you and the people you choose can see them." },
     { q: "Do I need crypto?", a: "No. You see dollars. In this simulation payouts settle in test dollars on Solana's test network. Paying into a bank account is not built." },
   ];
@@ -114,7 +114,7 @@ export default async function Landing() {
             </Reveal>
             <Reveal immediate i={1}>
               <h1 className="mt-6 max-w-[960px] bg-gradient-to-b from-ink from-30% to-ink/70 bg-clip-text pb-1 text-[38px] font-[540] leading-[1.06] tracking-[-0.032em] text-transparent sm:text-[52px] sm:leading-[1.03] lg:text-[64px]">
-                A small fleet earns {usd0(d.profitTtm)} a year. <br className="hidden md:block" />A bad diesel year costs {usd0(d.diesel.shockNet)}.
+                A small fleet makes {usd0(d.profitTtm)} in profit a year. <br className="hidden md:block" />A bad diesel year costs {usd0(d.diesel.shockNet)}.
               </h1>
             </Reveal>
             <Reveal immediate i={2}>
@@ -180,7 +180,7 @@ export default async function Landing() {
               </ul>
               <div className="num flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line/6 bg-panel/40 px-4 py-3 text-[12px] text-muted sm:px-5">
                 <span>Protection starts at <span className="text-ink2">{startsAt}</span> a gallon</span>
-                <span>Costs <span className="text-heat">{usd0(d.policy.premiumPerMonth)}</span> a month</span>
+                <span>Costs <span className="text-heat">{usd0(d.policy.premiumPerMonth)}</span> a month if bought {monYear(d.policy.inceptionMonth)}</span>
               </div>
             </div>
           }
@@ -206,7 +206,7 @@ export default async function Landing() {
         {/* Integrations */}
         <section id="integrations" aria-labelledby="integrations-title" className="scroll-mt-20 py-10 md:py-16">
           <div className={cx(wrap, "grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16")}>
-            <SectionHead id="integrations-title" title="Works with the books you keep" lede="Connect your accounting system or upload an export. CostShield does the rest." />
+            <SectionHead id="integrations-title" title="Works with the books you keep" lede="Upload an export from your accounting system. CostShield does the rest." />
             <dl className="divide-y divide-line/[0.07] border-y border-line/[0.07]">
               {integrations.map((x, i) => (
                 <Reveal key={x.k} i={i}>
@@ -290,7 +290,7 @@ export default async function Landing() {
             <Reveal>
               <div className={cx(surface, lift, "px-6 py-12 md:px-14 md:py-16")}>
                 <h2 className={cx(h2, "max-w-[640px]")}>See what a price spike would cost you</h2>
-                <p className={cx(body, "mt-5 max-w-[520px]")}>Connect your books to see your own numbers, or try it on a sample fleet first.</p>
+                <p className={cx(body, "mt-5 max-w-[520px]")}>Try it on the sample fleet first, or upload an export of your own books to see your numbers.</p>
                 <Actions />
               </div>
             </Reveal>
@@ -307,7 +307,7 @@ export default async function Landing() {
             </p>
           </div>
           <ul className="space-y-2 leading-[1.6]">
-            {[["Open app", "/app"], ["Try a sample fleet", "/app?sample=1"], ["How it works", "#how"], ["Security", "#security"], ["FAQ", "#faq"]].map(([l, h]) => (
+            {[["Open app", "/app"], ["Try the sample fleet", "/app?sample=1"], ["How it works", "#how"], ["Security", "#security"], ["FAQ", "#faq"]].map(([l, h]) => (
               <li key={l}><Link href={h} className="text-muted transition-colors duration-150 hover:text-ink">{l}</Link></li>
             ))}
           </ul>

@@ -59,7 +59,7 @@ async function build(): Promise<LandingData> {
 
   const s = p.settlement;
   const gallons = Math.min(s.coveredGallons, p.maxCoveredGallonsPerMonth);
-  const stepAmount = Math.round(STEP * gallons * 100) / 100;
+  const stepAmount = STEP * gallons; // unrounded, as on the payout screen; rounded only where it is shown
   const nSteps = Math.round(STEP_LIMIT / STEP);
   const steps = Array.from({ length: nSteps }, (_, i) => {
     const trigger = Math.ceil(Math.round((p.strike + (i + 1) * STEP) * 1e6) / 1000) / 1000;
@@ -90,7 +90,7 @@ async function build(): Promise<LandingData> {
     },
     wholesaleR2: a.wholesale.r2Annual,
     pool: { id: a.pool!.poolId, status: a.pool!.status, confidence: a.pool!.confidence },
-    settlement: { month: s.month, indexMean: s.indexMean, gallons, stepAmount, steps, paidSteps, payout: Math.round(stepAmount * paidSteps * 100) / 100, funded: Math.round(stepAmount * nSteps * 100) / 100 },
+    settlement: { month: s.month, indexMean: s.indexMean, gallons, stepAmount, steps, paidSteps, payout: stepAmount * paidSteps, funded: stepAmount * nSteps },
     eia: { sha256: createHash("sha256").update(bytes).digest("hex"), fetchedAt: series.fetchedAt, title: series.title },
   };
 }

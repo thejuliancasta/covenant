@@ -40,7 +40,7 @@ Costs behave like pressure. A market-driven cost is a fluid column whose level i
 ### Interaction inventory
 
 1. **Hero (welcome).** The PADD 2 weekly diesel series from `lib/data` drawn as a filled surface with a strike line. The 2026 spike pushes through it and the overflow tints heat. Pointer scrubs a readout (week, price). Static under reduced motion.
-2. **Connect.** Provider tiles for QuickBooks, Xero, Zoho Books and FreshBooks (disabled honestly with the server's reason when not configured), a CSV drop zone with a living drag-over state and a file chip that slides in, and the sample company.
+2. **Connect.** The sample company and a CSV drop zone first; provider tiles for QuickBooks, Xero, Zoho Books and FreshBooks only when the server holds that provider's keys, otherwise one line saying sign-in is built but switched off in this demo (since Nov 20); a CSV drop zone with a living drag-over state and a file chip that slides in, and the sample company.
 3. **Analysis.** A "ledger tape": each real pipeline stage event settles in with its measured duration; transaction counts tick to the real totals; once classification arrives, lines sort into category lanes sized by the real classified counts. Motion only on received events.
 4. **Risk profile.** Exposure columns: fill = share of spend; a ripple amplitude encodes the month-to-month swing; market-linked costs in heat. Hover lifts the row and reveals detail. Status chips carry state.
 5. **Protection.** The cap drawn as plates above the strike; the price and backtest charts restyled to the same grammar.

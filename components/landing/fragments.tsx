@@ -195,7 +195,7 @@ export function LenderView({ d }: { d: LandingData }) {
       </table>
       <div className="num flex flex-wrap gap-x-6 gap-y-1 border-t border-line/6 bg-panel/40 px-4 py-3 text-[12px] text-muted sm:px-5">
         <span>Set aside <span className="text-ink2">{usd2(s.funded)}</span></span>
-        <span>Paid <span className="text-ink2">{usd2(s.payout)}</span></span>
+        <span>Would have paid <span className="text-ink2">{usd2(s.payout)}</span></span>
         <span>Official price <span className="text-ink2">{"$"}{s.indexMean.toFixed(3)}</span></span>
       </div>
     </Frame>

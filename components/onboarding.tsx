@@ -9,6 +9,9 @@ import { LogoMark } from "./brand/logo";
 import { CountUp, TickText } from "./fx/count";
 import { SPRING_FLUID, SPRING_UI, STAGGER } from "./fx/motion";
 
+/** Source label of the bundled sample fleet. An uploaded file always carries its file name, so it can never match. */
+export const SAMPLE_LABEL = "Sample fleet (synthetic data)";
+
 export interface StageView { status: "running" | "done" | "error"; ms?: number; detail?: string }
 
 /** Settle in place without hiding: used for content that may start below the fold. */
@@ -77,21 +80,20 @@ function LinkGlyph({ ready }: { ready: boolean }) {
 
 function ProviderTile({ p, onConnect }: { p: LedgerProvider; onConnect: () => void }) {
   return (
-    <li className={cx("group flex min-w-0 flex-col rounded-[10px] border border-line/[0.08] bg-panel/60 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.03)]", p.configured && surfaceHover)}>
+    <li className={cx("group flex min-w-0 flex-col rounded-[10px] border border-line/[0.08] bg-panel/60 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.03)]", surfaceHover)}>
       <div className="flex items-center justify-between gap-3">
-        <LinkGlyph ready={p.configured} />
-        <Tag tone={p.configured ? "good" : "neutral"}>{p.configured ? "Ready" : "Not set up yet"}</Tag>
+        <LinkGlyph ready />
+        <Tag tone="good">Ready</Tag>
       </div>
-      <p className={cx("mt-3 text-[15px] font-medium leading-6", p.configured ? "text-ink" : "text-ink2")}>{p.name}</p>
-      <p className="mt-1 flex-1 text-[12.5px] leading-[1.5] text-muted">
-        {p.configured ? p.reads : "Not switched on in this demo. Upload a file or try the sample fleet."}
-      </p>
-      {p.configured
-        ? <Button variant="secondary" size="sm" onClick={onConnect} className="mt-4 self-start">Connect<Arrow /></Button>
-        : <p className="mt-4 text-[13px] leading-8 text-faint">Needs keys</p>}
+      <p className="mt-3 text-[15px] font-medium leading-6 text-ink">{p.name}</p>
+      <p className="mt-1 flex-1 text-[12.5px] leading-[1.5] text-muted">{p.reads}</p>
+      <Button variant="secondary" size="sm" onClick={onConnect} className="mt-4 self-start">Connect<Arrow /></Button>
     </li>
   );
 }
+
+const LEDGER_NAMES = ["QuickBooks Online", "Xero", "Zoho Books", "FreshBooks"];
+const listOf = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0]);
 
 /** A CSV sheet. On drag-over it lifts off the tray and its rows spread, ready to be read. */
 function SheetGlyph({ drag }: { drag: boolean }) {
@@ -175,7 +177,7 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
     try {
       const res = await fetch("/sample/johns-trucking.csv");
       if (!res.ok) throw new Error(`Could not load the sample file (HTTP ${res.status}).`);
-      onRun(await res.text(), "PADD2", "Sample company (synthetic)");
+      onRun(await res.text(), "PADD2", SAMPLE_LABEL);
     } catch (e) { setErr(e instanceof Error ? e.message : String(e)); setErrAt("top"); setBusy(false); }
   };
 
@@ -185,6 +187,10 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
     onDragLeave: () => { depth.current = Math.max(0, depth.current - 1); if (!depth.current) setDrag(false); },
     onDrop: (e: DragEvent) => { e.preventDefault(); depth.current = 0; setDrag(false); const f = e.dataTransfer.files[0]; if (f) take(f); },
   };
+
+  // Providers the server can sign in to, and the names of the ones it cannot (no client id and secret).
+  const ready = (ledgers ?? []).filter((p) => p.configured);
+  const off = ledgers === null ? [] : ledgers.length ? ledgers.filter((p) => !p.configured).map((p) => p.name) : LEDGER_NAMES;
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -224,50 +230,48 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
         <Alert text={errAt === "top" ? err : null} />
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card className="flex flex-col">
+          <div className="flex items-center justify-between gap-3"><CardTitle>Try a sample fleet</CardTitle><Tag tone="info">Synthetic data</Tag></div>
+          <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">John&apos;s Trucking LLC: 10 trucks in the Midwest, 3,315 transactions over 24 months. The ledger is generated, but its fuel prices follow the real EIA Midwest diesel index. It goes through the same importer as an upload.</p>
+          <div className="mt-auto pt-4"><Button size="lg" onClick={sample} disabled={busy}>{busy ? "Loading…" : <>Try the sample fleet<Arrow /></>}</Button></div>
+        </Card>
+        <Card className="flex flex-col">
+          <div className="flex items-center justify-between gap-3"><CardTitle>Upload a CSV export</CardTitle></div>
+          <div {...dragProps} onClick={() => input.current?.click()}
+            className={cx("group mt-3 cursor-pointer rounded-[10px] border border-dashed px-4 pb-5 pt-5 text-center transition-[border-color,background-color] duration-150 ease-out", drag ? "border-jade/60 bg-jade/[0.04]" : "border-line/[0.12] bg-bg/40 hover:border-line/[0.2]")}>
+            <SheetGlyph drag={drag} />
+            <p className={cx("mt-2 text-[13.5px] font-medium transition-colors duration-150", drag ? "text-jade" : "text-ink2")}>{drag ? "Release to upload" : "Drop a CSV here"}</p>
+            <p className="mx-auto mt-1 max-w-[34ch] text-[12px] leading-[1.45] text-faint">QuickBooks, Xero or any export with date, vendor, account and amount columns</p>
+          </div>
+          <AnimatePresence initial={false}>
+            {chip && (
+              <motion.div key={chip.name + chip.size} initial={{ opacity: 0, x: -14, height: 0, marginTop: 0 }} animate={{ opacity: 1, x: 0, height: "auto", marginTop: 12 }} exit={{ opacity: 0, height: 0, marginTop: 0 }} transition={SPRING_UI}>
+                <div className="flex items-center gap-3 rounded-[8px] border border-line/[0.08] bg-panel/60 px-3 py-2">
+                  <svg width="16" height="18" viewBox="0 0 16 18" aria-hidden className={chip.ok ? "text-jade" : "text-rust"}><path d="M3 1.5h6.5L13.5 5.5V16a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Z M9.5 1.5V5.5h4" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" /></svg>
+                  <span className="min-w-0 flex-1 truncate text-[13px] text-ink">{chip.name}</span>
+                  <span className="num shrink-0 text-[12px] text-faint">{kb(chip.size)}</span>
+                  <Tag tone={chip.ok ? "good" : "bad"}>{chip.ok ? "Reading" : "Not read"}</Tag>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <Alert text={errAt === "upload" ? err : null} />
+          <input ref={input} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) take(f); e.target.value = ""; }} />
+          <Button variant="secondary" onClick={() => input.current?.click()} className="mt-4 w-full">Choose file</Button>
+        </Card>
+      </div>
+
+      {ready.length > 0 && (
+        <Card className="mt-4">
           <div className="flex items-center justify-between gap-3"><CardTitle>Connect your accounting software</CardTitle><Tag tone="info">We only read</Tag></div>
           <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">Log in to your accounting software and approve access. We read the last 24 months and analyze them in this session. The login is not stored.</p>
-          {ledgers === null
-            ? <p className="mt-5 text-[13px] text-muted">Checking which connections are configured…</p>
-            : <motion.ul initial="hidden" animate="show" transition={{ staggerChildren: 0.06 }} className="mt-4 grid gap-3 sm:grid-cols-2">
-                {ledgers.map((p) => <motion.div key={p.id} variants={rise} className="flex"><ProviderTile p={p} onConnect={() => connect(p.id)} /></motion.div>)}
-              </motion.ul>}
-          
+          <motion.ul initial="hidden" animate="show" transition={{ staggerChildren: 0.06 }} className="mt-4 grid gap-3 sm:grid-cols-2">
+            {ready.map((p) => <motion.div key={p.id} variants={rise} className="flex"><ProviderTile p={p} onConnect={() => connect(p.id)} /></motion.div>)}
+          </motion.ul>
         </Card>
-
-        <div className="grid content-start gap-4">
-          <Card className="flex flex-col">
-            <div className="flex items-center justify-between gap-3"><CardTitle>Upload a CSV export</CardTitle></div>
-            <div {...dragProps} onClick={() => input.current?.click()}
-              className={cx("group mt-3 cursor-pointer rounded-[10px] border border-dashed px-4 pb-5 pt-5 text-center transition-[border-color,background-color] duration-150 ease-out", drag ? "border-jade/60 bg-jade/[0.04]" : "border-line/[0.12] bg-bg/40 hover:border-line/[0.2]")}>
-              <SheetGlyph drag={drag} />
-              <p className={cx("mt-2 text-[13.5px] font-medium transition-colors duration-150", drag ? "text-jade" : "text-ink2")}>{drag ? "Release to upload" : "Drop a CSV here"}</p>
-              <p className="mx-auto mt-1 max-w-[34ch] text-[12px] leading-[1.45] text-faint">QuickBooks, Xero or any export with date, vendor, account and amount columns</p>
-            </div>
-            <AnimatePresence initial={false}>
-              {chip && (
-                <motion.div key={chip.name + chip.size} initial={{ opacity: 0, x: -14, height: 0, marginTop: 0 }} animate={{ opacity: 1, x: 0, height: "auto", marginTop: 12 }} exit={{ opacity: 0, height: 0, marginTop: 0 }} transition={SPRING_UI}>
-                  <div className="flex items-center gap-3 rounded-[8px] border border-line/[0.08] bg-panel/60 px-3 py-2">
-                    <svg width="16" height="18" viewBox="0 0 16 18" aria-hidden className={chip.ok ? "text-jade" : "text-rust"}><path d="M3 1.5h6.5L13.5 5.5V16a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Z M9.5 1.5V5.5h4" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" /></svg>
-                    <span className="min-w-0 flex-1 truncate text-[13px] text-ink">{chip.name}</span>
-                    <span className="num shrink-0 text-[12px] text-faint">{kb(chip.size)}</span>
-                    <Tag tone={chip.ok ? "good" : "bad"}>{chip.ok ? "Reading" : "Not read"}</Tag>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <Alert text={errAt === "upload" ? err : null} />
-            <input ref={input} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) take(f); e.target.value = ""; }} />
-            <Button onClick={() => input.current?.click()} className="mt-4 w-full">Choose file</Button>
-          </Card>
-          <Card className="flex flex-col">
-            <div className="flex items-center justify-between gap-3"><CardTitle>Try a sample fleet</CardTitle><Tag tone="info">Synthetic data</Tag></div>
-            <p className="mt-2 text-[13.5px] leading-[1.55] text-muted">John&apos;s Trucking LLC: 10 trucks in the Midwest, 3,315 transactions over 24 months. The ledger is generated, but its fuel prices follow the real EIA Midwest diesel index. It goes through the same importer as an upload.</p>
-            <Button variant="secondary" onClick={sample} disabled={busy} className="mt-4 self-start">{busy ? "Loading…" : <>Try the sample fleet<Arrow /></>}</Button>
-          </Card>
-        </div>
-      </div>
+      )}
+      {off.length > 0 && <p className="mt-4 px-1 text-[13.5px] leading-[1.55] text-muted">Sign-in for {listOf(off)} is built but switched off in this demo.</p>}
 
 
       <Card className="mt-4">

@@ -40,7 +40,7 @@ export function Judge({ a, source }: { a: Analysis; source: string }) {
             ["Premium", <Tag key="6" tone="warn">model</Tag>, "Black-76 on EIA spot with a 30% load. Not a quote."],
             ["Oracle", <Tag key="7" tone="warn">trusted test key</Tag>, "One key recomputes the EIA monthly mean on the server and posts it with the data file's sha256. Not a decentralised feed."],
             ["Party wallets", <Tag key="7b" tone="warn">custodial demo</Tag>, "The demo server holds the fleet, underwriter and oracle keys and every step viewing key."],
-            ["Ledger sign-in (QuickBooks Online, Xero, Zoho Books, FreshBooks)", <Tag key="7c" tone="warn">built, not verified live</Tag>, "Code in lib/ledger/ and /api/connect/*. Unit-tested against mocked provider responses: QuickBooks end to end, the other three for line mapping only. Never run against a live provider account. This demo has no provider keys, so the buttons show \"Needs keys\"; CSV upload is the working path."],
+            ["Ledger sign-in (QuickBooks Online, Xero, Zoho Books, FreshBooks)", <Tag key="7c" tone="warn">built, not verified live</Tag>, "Code in lib/ledger/ and /api/connect/*. Unit-tested against mocked provider responses: QuickBooks end to end, the other three for line mapping only. Never run against a live provider account. This demo has no provider keys, so the Books screen shows one line saying sign-in is switched off; CSV upload is the working path."],
             ["Insurer, reinsurer, options execution", <Tag key="8" tone="bad">not built</Tag>, "Described in the product, absent from the prototype."],
           ]} />
         </Card>
