@@ -1,7 +1,9 @@
 /**
  * Helius Privacy Rings operations: private balances, private transfers, and
  * spending a step vault's private balance through the program (release/reclaim).
- * Uses @heliuslabs/spr 0.9.0-alpha (experimental), as the archived Equity Floor did.
+ * Uses @heliuslabs/spr 0.9.0-alpha (experimental), as Equity Floor did. Equity
+ * Floor was our first idea for this hackathon, written during the event and set
+ * aside on Nov 20.
  */
 import type { Address, TransactionSigner } from "@solana/kit";
 import { ViewingKey, Wallet, syncWallet, type ShieldedAddress, type ShieldedKeypair } from "@heliuslabs/spr";

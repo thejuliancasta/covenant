@@ -81,4 +81,4 @@ This is the linear cap rounded down to the step, with the per-gallon limit at $2
 | Recovery in bad periods about 54% | 49.5% with this repo's bad-period definition | reported, not asserted |
 | Premium $14,854 and $19,515 at 35% and 40% volatility | Reproduced with a wholesale forward of $2.46, close to the November 2025 ULSD spot of $2.52. The research did not state its forward | yes, within 3% |
 
-**A finding the engine adds.** At the October 2026 ULSD spot of $4.95 and the volatility implied by the live Gemini Brent ladder (about 44%), the same cap costs about 4.4 times what it cost in November 2025. Buyers who arrive after a spike pay for it.
+**A finding the engine adds.** At the October 2026 ULSD spot of $4.95 and the volatility implied by the live Gemini Brent ladder (about 48% when recorded on Nov 20, 2026; it moves with the live market), the same cap costs about 4.9 times what it cost in November 2025. Buyers who arrive after a spike pay for it.

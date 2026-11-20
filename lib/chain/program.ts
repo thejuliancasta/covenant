@@ -2,7 +2,8 @@
  * Low-level Solana plumbing for the CostShield steps program: the Helius
  * Privacy Rings client, v1 transaction send and simulate (with @solana/kit),
  * PDAs, instruction builders and account decoders.
- * Ported from the Equity Floor chain code (archive/2026-11-20-equity-floor).
+ * Adapted from Equity Floor, our first idea for this hackathon, written during
+ * the event and set aside on Nov 20.
  */
 import {
   AccountRole,

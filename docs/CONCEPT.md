@@ -130,7 +130,7 @@ Build Version A as the core product, use Version B as the main way customers arr
 The owner comes to CostShield directly, connects the books, and picks protection from a ranked list.
 
 1. **Sign up.** Email, business name, country. Nothing else yet. Analysis is free and needs no identity check.
-2. **Connect accounting.** QuickBooks, Xero, others through a unified API, or CSV upload. The owner signs in on the provider's own consent screen. CostShield never sees the password, access is read-only, and connecting authorizes no trades.
+2. **Connect accounting.** QuickBooks, Xero, others through a unified API, or CSV upload. The owner signs in on the provider's own consent screen. CostShield never sees the password, only reads the books and never changes them, and connecting authorizes no trades.
 3. **Automatic analysis (under a minute).** Classify 12 to 24 months of expenses, map each cost to a risk factor and region, measure volatility and fit.
 4. **Fill the gaps.** Ask only what the books cannot say: gallons or kWh behind a dollar total, where the fleet runs, whether customers already pay a fuel surcharge. Offer a fuel-card or utility connection in place of typing.
 5. **Risk profile.** "We analyzed your business." Exposures ranked by dollars at risk in a bad year, each with one of the four statuses from section 3.
@@ -282,6 +282,8 @@ Mobile is for the moments between decisions: checking whether a trigger is close
 
 ## 7. What to show by noon today, and what is roadmap
 
+> Historical. This section was written before settlement moved from Arc testnet to Solana devnet. The Arc vault was not deployed and ledger sign-in has since been written. For what exists now, see `README.md`, `docs/LIMITATIONS.md` and `docs/DECISIONS.md`.
+
 Pitch the platform for every business and every country, and demo one journey that fully works. Submission closes today at 12:00 PM Central. Rebuilding for 14 industries before then would cost you the working demo you already have.
 
 **What exists, as of last night's build:** CSV import of a QuickBooks export, rule-based classification, exposure measurement, pool assignment, hedge evaluation (NYMEX diesel options priced, Gemini markets read live and rejected with reasons), a backtest over 131 cohorts, seven screens plus a judge mode, and a tested vault contract. Not done at that point: the Arc deployment (wallet unfunded), hosting, the repo push, the video, live QuickBooks sign-in.
@@ -328,7 +330,7 @@ These came out of the design session that followed. Where they differ from secti
 
 | Platform | Screen | What it does |
 | --- | --- | --- |
-| Mobile | Connect | One promise, three ways to connect the books, and a read-only reassurance |
+| Mobile | Connect | One promise, three ways to connect the books, and a reassurance that we only read them |
 | Mobile | Risk profile | The biggest exposure in dollars with one "Protect this" button; the other costs each tagged with a plain status |
 | Mobile | Build a plan | A slider for how much to cover. Payout, the amount still carried, the maximum and the price update as it moves. "When it will not pay" sits on the same screen as the price |
 | Mobile | Home | How much the business is protected against, and a single gauge of the index against the trigger |
@@ -345,8 +347,8 @@ These came out of the design session that followed. Where they differ from secti
 
 ## Sources
 
-Built from your attached notes and screenshots and these earlier chats. Figures quoted from them were not re-checked today.
+Built from the team's notes and screenshots and three earlier planning chats, which are private and not linked here. Figures quoted from them were not re-checked today.
 
-- [Cost-protection platform feasibility](https://claude.ai/chat/c3cbe2ca-6787-4537-ab02-3fde239245ea)
-- [IB - UBC - Hackathon](https://claude.ai/chat/0b090908-fec8-421c-869c-0748c4cfd560) (router model, pooling, auction, unit economics)
-- [CostShield hackathon product strategy](https://claude.ai/chat/0304ebc3-27a6-4b3c-828d-dac29aabb93c) (current build status)
+- Cost-protection platform feasibility
+- IB - UBC - Hackathon (router model, pooling, auction, unit economics)
+- CostShield hackathon product strategy (build status at the time)

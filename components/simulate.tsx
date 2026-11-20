@@ -176,7 +176,7 @@ export function Payout({ a }: { a: Analysis }) {
       <Card>
         <Table align={["l", "r", "r", "r", "r", "r"]} head={["Month", "Index mean", "Above strike", "Covered gallons", "Payout", "Status"]}
           rows={p.replay.map((r) => [monthLabel(r.month), ppg(r.index), r.triggered ? `+${ppg(r.index - r.strike)}` : "—", int(r.coveredGallons), r.triggered ? usd(r.payout) : "—",
-            r.month === p.settlement.month ? <Tag tone="good" key="s">settled privately below</Tag> : r.triggered ? <Tag tone="neutral" key="t">triggered</Tag> : <span className="text-faint" key="n">no trigger</span>])} />
+            r.month === p.settlement.month ? (result ? <Tag tone="good" key="s">settled privately below</Tag> : <Tag tone="neutral" key="s">settlement month</Tag>) : r.triggered ? <Tag tone="neutral" key="t">triggered</Tag> : <span className="text-faint" key="n">no trigger</span>])} />
       </Card>
 
       <Card className="border-shield-line">

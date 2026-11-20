@@ -8,7 +8,9 @@
 
 **MVP.** One working journey: upload an accounting export, get a measured diesel exposure and an honest verdict on what can and cannot be protected, simulate a shock, and watch a funded payout settle privately on Solana devnet, then share read-only proof of it with a lender.
 
-**Out of scope.** Selling cover, taking premiums, executing hedges, QuickBooks OAuth, more than one priced risk, more than two diesel regions.
+**Out of scope.** Selling cover, taking premiums, executing hedges, more than one priced risk, more than two diesel regions.
+
+**Ledger sign-in.** Sign-in code exists for QuickBooks Online, Xero, Zoho Books and FreshBooks. It is unit-tested against mocked provider responses (QuickBooks end to end, the other three for line mapping only) and has not been verified against a live provider account. The demo has no provider keys, so the buttons show "Needs keys". CSV upload is the working path.
 
 **Acceptance criteria**
 
@@ -23,7 +25,7 @@
 | 7 | Gemini data is fetched live; if unreachable the UI says so and pricing falls back to a labelled assumption | Met, tested |
 | 8 | No Gemini market is presented as a hedge unless it passes every screen | Met, tested |
 | 9 | Scenario outputs are pure arithmetic on visible inputs | Met, tested |
-| 10 | A settlement produces real Solana devnet transactions, Explorer links and the fleet's decrypted balance before and after | Met once the program is deployed and `npm run solana:setup` has run |
+| 10 | A settlement produces real Solana devnet transactions, Explorer links and the fleet's decrypted balance before and after | Met on devnet: the program is deployed and settlements have run. Needs the Solana keys, so it does not run without them |
 | 11 | Reports from anyone but the oracle, releases of untriggered steps, releases by anyone but the fleet and double releases are refused by the program | Met on devnet; the stranger and duplicate refusals are shown on every settlement |
 | 12 | Step amounts, the payout and balances are encrypted on chain; the payout screen shows the fleet's view next to the public chain's view | Met with Helius Privacy Rings |
 | 13 | A lender link shows each step's trigger, funded amount and paid status, read-only | Met; decryption runs on the demo server |
@@ -36,7 +38,7 @@ Design intent: a business-banking product, not a trading terminal. Warm paper ba
 | Screen | Purpose | Key interactions | Data it needs | Narrow screens |
 | --- | --- | --- | --- | --- |
 | Welcome | Value proposition | "Analyze my business"; "Explore a sample company" runs the full pipeline on the sample | None | Single column |
-| Connect | Bring in records | File picker and drag-and-drop; sample company; region select; consent checkbox required before upload; QuickBooks card shown as not connected, with export instructions | Sample CSV in `public/sample` | Cards stack |
+| Connect | Bring in records | File picker and drag-and-drop; sample company; region select; consent checkbox required before upload; sign-in buttons for QuickBooks, Xero, Zoho Books and FreshBooks, each disabled with "Needs keys" when the server has no client id and secret for that provider | Sample CSV in `public/sample`; `/api/connect/status` | Cards stack |
 | Analysis | Show real processing | Seven stages, each with server-measured time and its actual result; errors name the failing stage and offer a way back | NDJSON from `/api/analyze` | Unchanged |
 | Your risks | Plain-language findings | Scroll only. Headline changes with the verdict (one risk, or none) | `financials`, `diesel`, `pool`, `others` | Two-column grids collapse |
 | Protection | Terms, cost, history, hedge test, who pays | Scroll only. "Not available to buy" is stated on the card | `policy`, `backtest`, `markets`, `hedges` | Tables scroll sideways |

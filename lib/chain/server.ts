@@ -17,7 +17,7 @@ import type { Address } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
 import { REGIONS, SERIES, monthlyMean } from "../engine/series";
 import { capPayout } from "../engine/payout";
-import { ASSET_ID, EXPLORER, INDEXES, MINT, PROGRAM_ID, RINGS_PROGRAM_ID, STEP_LIMIT, STEP_SIZE, fromBase, fromMilli, periodOf, rpcUrl, toBase, toMilli, toMilliCeil } from "./config";
+import { ASSET_ID, DEPLOYMENT, EXPLORER, INDEXES, MINT, PROGRAM_ID, RINGS_PROGRAM_ID, STEP_LIMIT, STEP_SIZE, fromBase, fromMilli, periodOf, rpcUrl, toBase, toMilli, toMilliCeil } from "./config";
 import { keysDir, loadRole, roles, type Role } from "./keys";
 import {
   decodeReport, errorName, fetchProgramAccount, firstSignature, getClient, hex, initStepIx, programAddress,
@@ -49,7 +49,12 @@ export async function chainStatus(): Promise<ChainStatus> {
   if (statusCache && Date.now() - statusCache.at < 20_000) return statusCache.value;
   const b = base();
   const r = roles();
-  const notConfigured = (reason: string): ChainStatus => ({ ...b, configured: false, reason, underwriter: r.underwriter?.address, oracle: r.oracle?.address, fleet: r.fleet?.address });
+  // Not configured means nothing settles from this server, so show the deployed program's public
+  // role wallets (deployments/solana-devnet.json), not whatever keys happen to be on this machine.
+  const notConfigured = (reason: string): ChainStatus => ({
+    ...b, configured: false, reason,
+    underwriter: DEPLOYMENT.underwriter ?? r.underwriter?.address, oracle: DEPLOYMENT.oracle ?? r.oracle?.address, fleet: DEPLOYMENT.fleet ?? r.fleet?.address,
+  });
   if (!PROGRAM_ID) return notConfigured("No Solana program is configured. Run `npm run solana:setup`.");
   if (!MINT || !ASSET_ID) return notConfigured("No tUSD mint is configured. Run `npm run solana:setup`.");
   if (!rpcUrl()) return notConfigured("No Helius devnet RPC is configured on this server (HELIUS_API_KEY).");

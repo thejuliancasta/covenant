@@ -16,13 +16,13 @@ Decided 2026-11-20 by the team. The product and engine stay the same (ledger imp
 
 The program cannot read encrypted amounts, so the monthly cap pays in steps. Strike `K = inception monthly mean + strikeOffset`. Step size `D` ($/gal, default 0.25; use 0.50 if transaction size limits force fewer steps). Step `i` triggers when the attested monthly mean is at or above `K + i*D` and pays `D * coveredGallons` tUSD. Steps run up to `K + 2.00` (the Arc version's per-gallon limit). Payout is the linear cap rounded down to the step size; show both numbers.
 
-## Program changes (from the archived Equity Floor program)
+## Program changes (from Equity Floor)
 
-Source: `../archive/2026-11-20-equity-floor/equity-floor/program/src/lib.rs` (Pinocchio; `init_step`, write-once `report_index` with a source sha256, `release` with a CPI into Rings signed by the vault PDA, `reclaim`). Changes: a direction flag per step (pay when the index is at or above the trigger), monthly periods (YYYYMM), an index id for the EIA regional diesel series, price units of 1/1000 $/gal. Deploy a new program to devnet.
+Equity Floor was our first idea for this hackathon, written during the event and set aside on Nov 20. Its code is not in this repo. Starting point: the Equity Floor program (Pinocchio; `init_step`, write-once `report_index` with a source sha256, `release` with a CPI into Rings signed by the vault PDA, `reclaim`). Changes: a direction flag per step (pay when the index is at or above the trigger), monthly periods (YYYYMM), an index id for the EIA regional diesel series, price units of 1/1000 $/gal. Deploy a new program to devnet.
 
 ## Keys and config
 
-Never commit secrets. Local secrets live in `.env.local` and `.solana-keys/` (both gitignored). Public addresses go in `deployments/solana-devnet.json` (committed). Reuse the archived Equity Floor wallets, tUSD mint (`FQKedE1cBThwLvc1FJ1xr5b3DPYGVwRNVKrQVSHmCfv8`, Rings asset 427) and Helius devnet key where possible.
+Never commit secrets. Local secrets live in `.env.local` and `.solana-keys/` (both gitignored). Public addresses go in `deployments/solana-devnet.json` (committed). Reuse the Equity Floor devnet wallets, tUSD mint (`FQKedE1cBThwLvc1FJ1xr5b3DPYGVwRNVKrQVSHmCfv8`, Rings asset 427) and Helius devnet key where possible.
 
 ## Honesty
 

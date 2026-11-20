@@ -83,21 +83,21 @@ export function Connect({ onRun, connectError }: { onRun: (csv: string, region: 
       </header>
       <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <Card className="flex flex-col">
-          <div className="flex items-center justify-between"><p className="text-[15px] font-medium">Sign in to the books</p><Tag tone="info">Read only</Tag></div>
+          <div className="flex items-center justify-between"><p className="text-[15px] font-medium">Sign in to the books</p><Tag tone="info">Only reads your books</Tag></div>
           <p className="mt-2 text-[13px] leading-relaxed text-muted">The owner logs in at their own software and approves access. We pull 24 months of lines and analyze them in this session. The login is not stored.</p>
           <ul className="mt-4 divide-y divide-line/70">
             {(ledgers ?? []).map((p) => (
               <li key={p.id} className="flex items-center justify-between gap-3 py-3">
                 <div className="min-w-0">
                   <p className="text-sm font-medium">{p.name}</p>
-                  <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{p.configured ? p.reads : `Set ${(p.missing ?? []).join(" and ") || "the client id and secret"} on the server.`}</p>
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{p.configured ? p.reads : "Not switched on in this demo."}</p>
                 </div>
                 <Button variant="secondary" disabled={!p.configured} onClick={() => connect(p.id)} className="shrink-0 px-3 py-2 text-[13px]">{p.configured ? "Connect" : "Needs keys"}</Button>
               </li>
             ))}
             {ledgers === null && <li className="py-3 text-[13px] text-muted">Checking which connections are configured…</li>}
           </ul>
-          <p className="mt-2 text-[12px] leading-relaxed text-faint">Each app needs a redirect URL of <span className="text-ink">/api/connect/quickbooks/callback</span>, and the same path with xero, zoho, or freshbooks. QuickBooks Desktop has no cloud sign-in, so use a CSV. Wave does not return historical ledger lines.</p>
+          <p className="mt-2 text-[12px] leading-relaxed text-faint">{ledgers?.some((p) => !p.configured) && "Sign-in is not switched on in this demo: the server has no keys for these providers. Upload a CSV or use the sample company. "}QuickBooks Desktop has no cloud sign-in, so use a CSV. Wave does not return historical ledger lines.</p>
         </Card>
         <div className="grid content-start gap-4">
         <Card className={cx("flex flex-col transition-colors", drag && "border-shield bg-shield-soft")}>

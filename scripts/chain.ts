@@ -1,4 +1,9 @@
 /**
+ * ARCHIVED: earlier work, not the settlement path. CostShield settles on Solana devnet
+ * (lib/chain/server.ts, scripts/solana-*.ts). The Arc vault was not deployed:
+ * deployments/arc-testnet.json holds no addresses. Do not run `deploy` or `demo`: they
+ * overwrite the README's "Deployed program" block with Arc details.
+ *
  * Arc testnet admin script. Reads keys from .env.local (never committed).
  *   npm run chain -- deploy          deploy the vault, fund oracle gas, deposit collateral
  *   npm run chain -- status          print balances and vault state

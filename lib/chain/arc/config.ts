@@ -1,3 +1,4 @@
+/** ARCHIVED: Arc testnet configuration, unused since the Solana port (see lib/chain/config.ts). The vault was not deployed. */
 import { defineChain } from "viem";
 import deployment from "../../../deployments/arc-testnet.json";
 

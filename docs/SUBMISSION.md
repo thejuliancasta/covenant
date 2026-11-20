@@ -4,12 +4,12 @@
 
 **Project name:** CostShield
 
-**Short description:** Connect your books, find the costs a market controls, and see a private payout settle on Solana when prices spike, provable to your lender. Cost protection for small businesses, starting from the ledger.
+**Short description:** Upload your books, find the costs a market controls, and see a private payout settle on Solana when prices spike, provable to your lender. Cost protection for small businesses, starting from the ledger.
 
 **Main track:** DeFi and Onchain Applications. **Chain award:** Best use of Solana. **Bounty:** Gemini Prediction Markets.
 
 **What did you build?**
-A working pipeline from accounting data to a private onchain payout. A small business uploads a QuickBooks export. CostShield classifies every expense with deterministic rules, measures how much of the spending follows a market price, assigns the business to a risk pool, and tests live whether any real instrument hedges the risk. For a 10-truck fleet it prices and backtests a diesel price cap on 11 years of EIA data, then settles a replayed September 2026 price shock on Solana devnet. The cover is a ladder of steps funded in advance by the underwriter. With Helius Privacy Rings, step amounts, the payout and balances are encrypted on chain. The fleet can share a read-only link with its lender, who sees the cover and the payout but cannot spend.
+A working pipeline from accounting data to a private onchain payout. A small business uploads a QuickBooks export. Sign-in for QuickBooks, Xero, Zoho Books and FreshBooks is written but not verified against a live account and not switched on in the demo; Judge mode shows its exact status. CostShield classifies every expense with deterministic rules, measures how much of the spending follows a market price, assigns the business to a risk pool, and tests live whether any real instrument hedges the risk. For a 10-truck fleet it prices and backtests a diesel price cap on 11 years of EIA data, then settles a replayed September 2026 price shock on Solana devnet. The cover is a ladder of steps funded in advance by the underwriter. With Helius Privacy Rings, step amounts, the payout and balances are encrypted on chain. The fleet can share a read-only link with its lender, who sees the cover and the payout but cannot spend.
 
 **What problem does it solve?**
 A bad diesel year costs a small fleet several times its annual profit. Large carriers hedge fuel. Small ones cannot size the exposure, find an instrument that tracks their cost, or meet contract minimums. Existing tools start from a list of prediction markets and ask the owner to pick. CostShield starts from the ledger and tells the owner what is worth protecting, what is not, and why. And a fleet's cover and payouts are sensitive: gallons reveal volume, a payout reveals margin stress. A public chain would show both to shippers, brokers and competitors.
@@ -23,29 +23,42 @@ Settlement runs on Solana devnet. A Pinocchio program stores each step's public 
 It can say no. The engine rejects hedges that do not track the customer's cost, labels every number as verified, calculated, estimated or assumed, and shows which licensed entity would have to owe a payout and that none has agreed to. It turns a prediction-market ladder into an implied volatility input, a use of event contracts that does not depend on their thin depth. Cover is private by default: the trigger condition is public and enforced by the program, while amounts, payouts and balances are encrypted. And it is provable to your lender: one link gives a lender or factoring company read-only proof that the fleet is protected and was paid.
 
 **What would you build next?**
-Fuel-card integration so gallons are measured, a QuickBooks OAuth connection, a multi-publisher oracle, decryption in the lender's browser instead of on our server, wallets where each party holds its own keys, natural gas as a second priced risk, and a conversation with a surplus-lines carrier about who would owe the payout.
+Fuel-card integration so gallons are measured, verifying the four ledger sign-ins (QuickBooks, Xero, Zoho Books, FreshBooks) against live accounts, a multi-publisher oracle, decryption in the lender's browser instead of on our server, wallets where each party holds its own keys, natural gas as a second priced risk, and a conversation with a surplus-lines carrier about who would owe the payout.
 
-**Technologies:** Next.js, React, TypeScript, Tailwind CSS, Solana devnet, Rust and Pinocchio, @solana/kit, Helius Privacy Rings (@heliuslabs/spr), tUSD devnet test dollars, Gemini Prediction Markets API, U.S. EIA open data, Vitest. Earlier work in the repo: Solidity and Foundry on Arc testnet.
+**Technologies:** Next.js, React, TypeScript, Tailwind CSS, Solana devnet, Rust and Pinocchio, @solana/kit, Helius Privacy Rings (@heliuslabs/spr), tUSD devnet test dollars, Gemini Prediction Markets API, U.S. EIA open data, Vitest. Earlier work in the repo, archived: a Solidity vault with Foundry tests, written for Arc testnet and not deployed.
 
 ## Demo video script (2 to 3 minutes)
 
 | Time | Screen | Say |
 | --- | --- | --- |
 | 0:00 | Welcome | "A bad diesel year costs a small trucking fleet many times its profit. Big carriers hedge. Small ones can't. CostShield starts from their books." |
-| 0:15 | Connect | "You upload a QuickBooks export. I'll use a sample 10-truck fleet: a synthetic ledger built on real diesel prices. It goes through the same importer." |
+| 0:15 | Connect | "You upload a QuickBooks export. Sign-in for four ledgers is written but not switched on in this demo, so I'll use a sample 10-truck fleet: a synthetic ledger built on real diesel prices. It goes through the same importer." |
 | 0:25 | Analysis | "These are real pipeline stages with measured run times. Stage six is a live call to Gemini Prediction Markets." |
 | 0:40 | Your risks | "3,315 transactions, one risk worth protecting. Fuel is 26% of revenue. A 1-in-20 year costs eight times annual profit after surcharges. Payroll, insurance and leases are 73% of spend and we say plainly that nothing hedges them." |
-| 1:05 | Protection | "The candidate is a diesel cap that pays on gallons actually bought. In November 2025 it modelled at about $4,300. Today it is over four times that. Since 2015 it paid in about a third of years." |
-| 1:25 | Hedge test | "Can it be hedged? ULSD options: yes. Gemini: there is no diesel market, and the Brent ladder fails on tenor, depth and fit, so we reject it as a hedge. We use it for what it is good at: the ladder is a probability curve, and we extract a 44% implied volatility to price the cap." |
+| 1:05 | Protection | "The candidate is a diesel cap that pays on gallons actually bought. In November 2025 it modelled at about $4,300. Today it is almost five times that. Since 2015 it paid in about a third of the 12-month periods." |
+| 1:25 | Hedge test | "Can it be hedged? ULSD options: yes. Gemini: there is no diesel market, and the Brent ladder fails on tenor, depth and fit, so we reject it as a hedge. We use it for what it is good at: the ladder is a probability curve, and we extract an implied volatility, about 48% today, to price the cap." |
 | 1:50 | Simulate | "Diesel up 60 cents. Every number is arithmetic on these inputs." |
-| 2:05 | Payout | "Now settle September 2026, the record month, privately on Solana devnet. The oracle posts the EIA average with the data file's hash. The cap pays in 25-cent steps because the program can't read encrypted amounts; here is the stepped payout next to the linear one. A stranger's attempt is refused. A duplicate is refused. On the left, what the fleet sees after decrypting. On the right, what the public chain shows: the terms and the transactions, but no amounts. One link shares a read-only view with the fleet's lender." |
+| 2:05 | Payout, then Solana Explorer | "September 2026 was the record month. The cap pays in 25-cent steps because the program can't read encrypted amounts; here is the stepped payout next to the linear one. This machine does not hold the team's keys, so the screen says settlement is not configured. We settled this month on Solana devnet earlier today, and these are the transactions on Solana Explorer: the oracle's report of the EIA average with the data file's hash, the fleet's release of a triggered step, a report from a stranger refused, a duplicate report refused. Explorer shows who signed and that a private transfer happened, not how much was paid. A fleet can share a link that lets its lender see the amounts without being able to spend." |
 | 2:40 | Judge mode | "Judge mode shows every source, formula, rejected market, the program's safeguards and its trust assumptions: one oracle key, our server holds the demo keys, and Helius's prover sees amounts inside attested hardware. This is devnet with test dollars, and the README says exactly what is real." |
+
+Recording notes:
+
+- The cap price, the "times" figure and the implied volatility move with the live Gemini market. Read them off the screen. At 4:22 AM Central on Nov 20 they were $21,383, 4.9 times and 48%.
+- The Payout row above is the version for a machine without the Solana keys. The Explorer links are in the README under "Deployed program". Do not narrate the fleet-and-chain panel or open the lender page: neither appears without a settlement.
+- If the keys are available, record the live version instead: "Now settle September 2026, the record month, privately on Solana devnet. The oracle posts the EIA average with the data file's hash. The cap pays in 25-cent steps because the program can't read encrypted amounts; here is the stepped payout next to the linear one. A stranger's attempt is refused. A duplicate is refused. On the left, what the fleet sees after decrypting. On the right, what the public chain shows: the terms and the transactions, but no amounts. One link shares a read-only view with the fleet's lender."
+
+## Links for the Devpost form
+
+- Repository: https://github.com/thejuliancasta/orange-cat
+- Program (Solana devnet): `DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114`, https://explorer.solana.com/address/DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114?cluster=devnet
+- Live demo: _add your deployment URL_ (no keys on the host, so private settlement is not enabled there)
+- Video: _add your video link_
 
 ## Finalist presentation (5 minutes)
 
 1. **Problem (40s).** One number: a 1-in-20 diesel year is about 8 times this fleet's annual profit. 2026 was worse than that.
 2. **Insight (40s).** Most small-business costs cannot be hedged and we say so. Diesel can, because the cost is a quoted price with a liquid hedge. A product that can say no is more credible than one that sells everything.
-3. **Live demo (2m 30s).** Sample company, risks, protection, the Gemini rejection and implied volatility, then the private Solana payout with the two refused attempts, the two views, and the lender link.
+3. **Live demo (2m 30s).** Sample company, risks, protection, the Gemini rejection and implied volatility, then the private Solana payout with the two refused attempts, the two views, and the lender link. The payout needs the Solana keys on the presenting machine; without them, show the replay and the Explorer transactions from the README.
 4. **Why Solana and Privacy Rings (30s).** The trigger should be public and enforced by a program. The money should not be public: gallons reveal volume and a payout reveals stress. Program-owned private balances on Solana give both, and a viewing key lets the fleet prove cover to its lender without publishing it.
 5. **What is not real (30s).** No carrier, modelled options, trusted oracle, synthetic ledger, devnet test dollars, and a demo server that holds every key. Say it before a judge asks.
 6. **Next (20s).** Fuel-card data, a carrier conversation, a second risk.

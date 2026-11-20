@@ -1,6 +1,7 @@
 /**
  * npm run solana:checks -- on-chain enforcement and privacy checks for the CostShield
- * steps program on Solana devnet (ported from the Equity Floor checks).
+ * steps program on Solana devnet (adapted from the checks for Equity Floor, our first
+ * idea for this hackathon, written during the event and set aside on Nov 20).
  * Lands deliberately invalid transactions (skipPreflight) and asserts the program's
  * custom error codes, scans public transaction bytes and logs for amounts, and
  * exercises release and reclaim. Uses small odd amounts so a leak would be unambiguous.

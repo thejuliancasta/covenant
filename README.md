@@ -9,7 +9,7 @@
 | Main track | DeFi and Onchain Applications |
 | Chain award | Best use of Solana |
 | Bounty | Gemini Prediction Markets |
-| Live demo | _add your deployment URL_ |
+| Live demo | _add your deployment URL_ (the hosted demo holds no keys, so private settlement is not enabled there; the devnet evidence is under [Deployed program](#deployed-program)) |
 | Demo video | _add your video link_ |
 
 ## What it does
@@ -30,13 +30,17 @@ The demo company is a synthetic 10-truck Midwest fleet. Its result: diesel is 26
 ```bash
 npm install
 npm run dev            # http://localhost:3000
-npm test               # 31 engine tests
+npm test               # 40 unit tests: 31 engine, 9 ledger
 npm run test:contracts # earlier work: 15 Foundry tests for the Arc vault (needs Foundry)
 ```
 
 The app works without any keys: analysis, Gemini evaluation, pricing, backtest and the replay all run. Only private settlement and the lender page need the Solana setup below. Without it, the payout screen says settlement is not configured and why.
 
+Ledger sign-in (QuickBooks Online, Xero, Zoho Books, FreshBooks) is off unless the server has that provider's client id and secret; `.env.example` lists the variables and redirect URLs. The sign-in code has not been verified against a live provider. CSV upload and the sample company always work.
+
 ### Private settlement on Solana devnet
+
+These commands are for the team's machine. They need a Helius devnet API key in `.env.local` (copy `.env.example`) and the team's wallet keys in `.solana-keys/`. Do not run `solana:setup` without those keys: it creates new wallets and can overwrite `deployments/solana-devnet.json`, and the deployed program still accepts reports only from the team's oracle key. To settle with your own keys, set `ORACLE` in `solana/program/src/lib.rs` to your oracle wallet, build with `npm run solana:build` and deploy your own program.
 
 ```bash
 npm run solana:setup   # idempotent: wallets, devnet SOL, tUSD mint and Rings registration, private deposits
@@ -48,12 +52,26 @@ Secrets live in `.env.local` (Helius devnet API key) and `.solana-keys/` (wallet
 <!-- DEPLOYMENT:START -->
 ### Deployed program
 
-Addresses are in [`deployments/solana-devnet.json`](deployments/solana-devnet.json), including the CostShield program id and the underwriter, oracle and fleet wallets. Fixed addresses:
+All addresses are also in [`deployments/solana-devnet.json`](deployments/solana-devnet.json). Solana devnet only.
 
+- CostShield program: [`DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114`](https://explorer.solana.com/address/DnKV9uZ32G2NdrmKuDKL1mLKRAed9MKvw5jHtUu3R114?cluster=devnet)
 - Helius Privacy Rings program: `ring1GaLCuJnkUMVkX2JeZLTTX17wKsV4fZmPVzXANW`
 - tUSD test mint (6 decimals, Rings asset 427): `FQKedE1cBThwLvc1FJ1xr5b3DPYGVwRNVKrQVSHmCfv8`
+- Oracle `2RECf7GfWRSw8U73tyWJ1ZhTJ5U21FRHPjEaXxTa7EsH` · underwriter `D4VUvtQh3ad8j1FF48ZNNAc9fN1oZC8F241pcuQMEUua` · fleet `2gfZPF6tSUkUbEApUNzZNFxh1fqcMhMoCybKR1VSVY8N`
 
-Explorer links use `https://explorer.solana.com/...?cluster=devnet`.
+Evidence on devnet, Nov 20, 2026 (times Central). Amounts and payouts are encrypted: Explorer shows the signers, the accounts and that a Privacy Rings transfer happened, not how much was paid.
+
+| When | What | Transaction |
+| --- | --- | --- |
+| 3:05 AM | Program deployed | [`535eqFpm…`](https://explorer.solana.com/tx/535eqFpmsfF5iJV9gTHm9MJJwPThenfqjv5pQzRvHzq1p5pV1awntFM53EeC1KfrrD1y7uKfEig8FQs3iyZzzqi1?cluster=devnet) |
+| 3:12 AM | Open 8 steps for September 2026, triggers from $4.607 a gallon, signed by fleet and underwriter | [`5EcVnVPw…`](https://explorer.solana.com/tx/5EcVnVPwuLLKudQEhm5p4nErLGkFS29vx7Jo6thwrHDR1nJuWGPDS5xKrPHzF5EaQHLjgDg8hxK2ZDBenrF5Y7jL?cluster=devnet) |
+| 3:12 AM | Oracle report: Midwest diesel, September 2026 mean $6.350 a gallon, with the sha256 of `lib/data/diesel_padd2_weekly.json` | [`3FYhzywt…`](https://explorer.solana.com/tx/3FYhzywtKP1hmRxN1Y1BmsBaaoW3YWiKugKndctb5A8NcbVKVcT7M1jAPKwoFvgHqkczNYVmhsCPSues4wca8a2Z?cluster=devnet) |
+| 3:12 AM | First payout: the fleet releases a triggered step and Privacy Rings pays it privately | [`2wTYb5Mj…`](https://explorer.solana.com/tx/2wTYb5MjiCKCWLNA6FVrnufXAWsfmhyCBhAimbWnjFXFCQnXrEsm61zHstiz5z6ZvgiXycqujN2HRQKngPC7pC9S?cluster=devnet) |
+| 3:12 AM | Unused step reclaimed by the underwriter | [`3zZyVtP2…`](https://explorer.solana.com/tx/3zZyVtP2HHdRU5am7YRaddypcjYYebUfpF3KgHy26tUWT3V71iPPTi9rbar4L8gNwuABrnMaxiNyJEL3LKftHP7j?cluster=devnet) |
+| 3:16 AM | Refused: report from a non-oracle wallet, error 6002 (`ERR_BAD_ORACLE`, shown as `0x1772`) | [`2GRvp8F1…`](https://explorer.solana.com/tx/2GRvp8F1S2AVJoZhw7XLoKwsgJsh9ZqZgdZx8n1eT5symcAqEgriXvrZEovqNKXrVvbKzLdRcMsUY8ju99pD7qn7?cluster=devnet) |
+| 3:16 AM | Refused: duplicate report for the same month, error 6011 (`ERR_ALREADY_REPORTED`, shown as `0x177b`) | [`LxKHWJZW…`](https://explorer.solana.com/tx/LxKHWJZW1JbRhmbYUPC9LmK9pjy7XMQ9sTwrDo87obrgmDQgbR9nSeNXUzamvxtpTi9HEkfQbfd76fa9sbiSEqZ?cluster=devnet) |
+
+The $6.350 on chain is the mean of the four September 2026 weeks in the committed EIA snapshot ($6.3505). A judge cannot re-run settlement against this program: it accepts reports only from the oracle key above, which the team holds.
 <!-- DEPLOYMENT:END -->
 
 ## Architecture
@@ -66,6 +84,8 @@ Browser (Next.js, React, Tailwind)
         |  GET  /api/chain   (program, mint, roles, decrypted demo balances)
         |  POST /api/settle  (NDJSON stream of settlement steps on Solana devnet)
         |  POST /api/lender  (decrypts step balances with the shared viewing keys)
+        |  GET  /api/connect/status, /api/connect/<provider>, /api/connect/<provider>/callback
+        |       (ledger sign-in; off unless the server has that provider's keys)
         v
 Server (Next.js route handlers, Node runtime)
   lib/engine/   pure TypeScript, no I/O except the Gemini client
@@ -78,6 +98,9 @@ Server (Next.js route handlers, Node runtime)
     payout.ts     cap payout, scenario arithmetic, policy replay
     gemini.ts     market data client, implied distribution, ladder replication, verdicts
     pipeline.ts   orchestration with stage events
+  lib/ledger/   ledger sign-in for QuickBooks Online, Xero, Zoho Books and FreshBooks: signed state,
+                token exchange, a 24-month pull, converted to the CSV the importer reads
+                (unit-tested against mocked responses, not verified against a live provider)
   lib/data/     EIA snapshots (scripts/fetch_eia.py), each with source URL and fetch time
   lib/chain/    Solana devnet access, Privacy Rings transfers, settlement flow
                 (types.ts is the shared contract with the UI)
@@ -94,7 +117,7 @@ No database. An uploaded file is processed in memory for the request and is not 
 
 ## How CostShield uses Solana
 
-The settlement program is a Pinocchio program on Solana devnet, ported from our earlier Equity Floor program (`solana/program`). It keeps public terms and private money apart:
+The settlement program is a Pinocchio program on Solana devnet, adapted from Equity Floor, our first idea for this hackathon, written during the event and set aside on Nov 20 (`solana/program`). It keeps public terms and private money apart:
 
 - **Step accounts (public).** Each policy month is a ladder of steps. A step account stores the terms only: the fleet, the underwriter, the index id (EIA regional diesel), the period (YYYYMM), and the trigger price in 1/1000 $ per gallon. Both parties sign when the steps are created. No amount is stored.
 - **Step vaults (private).** Each step's money sits in a Privacy Rings private balance owned by a program-derived address `["vault", step]`. Only the program can sign for it. The underwriter funds all steps in advance in one private transfer.
@@ -147,6 +170,10 @@ CostShield places no orders and Gemini markets do not settle the program.
 - **Basis risk.** The index is not the business's pump price. The engine measures the gap from ledger gallons and shows it. An index cover cannot remove it. Steps add a little more: a month just below the next trigger pays up to $0.25 a gallon less than the linear cap.
 - **Pricing.** Black-76 on EIA spot with a flat forward curve, one volatility, mid-month expiries and a 30% load. No skew, no bid/offer. Real cost would be higher. Pricing uses the linear cap, which slightly overstates the stepped cover's value.
 - **Oracle.** One trusted key. The server recomputes the monthly mean from its own EIA data, ignores prices sent by the browser, and posts the mean on chain with the data file's sha256. This is a trusted oracle, disclosed as such.
+- **Premium and who pays whom.** No premium is collected, on chain or off. The program has no premium instruction, the fleet pays nothing, and the underwriter funds the steps with its own test dollars. The premium on screen is a model price. Its 30% load is the only allowance for a carrier's costs and margin, and no fee for CostShield is modelled. In a real programme the fleet would pay the premium to a licensed carrier, and none has agreed to that.
+- **Maximum loss.** The underwriter's loss on a policy month is capped at the 8 funded steps: $2.00 per gallon times covered gallons. A month above `K + $2.00` pays no more. The on-chain demo policy funds one month's steps.
+- **Upgrade authority.** The program is upgradeable. One team wallet, the one that deployed it (`84ZgVXHPfpYML8E3o63aLqMo69Z4A6o4cxUY4r7xuWRE`), can replace its code. A production program would give that up or put it behind a multisig.
+- **Unfinished runs.** Nothing on chain expires. If a settlement run stops midway, the remaining steps stay open and funded. One devnet policy (`2c7cb8f46c1f57c2`) was in that state when read at 4:25 AM Central on Nov 20: 3 steps paid, 5 open. Releasing or reclaiming them needs each step's vault key, which the server that ran the settlement keeps on its own disk. There is no recovery tool.
 - **Money.** tUSD devnet test dollars at 1 tUSD = $1. No real funds.
 
 More in [docs/MODEL.md](docs/MODEL.md) and [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
@@ -167,10 +194,15 @@ More in [docs/MODEL.md](docs/MODEL.md) and [docs/LIMITATIONS.md](docs/LIMITATION
 
 ## Earlier work: the Arc vault
 
-CostShield was first built to settle on Arc testnet. `contracts/src/CostShieldVault.sol` (a fully collateralised USDC vault, 15 Foundry tests) and `scripts/chain.ts` remain in the repo for reference. That vault is no longer the settlement path.
+CostShield was first built to settle on Arc testnet. That work is archived, not the settlement path, and the vault was not deployed: `deployments/arc-testnet.json` holds no addresses. What remains in the repo for reference:
+
+- `contracts/src/CostShieldVault.sol`, a fully collateralised USDC vault with 15 Foundry tests (`npm run test:contracts`).
+- `lib/chain/arc/`, `scripts/chain.ts` and `scripts/export-abi.cjs`, with the `chain` and `abi` npm scripts. `viem` is a dependency only for these.
+
+Do not run `npm run chain`: its `deploy` and `demo` commands overwrite the "Deployed program" section above with Arc details.
 
 ## Repository map
 
-`app/` pages (including `app/lender`) and API routes · `components/` screens · `lib/engine/` risk engine · `lib/chain/` Solana and Privacy Rings access · `solana/program/` settlement program (Rust, Pinocchio) · `deployments/` public addresses · `contracts/` earlier Arc vault and Foundry tests · `scripts/` data, ledger and chain tools · `tests/` engine tests and a recorded Gemini fixture · `docs/` product, model, submission, limitations and the Solana port decision.
+`app/` pages (including `app/lender`) and API routes · `components/` screens · `lib/engine/` risk engine · `lib/ledger/` ledger sign-in for four accounting providers · `lib/chain/` Solana and Privacy Rings access (`lib/chain/arc/` is the archived Arc version) · `solana/program/` settlement program (Rust, Pinocchio) · `deployments/` public addresses · `contracts/` archived Arc vault and Foundry tests · `scripts/` data, ledger and chain tools · `tests/` engine and ledger tests and a recorded Gemini fixture · `docs/` product, model, submission, limitations and the Solana port decision.
 
 Built during the UBC 2026 hackathon. MIT licence.

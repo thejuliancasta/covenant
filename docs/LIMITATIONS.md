@@ -2,15 +2,16 @@
 
 ## What works
 
-- CSV import, rule-based classification, exposure statistics, pool classification, Black-76 pricing, cohort backtest, scenario arithmetic and policy replay. 31 unit tests.
+- CSV import, rule-based classification, exposure statistics, pool classification, Black-76 pricing, cohort backtest, scenario arithmetic and policy replay. 40 unit tests: 31 for the engine, 9 for the ledger import and sign-in mapping.
 - Live Gemini Prediction Markets data: discovery, suitability screens, implied distribution and ladder replication.
+- Ledger sign-in code for QuickBooks Online, Xero, Zoho Books and FreshBooks (`lib/ledger/`, `/api/connect/*`). It is unit-tested against mocked provider responses: QuickBooks end to end (token, company and transaction list), the other three for line mapping only. It has not been verified against a live provider account. The demo has no provider keys, so each sign-in button shows "Needs keys". CSV upload is the working path.
 - A settlement program on Solana devnet with Helius Privacy Rings, and a server flow that opens a policy as a ladder of steps, funds the steps privately, posts the oracle report, releases triggered steps to the fleet, and shows the refused attempts. A lender page decrypts the steps with read-only viewing keys.
-- Earlier work, no longer the settlement path: a fully collateralised USDC vault for Arc testnet with 15 Foundry tests (`contracts/`).
+- Earlier work, archived and not the settlement path: a fully collateralised USDC vault written for Arc testnet with 15 Foundry tests (`contracts/`). It was not deployed.
 
 ## What is simulated
 
 - **The sample company.** Synthetic. Fuel prices paid are built from the real EIA Midwest index plus seeded noise, so its R² to the index reflects the generator, not a real fleet.
-- **The premium.** A model price on EIA spot with an assumed load. No live options quotes, no skew, no bid/offer.
+- **The premium.** A model price on EIA spot with an assumed load. No live options quotes, no skew, no bid/offer. No premium is collected, on chain or off: the program has no premium instruction and the fleet pays nothing.
 - **The oracle.** One trusted key posting public history.
 - **The policy.** Nobody sold it and nobody owes it. The onchain policy funds one month's steps in tUSD, devnet test dollars at 1 tUSD = $1.
 - **The fleet wallet.** A demo wallet the server controls, so devnet funds can be recycled.
@@ -28,10 +29,12 @@
 - **Alpha software.** The Privacy Rings SDK (`@heliuslabs/spr`) is an alpha, and its program-owned balance helpers are marked experimental.
 - **Explorer support.** Privacy Rings uses v1 transactions. Some explorers and RPC clients cannot render them yet.
 - **Write-once reports are global.** One report per index and month. A rerun of the demo reuses the report already on chain and says so.
+- **Upgradeable program.** One team wallet, the one that deployed the program (`84ZgVXHPfpYML8E3o63aLqMo69Z4A6o4cxUY4r7xuWRE`), holds the upgrade authority and can replace the code.
+- **Unfinished runs stay open.** Nothing on chain expires. A settlement run that stops midway leaves its remaining steps open and funded, and releasing or reclaiming them needs each step's vault key, which only the server that ran it keeps. One devnet policy (`2c7cb8f46c1f57c2`) had 3 steps paid and 5 open when read on Nov 20. There is no recovery tool.
+- **No settlement without the team's keys.** A server that lacks them, including the hosted demo, shows the replay and the not-configured note on the payout screen. Settlement has run only from a team machine; the README lists the devnet transactions.
 
 ## What was not built
 
-- QuickBooks or Xero OAuth. The connect screen says so.
 - An LLM fallback for unmatched expense lines.
 - More than one priced risk. Natural gas, electricity and interest are sized and screened, not priced.
 - Regions other than the Midwest and the national average.
@@ -44,6 +47,7 @@
 - The un-surcharged share is inferred from revenue mix, which is a proxy for gallons.
 - Shock percentiles come from 25 annual observations.
 - The implied volatility comes from Brent, not ULSD, at a horizon of days, with quote spreads of several cents.
+- Order-book depth is read only for the chosen ladder, so every other Gemini market shows a depth of 0.
 - Gemini fees and collateral rules were not verified and are left out of the replication cost.
 - The program trusts a single oracle key. It stores the data file's sha256 but cannot check it against EIA.
 - Pricing and the replay use the linear cap; on chain the cap pays in steps, which is slightly less.

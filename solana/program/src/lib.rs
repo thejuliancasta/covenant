@@ -1,7 +1,8 @@
 //! CostShield steps: index-triggered payout steps for a fuel price cap, whose
 //! collateral is a program-owned Helius Privacy Rings private balance.
 //!
-//! Ported from the Equity Floor program. Public terms live in a step account;
+//! Adapted from Equity Floor, our first idea for this hackathon, written during
+//! the event and set aside on Nov 20. Public terms live in a step account;
 //! amounts never touch this program. Each step's collateral is a private
 //! (encrypted) Rings balance owned by the vault PDA ["vault", step]. Only this
 //! program can sign for that PDA, and it does so (invoke_signed into Rings
