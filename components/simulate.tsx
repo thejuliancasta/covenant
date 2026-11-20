@@ -54,7 +54,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
     <MotionConfig reducedMotion="user">
       <div className="space-y-6">
         <PageHead eyebrow={`One month for ${company}, using the gallons in your books`} title="What if diesel jumps?"
-          lede="Move the price. Every number is simple arithmetic on your own books: gallons times the price rise, minus what CostShield pays you back." />
+          lede="Move the price. Every number is simple arithmetic on your own books: gallons times the price rise, minus what CostShield would pay you back." />
 
         <Card>
           <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
@@ -69,11 +69,11 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
           </div>
 
           <PriceRiseControl className="mt-6" value={rise} onChange={setRise} offset={offset} label="How much diesel rises, per gallon"
-            valueText={`diesel up $${rise.toFixed(2)} a gallon; CostShield pays you ${usd(s.payout)}`} />
+            valueText={`diesel up $${rise.toFixed(2)} a gallon; CostShield would pay you ${usd(s.payout)}`} />
 
           <ol className="mt-7 space-y-2" aria-live="polite">
             {line("your fuel bill rises", s.extraCost, "text-ink", s.passedThrough > 0 ? `(your fuel surcharges pass ${usd(s.passedThrough)} of it to customers)` : undefined)}
-            {line("CostShield pays you back", s.payout, "text-jade", s.payout === 0 && rise > 0 ? `(the rise is still under the ${usd(offset, 2)} you cover yourself)` : undefined)}
+            {line("CostShield would pay you back", s.payout, "text-jade", s.payout === 0 && rise > 0 ? `(the rise is still under the ${usd(offset, 2)} you cover yourself)` : undefined)}
             {line("you're out only", s.unhedged, "text-ink", `instead of ${usd(s.exposedCost)}`)}
           </ol>
 
@@ -88,7 +88,7 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
               <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-jade" />Paid back by CostShield</span>
               <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-heat/70" />Still on you</span>
             </div>
-            <p className="mt-3 max-w-[70ch] text-[12.5px] leading-[1.55] text-faint">Protection starts once diesel is up {usd(offset, 2)} a gallon. Above that, CostShield pays back every cent on the <span className="num">{int(covered)}</span> gallons your customers don&apos;t cover; each lit block on the slider is 25 cents{crossed ? `, ${crossed} lit now` : ""}.</p>
+            <p className="mt-3 max-w-[70ch] text-[12.5px] leading-[1.55] text-faint">Protection starts once diesel is up {usd(offset, 2)} a gallon. Above that, CostShield would pay back every cent on the <span className="num">{int(covered)}</span> gallons your customers don&apos;t cover; each lit block on the slider is 25 cents{crossed ? `, ${crossed} lit now` : ""}.</p>
           </div>
         </Card>
 
@@ -107,12 +107,12 @@ export function Simulator({ a, onNext }: { a: Analysis; onNext: () => void }) {
               <Row label="Extra fuel cost" hint={`${int(gallons)} gallons × $${rise.toFixed(2)}`}>{usd(s.extraCost)}</Row>
               <Row label="Passed on through fuel surcharges" hint={`${pct(1 - share)} of gallons, if surcharges keep pace`}>−{usd(s.passedThrough)}</Row>
               <Row label="Left for you to pay"><span className="text-heat">{usd(s.exposedCost)}</span></Row>
-              <Row label="CostShield pays you back" hint={`($${rise.toFixed(2)} − $${offset.toFixed(2)}, if above zero) × ${int(gallons * share)} protected gallons`}><span className="text-jade">−{usd(s.payout)}</span></Row>
-              <Row label="You're out" hint={`${pct(s.offsetShare)} of the hit is paid back`}>{usd(s.unhedged)}</Row>
+              <Row label="CostShield would pay you back" hint={`($${rise.toFixed(2)} − $${offset.toFixed(2)}, if above zero) × ${int(gallons * share)} protected gallons`}><span className="text-jade">−{usd(s.payout)}</span></Row>
+              <Row label="You're out" hint={`${pct(s.offsetShare)} of the hit would be paid back`}>{usd(s.unhedged)}</Row>
               <Row label="What protection costs this month" hint={`Estimated price: ${usd(price.premium)} a year, ${ppg(price.premiumPerGallon)} per protected gallon`}>{usd(s.premium)}<Ev e="A" /></Row>
               <Row label={<span className="font-medium text-ink">Effect on profit this month</span>} hint={`Without protection: ${usd(s.netWithoutCover)}`}><span className="text-base">{usd(s.net)}</span></Row>
             </div>
-            <div className="mt-4"><Note tone="info" title="Your pump price can differ from the official price">CostShield pays on the official Midwest diesel price (U.S. government data), not your pump price. Yours differs by about ±{ppg(basisStd)} a gallon in a typical month<Ev e={d.fit.method === "ledger-regression" ? "C" : "A"} />, so the real effect on {int(gallons * share)} gallons could be about {usd(s.basisBand)} better or worse (95% range).</Note></div>
+            <div className="mt-4"><Note tone="info" title="Your pump price can differ from the official price">CostShield would pay on the official Midwest diesel price (U.S. government data), not your pump price. Yours differs by about ±{ppg(basisStd)} a gallon in a typical month<Ev e={d.fit.method === "ledger-regression" ? "C" : "A"} />, so the real effect on {int(gallons * share)} gallons could be about {usd(s.basisBand)} better or worse (95% range).</Note></div>
           </Card>
         </div>
         <div className="flex justify-end"><Button onClick={onNext} size="lg">See a real payout<Arrow /></Button></div>
@@ -206,7 +206,7 @@ export function Payout({ a }: { a: Analysis }) {
               <Row label="Estimated cost of protection for those months">{usd(p.priceAtInception.premium * (p.replay.length / 12))}<Ev e="A" /></Row>
               <Row label={<span className="font-medium text-ink">Net benefit</span>}>{usd(net)}</Row>
             </div>
-            <p className="mt-3 text-xs leading-[1.5] text-faint">2026 was one of the worst diesel years on record. In {pct(1 - (a.backtest?.shareOfCohortsPaid ?? 0.35))} of 12-month periods since 2015 this protection paid nothing. The replay pays every cent above the line; the real payment below pays in 25-cent chunks.</p>
+            <p className="mt-3 text-xs leading-[1.5] text-faint">2026 was one of the worst diesel years on record. In {pct(1 - (a.backtest?.shareOfCohortsPaid ?? 0.35))} of 12-month periods since 2015 this protection paid nothing. The replay pays every cent above the line; the devnet settlement below pays in 25-cent chunks.</p>
           </Card>
         </div>
 

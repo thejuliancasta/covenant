@@ -132,7 +132,7 @@ export function PriceVsTrigger({ months, trigger, selected, onSelect, height = 2
         {!compact && (
           <p className="flex flex-wrap gap-x-5 gap-y-1 text-[12px] text-muted">
             <span className="inline-flex items-center gap-2"><i aria-hidden className="h-2.5 w-2.5 rounded-[2px] bg-ink/25" />Diesel price that month</span>
-            <span className="inline-flex items-center gap-2"><i aria-hidden className="h-2.5 w-2.5 rounded-[2px] bg-jade" />The part CostShield pays back</span>
+            <span className="inline-flex items-center gap-2"><i aria-hidden className="h-2.5 w-2.5 rounded-[2px] bg-jade" />The part CostShield would pay back</span>
           </p>
         )}
         <p id={`${uid}-say`} aria-live="polite" className="num mt-2 max-w-[72ch] text-[14px] leading-[1.55] text-ink2">{monthSentence(m, trigger)}</p>

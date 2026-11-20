@@ -185,7 +185,7 @@ export default async function Landing() {
             </div>
           }
         >
-          <p>Protection is priced for your gallons and shown per month before you commit. When nothing can fairly protect a cost, CostShield says so instead of selling you something that won&apos;t pay.</p>
+          <p>A model price for your gallons is shown per month. It is an estimate, not a quote. When nothing can fairly protect a cost, CostShield says so instead of selling you something that won&apos;t pay.</p>
         </Feature>
 
         <Feature label="Automatic payouts" title="When prices spike, the money comes back on its own" fragment={<ProtectionChart d={d} />}>
@@ -248,13 +248,13 @@ export default async function Landing() {
             <div>
               <Reveal>
                 <div className={cx(surface, "px-6 py-6")}>
-                  <p className="text-[13px] text-jade">Available today</p>
+                  <p className="text-[13px] text-jade">In the simulation today</p>
                   <p className="mt-2 text-[20px] font-[560] tracking-[-0.015em] text-ink">Trucking fleets</p>
-                  <p className="mt-1 text-[14px] text-muted">Protection against diesel price spikes, priced for your gallons.</p>
+                  <p className="mt-1 text-[14px] text-muted">Diesel price spikes, measured and priced for your gallons. Not on sale.</p>
                 </div>
               </Reveal>
               <Reveal i={1}>
-                <p className="mt-8 text-[13px] text-faint">Coming next</p>
+                <p className="mt-8 text-[13px] text-faint">Ideas for later, not built</p>
                 <dl className="mt-3 divide-y divide-line/[0.07] border-y border-line/[0.07] text-[15px]">
                   {[["Restaurants and bakeries", "Natural gas and flour"], ["Farms", "Rainfall"], ["Contractors", "Diesel"]].map(([k, v]) => (
                     <div key={k} className="grid grid-cols-[1fr_auto] gap-4 py-4"><dt className="text-ink2">{k}</dt><dd className="text-muted">{v}</dd></div>
